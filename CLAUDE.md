@@ -20,7 +20,7 @@ Given the above parameters, the application calculates locations where the jump 
 The user should be able to give the given parameters with different units. For example altitude can be given as meters or feet. Speed in m/s, knots or miles per hour.
 
 After calculating the "optimal exit point", the application draws:
-- a circle around the "optimal exit point"
+- a circle around the "optimal exit point". The circle radius should correspond to distance from which the landing location can be reached safely.
 - positions of the group exits
 - the given landing location
 - airplane flight direction as a line
@@ -57,3 +57,4 @@ Later, we should also calculate cloud probability in different altitude levels.
 App should remember user choice in units.
 Cached weather data should be available offline.
 Mobile interface should have same features as desktop interface.
+Visualize ground wind direction at the set landing position (direction and speed with a text).
