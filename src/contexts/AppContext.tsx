@@ -1,0 +1,127 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { JumpParameters, UserPreferences, Units, LatLon, TerrainData, WeatherDataCache } from '../types';
+
+interface AppContextType {
+  jumpParameters: JumpParameters;
+  setJumpParameters: (params: JumpParameters) => void;
+  userPreferences: UserPreferences;
+  setUserPreferences: (prefs: UserPreferences) => void;
+  weatherCache: WeatherDataCache[];
+  setWeatherCache: (cache: WeatherDataCache[]) => void;
+  terrainData: TerrainData | null;
+  setTerrainData: (data: TerrainData | null) => void;
+  selectedWeatherModel: string;
+  setSelectedWeatherModel: (model: string) => void;
+}
+
+const defaultJumpParameters: JumpParameters = {
+  jumpAltitude: 4000, // meters
+  aircraftSpeed: 50, // m/s (180 km/h)
+  freefallSpeed: 55.56, // m/s (200 km/h)
+  openingAltitude: 1000, // meters
+  canopyAirSpeed: 11, // m/s
+  canopyDescentRate: 6, // m/s
+  glideRatio: 2.5,
+  numberOfGroups: 1,
+  timeBetweenGroups: 6, // seconds
+  landingZone: { lat: 61.7807, lon: 22.7221 },
+  flightDirection: undefined, // headwind
+  jumpTime: new Date(),
+};
+
+const defaultUserPreferences: UserPreferences = {
+  units: {
+    altitude: 'meters',
+    speed: 'ms',
+    temperature: 'celsius',
+  },
+  studentWindLimit: 8, // m/s
+  sportWindLimit: 11, // m/s
+  showDriftVisualization: true,
+};
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useAppContext must be used within AppProvider');
+  }
+  return context;
+};
+
+interface AppProviderProps {
+  children: ReactNode;
+}
+
+export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  // Load initial values from localStorage
+  const loadFromStorage = <T,>(key: string, defaultValue: T): T => {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  };
+
+  const [jumpParameters, setJumpParametersState] = useState<JumpParameters>(() => {
+    const stored = loadFromStorage('jumpParameters', defaultJumpParameters);
+    // Convert stored date string back to Date object
+    return { ...stored, jumpTime: new Date(stored.jumpTime) };
+  });
+
+  const [userPreferences, setUserPreferencesState] = useState<UserPreferences>(() => 
+    loadFromStorage('userPreferences', defaultUserPreferences)
+  );
+
+  const [weatherCache, setWeatherCache] = useState<WeatherDataCache[]>([]);
+  const [terrainData, setTerrainData] = useState<TerrainData | null>(null);
+  const [selectedWeatherModel, setSelectedWeatherModel] = useState<string>('best_match');
+
+  // Save to localStorage whenever state changes
+  const setJumpParameters = (params: JumpParameters) => {
+    setJumpParametersState(params);
+    localStorage.setItem('jumpParameters', JSON.stringify(params));
+  };
+
+  const setUserPreferences = (prefs: UserPreferences) => {
+    setUserPreferencesState(prefs);
+    localStorage.setItem('userPreferences', JSON.stringify(prefs));
+  };
+
+  // Get user location on mount
+  useEffect(() => {
+    if (navigator.geolocation && jumpParameters.landingZone.lat === 0 && jumpParameters.landingZone.lon === 0) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setJumpParameters({
+            ...jumpParameters,
+            landingZone: {
+              lat: position.coords.latitude,
+              lon: position.coords.longitude,
+            },
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+        }
+      );
+    }
+  }, []);
+
+  const value: AppContextType = {
+    jumpParameters,
+    setJumpParameters,
+    userPreferences,
+    setUserPreferences,
+    weatherCache,
+    setWeatherCache,
+    terrainData,
+    setTerrainData,
+    selectedWeatherModel,
+    setSelectedWeatherModel,
+  };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+};
