@@ -57,4 +57,4 @@ Later, we should also calculate cloud probability in different altitude levels.
 App should remember user choice in units.
 Cached weather data should be available offline.
 Mobile interface should have same features as desktop interface.
-Visualize ground wind direction at the set landing position (direction and speed with a text).
+Visualize ground wind direction at the set landing position (direction and speed (both average wind speend and gusts speed) with a text).
