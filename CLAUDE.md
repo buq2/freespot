@@ -27,3 +27,7 @@ After calculating the "optimal exit point", the application draws:
 Write project in typescript and react.
 Use leaflet library for displaying map.
 Use openmeteo to get weather information.
+When user changes the parameters, the parameters should be saved to local storage.
+The parameters can be exported or imported as .json.
+The weather model can be selected between GFS, Icon EU, ECMWF or "Best match" (model in openmeteo).
+The weather data for the landing location is displayed as a table for different altitudes (wind direction, wind speed, temperature).
