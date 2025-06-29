@@ -1,4 +1,4 @@
-import { Units } from '../types';
+import type { Units } from '../types';
 
 // Altitude conversions
 export const metersToFeet = (meters: number): number => meters * 3.28084;

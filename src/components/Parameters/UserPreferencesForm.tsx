@@ -15,7 +15,7 @@ import {
   Divider
 } from '@mui/material';
 import { useAppContext } from '../../contexts/AppContext';
-import { Units } from '../../types';
+import type { Units } from '../../types';
 
 export const UserPreferencesForm: React.FC = () => {
   const { userPreferences, setUserPreferences } = useAppContext();
