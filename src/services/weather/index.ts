@@ -54,7 +54,7 @@ export const fetchMultipleModels = async (
   location: LatLon,
   models: string[],
   date: Date
-): Promise<{ [modelId: string]: ForecastData[], terrainElevation: number }> => {
+): Promise<{ [modelId: string]: ForecastData[] } & { terrainElevation: number }> => {
   const results: { [modelId: string]: ForecastData[] } = {};
   let terrainElevation = 0;
   

@@ -1,13 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { JumpParameters, UserPreferences, Units, LatLon, TerrainData, WeatherDataCache } from '../types';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import type { JumpParameters, UserPreferences, LatLon, TerrainData, CachedLocationData } from '../types';
 
 interface AppContextType {
   jumpParameters: JumpParameters;
   setJumpParameters: (params: JumpParameters) => void;
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
-  weatherCache: WeatherDataCache[];
-  setWeatherCache: (cache: WeatherDataCache[]) => void;
+  weatherCache: CachedLocationData[];
+  setWeatherCache: (cache: CachedLocationData[]) => void;
   terrainData: TerrainData | null;
   setTerrainData: (data: TerrainData | null) => void;
   selectedWeatherModel: string;
@@ -75,7 +76,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     loadFromStorage('userPreferences', defaultUserPreferences)
   );
 
-  const [weatherCache, setWeatherCache] = useState<WeatherDataCache[]>([]);
+  const [weatherCache, setWeatherCache] = useState<CachedLocationData[]>([]);
   const [terrainData, setTerrainData] = useState<TerrainData | null>(null);
   const [selectedWeatherModel, setSelectedWeatherModel] = useState<string>('best_match');
 
