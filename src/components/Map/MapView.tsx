@@ -7,11 +7,15 @@ import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIco
 import type { ForecastData } from '../../types';
 import { formatSpeed } from '../../utils/units';
 import { getDestinationPoint } from '../../physics/geo';
+import { DrawingManager } from './DrawingManager';
 import './leaflet.css';
 
 interface MapViewProps {
   exitCalculation: ExitCalculationResult | null;
   groundWindData?: ForecastData;
+  isDrawingMode?: boolean;
+  onFlightPathComplete?: (bearing: number) => void;
+  onCancelDrawing?: () => void;
 }
 
 // Component to handle map centering
@@ -25,7 +29,13 @@ const MapController: React.FC<{ center: LatLng }> = ({ center }) => {
   return null;
 };
 
-export const MapView: React.FC<MapViewProps> = ({ exitCalculation, groundWindData }) => {
+export const MapView: React.FC<MapViewProps> = ({ 
+  exitCalculation, 
+  groundWindData,
+  isDrawingMode = false,
+  onFlightPathComplete,
+  onCancelDrawing
+}) => {
   const { jumpParameters, userPreferences } = useAppContext();
   const [mapCenter, setMapCenter] = useState<LatLng>(
     new LatLng(jumpParameters.landingZone.lat, jumpParameters.landingZone.lon)
@@ -191,6 +201,15 @@ export const MapView: React.FC<MapViewProps> = ({ exitCalculation, groundWindDat
             </>
           )}
         </>
+      )}
+
+      {/* Drawing Manager - must be inside MapContainer */}
+      {isDrawingMode && onFlightPathComplete && onCancelDrawing && (
+        <DrawingManager
+          isActive={isDrawingMode}
+          onFlightPathComplete={onFlightPathComplete}
+          onCancel={onCancelDrawing}
+        />
       )}
     </MapContainer>
   );

@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { Box, Button, ButtonGroup, Paper, Typography } from '@mui/material';
 import { Navigation, Edit } from '@mui/icons-material';
 import { MapView } from './MapView';
-import { DrawingManager } from './DrawingManager';
 import { useAppContext } from '../../contexts/AppContext';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import type { ForecastData } from '../../types';
@@ -75,12 +74,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         <MapView
           exitCalculation={exitCalculation}
           groundWindData={groundWindData}
-        />
-        
-        <DrawingManager
-          isActive={isDrawingMode}
+          isDrawingMode={isDrawingMode}
           onFlightPathComplete={handleFlightPathComplete}
-          onCancel={handleCancelDrawing}
+          onCancelDrawing={handleCancelDrawing}
         />
       </Box>
     </Paper>
