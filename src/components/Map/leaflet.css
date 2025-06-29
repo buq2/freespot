@@ -1,0 +1,14 @@
+/* Import Leaflet CSS */
+@import 'leaflet/dist/leaflet.css';
+
+/* Fix for missing marker icons in Vite */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Ensure markers are visible */
+.leaflet-marker-icon {
+  background: transparent;
+  border: none;
+}
