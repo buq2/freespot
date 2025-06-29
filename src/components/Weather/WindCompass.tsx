@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
-import { ForecastData } from '../../types';
+import type { ForecastData } from '../../types';
 import { useAppContext } from '../../contexts/AppContext';
 import { formatSpeed } from '../../utils/units';
 

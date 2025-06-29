@@ -1,5 +1,5 @@
-import { LatLon } from '../types';
-import { Vector2D } from './vector';
+import type { LatLon } from '../types';
+import type { Vector2D } from './vector';
 import * as geolib from 'geolib';
 
 // Re-export useful geolib functions with our types

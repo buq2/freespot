@@ -4,8 +4,8 @@ import { Navigation, Edit } from '@mui/icons-material';
 import { MapView } from './MapView';
 import { DrawingManager } from './DrawingManager';
 import { useAppContext } from '../../contexts/AppContext';
-import { ExitCalculationResult } from '../../physics/exit-point';
-import { ForecastData } from '../../types';
+import type { ExitCalculationResult } from '../../physics/exit-point';
+import type { ForecastData } from '../../types';
 
 interface MapContainerProps {
   exitCalculation: ExitCalculationResult | null;

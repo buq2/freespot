@@ -22,8 +22,8 @@ import { MapContainer } from '../Map';
 import { fetchWeatherData, fetchMultipleModels } from '../../services/weather';
 import { calculateExitPoints } from '../../physics/exit-point';
 import { getWindDataAtAltitude } from '../../services/weather';
-import { ExitCalculationResult } from '../../physics/exit-point';
-import { ForecastData } from '../../types';
+import type { ExitCalculationResult } from '../../physics/exit-point';
+import type { ForecastData } from '../../types';
 
 interface TabPanelProps {
   children?: React.ReactNode;

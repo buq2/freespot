@@ -1,7 +1,8 @@
-import { LatLon, JumpParameters, ForecastData, ExitPoint } from '../types';
+import type { LatLon, JumpParameters, ForecastData, ExitPoint } from '../types';
 import { movePoint, pointsToVector, calculateBearing, calculateDistance } from './geo';
 import { calculateFreefallDrift, calculateCanopyDrift } from './wind-drift';
-import { Vector2D, windToVector, vectorToWind, subtractVectors, addVectors, scaleVector, vectorMagnitude } from './vector';
+import type { Vector2D } from './vector';
+import { windToVector, vectorToWind, subtractVectors, addVectors, scaleVector, vectorMagnitude } from './vector';
 import { interpolateWeatherData } from '../services/weather/openmeteo';
 
 // Safety margins

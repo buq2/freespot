@@ -1,4 +1,4 @@
-import { LatLon, ForecastData, TerrainData } from '../../types';
+import type { LatLon, ForecastData, TerrainData } from '../../types';
 import { fetchWeatherData as fetchFromAPI, fetchTerrainElevation, interpolateWeatherData } from './openmeteo';
 import { weatherCache } from './cache';
 

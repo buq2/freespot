@@ -1,4 +1,4 @@
-import { LatLon, ForecastData, WeatherModel } from '../../types';
+import type { LatLon, ForecastData, WeatherModel } from '../../types';
 
 const OPENMETEO_API_URL = 'https://api.open-meteo.com/v1/forecast';
 const OPENMETEO_ELEVATION_URL = 'https://api.open-meteo.com/v1/elevation';

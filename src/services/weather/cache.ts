@@ -1,5 +1,5 @@
 import localforage from 'localforage';
-import { LatLon, CachedLocationData, ForecastData, TerrainData } from '../../types';
+import type { LatLon, CachedLocationData, ForecastData, TerrainData } from '../../types';
 
 // Configure localforage
 const weatherStore = localforage.createInstance({

@@ -13,7 +13,7 @@ import {
   Chip
 } from '@mui/material';
 import { Warning, CheckCircle } from '@mui/icons-material';
-import { ForecastData } from '../../types';
+import type { ForecastData } from '../../types';
 import { useAppContext } from '../../contexts/AppContext';
 import { formatAltitude, formatSpeed, formatTemperature } from '../../utils/units';
 

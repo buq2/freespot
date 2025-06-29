@@ -13,7 +13,7 @@ import {
   Divider
 } from '@mui/material';
 import { Flight, LocationOn, Speed, Height } from '@mui/icons-material';
-import { ExitCalculationResult } from '../../physics/exit-point';
+import type { ExitCalculationResult } from '../../physics/exit-point';
 import { useAppContext } from '../../contexts/AppContext';
 import { formatAltitude } from '../../utils/units';
 

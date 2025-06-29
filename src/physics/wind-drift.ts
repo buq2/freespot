@@ -1,5 +1,6 @@
-import { ForecastData } from '../types';
-import { Vector2D, windToVector, addVectors, scaleVector } from './vector';
+import type { ForecastData } from '../types';
+import type { Vector2D } from './vector';
+import { windToVector, addVectors, scaleVector } from './vector';
 import { interpolateWeatherData } from '../services/weather/openmeteo';
 
 export interface DriftResult {
