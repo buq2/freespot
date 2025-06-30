@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useMapEvents, Polyline, Marker } from 'react-leaflet';
 import { LatLng, divIcon } from 'leaflet';
-import { Button, IconButton, Tooltip } from '@mui/material';
-import { Edit, Check, Clear } from '@mui/icons-material';
+import { IconButton, Tooltip } from '@mui/material';
+import { Clear } from '@mui/icons-material';
 import { calculateBearing } from '../../physics/geo';
 
 interface DrawingManagerProps {
@@ -37,7 +37,22 @@ export const DrawingManager: React.FC<DrawingManagerProps> = ({
   const map = useMapEvents({
     click: (e) => {
       if (isActive) {
-        setPoints([...points, e.latlng]);
+        const newPoints = [...points, e.latlng];
+        setPoints(newPoints);
+        
+        // Auto-complete after 2 clicks
+        if (newPoints.length === 2) {
+          const firstPoint = newPoints[0];
+          const lastPoint = newPoints[1];
+          
+          const bearing = calculateBearing(
+            { lat: firstPoint.lat, lon: firstPoint.lng },
+            { lat: lastPoint.lat, lon: lastPoint.lng }
+          );
+          
+          onFlightPathComplete(bearing);
+          setPoints([]);
+        }
       }
     }
   });
@@ -47,22 +62,6 @@ export const DrawingManager: React.FC<DrawingManagerProps> = ({
       setPoints([]);
     }
   }, [isActive]);
-
-  const handleComplete = () => {
-    if (points.length >= 2) {
-      // Calculate bearing from first to last point
-      const firstPoint = points[0];
-      const lastPoint = points[points.length - 1];
-      
-      const bearing = calculateBearing(
-        { lat: firstPoint.lat, lon: firstPoint.lng },
-        { lat: lastPoint.lat, lon: lastPoint.lng }
-      );
-      
-      onFlightPathComplete(bearing);
-      setPoints([]);
-    }
-  };
 
   const handleCancel = () => {
     setPoints([]);
@@ -111,21 +110,14 @@ export const DrawingManager: React.FC<DrawingManagerProps> = ({
           Draw Flight Path
         </div>
         <div style={{ fontSize: '12px', marginBottom: '8px' }}>
-          Click on map to add points
+          Click two points to set direction
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Tooltip title="Complete">
-            <span>
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={handleComplete}
-                disabled={points.length < 2}
-              >
-                <Check />
-              </IconButton>
-            </span>
-          </Tooltip>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {points.length === 1 && (
+            <div style={{ fontSize: '12px', color: '#666' }}>
+              Click one more point...
+            </div>
+          )}
           <Tooltip title="Cancel">
             <IconButton
               size="small"
