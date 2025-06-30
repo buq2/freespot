@@ -36,7 +36,7 @@ const calculateOptimalExitPoint = (
   const canopyDrift = calculateCanopyDrift(
     weatherData,
     params.openingAltitude,
-    0, // ground level
+    params.setupAltitude, // setup altitude AGL
     0, // no forward canopy speed - pure drift
     params.canopyDescentRate,
     params.glideRatio,
@@ -96,6 +96,14 @@ const validateParameters = (params: JumpParameters): string | null => {
   
   if (params.openingAltitude <= 0) {
     return 'Opening altitude must be greater than 0';
+  }
+  
+  if (params.setupAltitude < 0) {
+    return 'Setup altitude cannot be negative';
+  }
+  
+  if (params.setupAltitude >= params.openingAltitude) {
+    return 'Setup altitude must be lower than opening altitude';
   }
   
   if (params.aircraftSpeed <= 0) {
@@ -210,7 +218,8 @@ export const calculateExitPoints = (
   
   // Calculate safety radius (maximum distance from which landing zone can be reached)
   const canopyAirSpeed = calculateCanopyAirSpeed(params.canopyDescentRate, params.glideRatio);
-  const maxCanopyDistance = canopyAirSpeed * (params.openingAltitude / params.canopyDescentRate);
+  const canopyAltitudeDifference = params.openingAltitude - params.setupAltitude;
+  const maxCanopyDistance = canopyAirSpeed * (canopyAltitudeDifference / params.canopyDescentRate);
   const safetyRadius = maxCanopyDistance * SAFETY_RADIUS_MARGIN;
   
   return {

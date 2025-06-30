@@ -83,7 +83,7 @@ const calculateDriftPaths = (
       const canopyDrift = calculateCanopyDrift(
         simpleWeatherData,
         jumpParameters.openingAltitude,
-        0,
+        jumpParameters.setupAltitude,
         0, // no forward speed for this visualization
         jumpParameters.canopyDescentRate,
         jumpParameters.glideRatio,

@@ -24,6 +24,7 @@ const defaultJumpParameters: JumpParameters = {
   openingAltitude: 1000, // meters
   canopyDescentRate: 6, // m/s
   glideRatio: 2.5, // This gives us ~16.1 m/s canopy air speed (sqrt(6^2 + (6*2.5)^2) = sqrt(36 + 225))
+  setupAltitude: 100, // meters AGL - default to 100m for pattern work
   numberOfGroups: 1,
   timeBetweenGroups: 6, // seconds
   landingZone: { lat: 61.7807, lon: 22.7221 },
@@ -70,8 +71,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   const [jumpParameters, setJumpParametersState] = useState<JumpParameters>(() => {
     const stored = loadFromStorage('jumpParameters', defaultJumpParameters);
+    // Merge with defaults to ensure all fields exist (for backward compatibility)
+    const merged = { ...defaultJumpParameters, ...stored };
     // Convert stored date string back to Date object
-    return { ...stored, jumpTime: new Date(stored.jumpTime) };
+    return { ...merged, jumpTime: new Date(merged.jumpTime) };
   });
 
   const [userPreferences, setUserPreferencesState] = useState<UserPreferences>(() => 

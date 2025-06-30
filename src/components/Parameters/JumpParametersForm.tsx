@@ -62,6 +62,7 @@ export const JumpParametersForm: React.FC = () => {
   // Convert values for display
   const displayJumpAltitude = convertAltitude(jumpParameters.jumpAltitude, 'meters', userPreferences.units.altitude);
   const displayOpeningAltitude = convertAltitude(jumpParameters.openingAltitude, 'meters', userPreferences.units.altitude);
+  const displaySetupAltitude = convertAltitude(jumpParameters.setupAltitude, 'meters', userPreferences.units.altitude);
   const displayAircraftSpeed = convertSpeed(jumpParameters.aircraftSpeed, 'ms', userPreferences.units.speed);
   const displayFreefallSpeed = convertSpeed(jumpParameters.freefallSpeed, 'ms', userPreferences.units.speed);
   const displayCanopyDescentRate = convertSpeed(jumpParameters.canopyDescentRate, 'ms', userPreferences.units.speed);
@@ -123,6 +124,28 @@ export const JumpParametersForm: React.FC = () => {
                 {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
               </InputAdornment>
             }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Setup Altitude"
+            value={displaySetupAltitude.toFixed(0)}
+            onChange={(e) => {
+              const displayValue = parseFloat(e.target.value) || 0;
+              const metersValue = convertAltitude(displayValue, userPreferences.units.altitude, 'meters');
+              setJumpParameters({
+                ...jumpParameters,
+                setupAltitude: metersValue
+              });
+            }}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">
+                {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
+              </InputAdornment>
+            }}
+            helperText="Altitude AGL to be on top of landing zone without canopy forward speed"
           />
         </Grid>
 

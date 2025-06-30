@@ -18,6 +18,7 @@ export interface JumpParameters {
   openingAltitude: number; // meters
   canopyDescentRate: number; // m/s
   glideRatio: number;
+  setupAltitude: number; // meters AGL - altitude to be on top of landing zone without forward canopy speed
   numberOfGroups: number;
   timeBetweenGroups: number; // seconds
   landingZone: LatLon;
