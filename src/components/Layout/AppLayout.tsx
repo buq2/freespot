@@ -54,6 +54,7 @@ export const AppLayout: React.FC = () => {
   const [exitCalculation, setExitCalculation] = useState<ExitCalculationResult | null>(null);
   const [groundWindData, setGroundWindData] = useState<ForecastData | undefined>();
   const [loading, setLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
 
@@ -91,6 +92,9 @@ export const AppLayout: React.FC = () => {
       // Get ground wind data
       const groundWind = getWindDataAtAltitude(primaryModelData, 10); // 10m AGL
       setGroundWindData(groundWind);
+      
+      // Mark initial load as complete
+      setInitialLoad(false);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to calculate exit points');
@@ -98,6 +102,7 @@ export const AppLayout: React.FC = () => {
       setGroundWindData(undefined);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   }, [jumpParameters, selectedModels]);
 
@@ -175,17 +180,48 @@ export const AppLayout: React.FC = () => {
               )}
 
               {/* Map */}
-              <Box sx={{ height: '600px' }}>
-                <MapContainer
-                  exitCalculation={exitCalculation}
-                  groundWindData={groundWindData}
-                />
+              <Box sx={{ height: '600px', position: 'relative' }}>
+                {initialLoad && loading ? (
+                  <Paper 
+                    elevation={3} 
+                    sx={{ 
+                      height: '100%', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      flexDirection: 'column',
+                      gap: 2
+                    }}
+                  >
+                    <CircularProgress size={60} />
+                    <Typography variant="h6" color="text.secondary">
+                      Loading weather data...
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      This may take a few moments
+                    </Typography>
+                  </Paper>
+                ) : (
+                  <MapContainer
+                    exitCalculation={exitCalculation}
+                    groundWindData={groundWindData}
+                  />
+                )}
               </Box>
 
               {/* Results */}
-              {exitCalculation && (
+              {initialLoad && loading ? (
+                <Paper elevation={1} sx={{ p: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <CircularProgress size={20} />
+                    <Typography color="text.secondary">
+                      Calculating exit points...
+                    </Typography>
+                  </Box>
+                </Paper>
+              ) : exitCalculation ? (
                 <ExitPointResults result={exitCalculation} />
-              )}
+              ) : null}
 
               {/* Ground Wind Display */}
               {groundWindData && (
@@ -200,7 +236,21 @@ export const AppLayout: React.FC = () => {
               )}
 
               {/* Weather Tables */}
-              {Object.keys(weatherData).length > 0 && (
+              {initialLoad && loading ? (
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Weather Data
+                  </Typography>
+                  <Paper elevation={1} sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <CircularProgress size={20} />
+                      <Typography color="text.secondary">
+                        Fetching weather data...
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Box>
+              ) : Object.keys(weatherData).length > 0 ? (
                 <Box>
                   <Typography variant="h6" gutterBottom>
                     Weather Data
@@ -227,7 +277,7 @@ export const AppLayout: React.FC = () => {
                     })}
                   </Grid>
                 </Box>
-              )}
+              ) : null}
             </Box>
           </Grid>
         </Grid>
