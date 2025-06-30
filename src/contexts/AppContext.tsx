@@ -13,6 +13,8 @@ interface AppContextType {
   setTerrainData: (data: TerrainData | null) => void;
   selectedWeatherModel: string;
   setSelectedWeatherModel: (model: string) => void;
+  customWeatherData: ForecastData[] | null;
+  setCustomWeatherData: (data: ForecastData[] | null) => void;
 }
 
 const defaultJumpParameters: JumpParameters = {
@@ -79,6 +81,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [weatherCache, setWeatherCache] = useState<CachedLocationData[]>([]);
   const [terrainData, setTerrainData] = useState<TerrainData | null>(null);
   const [selectedWeatherModel, setSelectedWeatherModel] = useState<string>('best_match');
+  const [customWeatherData, setCustomWeatherData] = useState<ForecastData[] | null>(null);
 
   // Save to localStorage whenever state changes
   const setJumpParameters = (params: JumpParameters) => {
@@ -122,6 +125,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setTerrainData,
     selectedWeatherModel,
     setSelectedWeatherModel,
+    customWeatherData,
+    setCustomWeatherData,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

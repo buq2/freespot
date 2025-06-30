@@ -6,8 +6,9 @@ const OPENMETEO_ELEVATION_URL = 'https://api.open-meteo.com/v1/elevation';
 export const WEATHER_MODELS: WeatherModel[] = [
   { id: 'best_match', name: 'Best Match', altitudeLevels: [] },
   { id: 'gfs_global', name: 'GFS Global', altitudeLevels: [] },
-  { id: 'icon_eu', name: 'ICON EU', altitudeLevels: [] },
+  { id: 'icon_eu', name:'ICON EU', altitudeLevels: [] },
   { id: 'ecmwf_ifs04', name: 'ECMWF', altitudeLevels: [] },
+  { id: 'custom', name: 'Custom Weather Data', altitudeLevels: [] },
 ];
 
 // Pressure levels with approximate altitudes in meters above sea level

@@ -53,16 +53,27 @@ export const fetchWeatherData = async (
 export const fetchMultipleModels = async (
   location: LatLon,
   models: string[],
-  date: Date
+  date: Date,
+  customWeatherData?: ForecastData[] | null
 ): Promise<{ [modelId: string]: ForecastData[] } & { terrainElevation: number }> => {
   const results: { [modelId: string]: ForecastData[] } = {};
   let terrainElevation = 0;
   
   // Fetch data for each model (will use cache when available)
   for (const model of models) {
-    const result = await fetchWeatherData(location, model, date);
-    results[model] = result.data;
-    terrainElevation = result.terrainElevation;
+    if (model === 'custom' && customWeatherData) {
+      // Use custom weather data
+      results[model] = customWeatherData;
+      // Still need terrain elevation for custom data
+      if (terrainElevation === 0) {
+        const terrain = await fetchTerrain(location);
+        terrainElevation = terrain.elevation;
+      }
+    } else if (model !== 'custom') {
+      const result = await fetchWeatherData(location, model, date);
+      results[model] = result.data;
+      terrainElevation = result.terrainElevation;
+    }
   }
   
   return { ...results, terrainElevation };

@@ -47,7 +47,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const AppLayout: React.FC = () => {
-  const { jumpParameters } = useAppContext();
+  const { jumpParameters, customWeatherData } = useAppContext();
   const [selectedModels, setSelectedModels] = useState<string[]>(['best_match']);
   const [weatherData, setWeatherData] = useState<{ [modelId: string]: ForecastData[] }>({});
   const [terrainElevation, setTerrainElevation] = useState<number>(0);
@@ -76,7 +76,8 @@ export const AppLayout: React.FC = () => {
       const results = await fetchMultipleModels(
         jumpParameters.landingZone,
         selectedModels,
-        jumpParameters.jumpTime
+        jumpParameters.jumpTime,
+        customWeatherData
       );
 
       setWeatherData(results);
@@ -104,7 +105,7 @@ export const AppLayout: React.FC = () => {
       setLoading(false);
       setInitialLoad(false);
     }
-  }, [jumpParameters, selectedModels]);
+  }, [jumpParameters, selectedModels, customWeatherData]);
 
   // Auto-calculate when parameters change
   useEffect(() => {
@@ -116,7 +117,7 @@ export const AppLayout: React.FC = () => {
 
       return () => clearTimeout(delayDebounce);
     }
-  }, [jumpParameters, selectedModels, handleCalculate]);
+  }, [jumpParameters, selectedModels, customWeatherData, handleCalculate]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
