@@ -5,7 +5,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIcon } from './icons';
 import type { ForecastData, JumpParameters } from '../../types';
-import { formatSpeed } from '../../utils/units';
+import { formatSpeed, formatAltitude } from '../../utils/units';
 import { getDestinationPoint, movePoint } from '../../physics/geo';
 import { DrawingManager } from './DrawingManager';
 import { LandingZoneManager } from './LandingZoneManager';
@@ -285,7 +285,7 @@ export const MapView: React.FC<MapViewProps> = ({
             }}
           >
             <Popup>
-              Safety radius: {Math.round(exitCalculation.safetyRadius)}m
+              Safety radius: {formatAltitude(exitCalculation.safetyRadius, userPreferences.units.altitude)}
             </Popup>
           </Circle>
 

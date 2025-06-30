@@ -52,7 +52,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
                   Safety Radius
                 </Typography>
                 <Typography variant="body1">
-                  {Math.round(result.safetyRadius)} meters
+                  {formatAltitude(result.safetyRadius, userPreferences.units.altitude)}
                 </Typography>
               </Box>
             </CardContent>
@@ -150,7 +150,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
                     Safety Radius
                   </Typography>
                   <Typography variant="h6">
-                    {Math.round(result.safetyRadius)}m
+                    {formatAltitude(result.safetyRadius, userPreferences.units.altitude)}
                   </Typography>
                 </Grid>
                 
