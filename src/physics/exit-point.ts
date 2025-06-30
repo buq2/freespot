@@ -65,6 +65,8 @@ const findSingleExitPoint = (
   const initialOffset = windToVector(windAtExit.direction, INITIAL_GUESS_DISTANCE);
   let currentGuess = movePoint(landingZone, initialOffset);
   
+  let lastError = Infinity;
+  
   // Iterative refinement
   for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
     // Calculate freefall drift from current guess
@@ -108,11 +110,20 @@ const findSingleExitPoint = (
       return currentGuess;
     }
     
+    // Check if we're making progress
+    if (iter > 5 && error >= lastError * 0.99) {
+      // Not converging - likely an issue with parameters
+      console.warn(`Exit point calculation not converging. Iteration ${iter}, error: ${error}m, last error: ${lastError}m`);
+    }
+    
+    lastError = error;
+    
     // Adjust guess based on error
     const errorVector = pointsToVector(landingPosition, landingZone);
     currentGuess = movePoint(currentGuess, errorVector);
   }
   
+  console.error(`Failed to find exit point after ${MAX_ITERATIONS} iterations. Final error: ${lastError}m`);
   return null; // Failed to converge
 };
 
@@ -131,16 +142,73 @@ const calculateAircraftHeading = (
   return (windAtExit.direction + 180) % 360; // Fly into the wind
 };
 
+// Validate jump parameters
+const validateParameters = (params: JumpParameters): string | null => {
+  if (params.jumpAltitude <= params.openingAltitude) {
+    return 'Jump altitude must be higher than opening altitude';
+  }
+  
+  if (params.openingAltitude <= 0) {
+    return 'Opening altitude must be greater than 0';
+  }
+  
+  if (params.aircraftSpeed <= 0) {
+    return 'Aircraft speed must be greater than 0';
+  }
+  
+  if (params.freefallSpeed <= 0) {
+    return 'Freefall speed must be greater than 0';
+  }
+  
+  if (params.canopyAirSpeed <= 0) {
+    return 'Canopy air speed must be greater than 0';
+  }
+  
+  if (params.canopyDescentRate <= 0) {
+    return 'Canopy descent rate must be greater than 0';
+  }
+  
+  if (params.glideRatio < 0) {
+    return 'Glide ratio cannot be negative';
+  }
+  
+  if (params.numberOfGroups <= 0) {
+    return 'Number of groups must be at least 1';
+  }
+  
+  if (params.timeBetweenGroups < 0) {
+    return 'Time between groups cannot be negative';
+  }
+  
+  if (!params.landingZone.lat || !params.landingZone.lon) {
+    return 'Landing zone coordinates must be provided';
+  }
+  
+  return null;
+};
+
 // Calculate exit points for multiple groups
 export const calculateExitPoints = (
   params: JumpParameters,
   weatherData: ForecastData[]
 ): ExitCalculationResult => {
+  // Validate parameters first
+  const validationError = validateParameters(params);
+  if (validationError) {
+    throw new Error(validationError);
+  }
+  
+  // Check if we have weather data
+  if (!weatherData || weatherData.length === 0) {
+    throw new Error('No weather data available - try fetching weather first');
+  }
+  
   // Find optimal exit point for middle group
   const optimalExit = findSingleExitPoint(params.landingZone, weatherData, params);
   
   if (!optimalExit) {
-    throw new Error('Could not calculate exit point - check parameters');
+    // The algorithm failed to converge - this usually means the parameters create an impossible scenario
+    throw new Error('Could not find valid exit point after ' + MAX_ITERATIONS + ' iterations. Try adjusting jump altitude, opening altitude, or canopy performance parameters.');
   }
   
   // Calculate aircraft heading
