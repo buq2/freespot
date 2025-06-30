@@ -118,26 +118,49 @@ const extractHeightLevelData = (
     const winddirectionKey = `winddirection_${height}m`;
     
     if (data.hourly[windspeedKey] && data.hourly[winddirectionKey]) {
+      const speed = data.hourly[windspeedKey][timeIndex];
+      const direction = data.hourly[winddirectionKey][timeIndex];
+      
+      // Skip if data is missing (null, undefined, or NaN)
+      if (speed == null || direction == null || isNaN(speed) || isNaN(direction)) {
+        continue;
+      }
+      
       const forecast: ForecastData = {
         altitude: height, // Already in AGL
-        speed: data.hourly[windspeedKey][timeIndex] / 3.6, // Convert km/h to m/s
-        direction: data.hourly[winddirectionKey][timeIndex],
+        speed: speed / 3.6, // Convert km/h to m/s
+        direction: direction,
       };
 
       // Add gust speed for ground level
       if (height === 10 && data.hourly.windgusts_10m) {
-        forecast.gustSpeed = data.hourly.windgusts_10m[timeIndex] / 3.6;
+        const gustSpeed = data.hourly.windgusts_10m[timeIndex];
+        if (gustSpeed != null && !isNaN(gustSpeed)) {
+          forecast.gustSpeed = gustSpeed / 3.6;
+        }
       }
 
       // Add temperature data where available
       if (height === 10 && data.hourly.temperature_2m) {
-        forecast.temperature = data.hourly.temperature_2m[timeIndex];
+        const temp = data.hourly.temperature_2m[timeIndex];
+        if (temp != null && !isNaN(temp)) {
+          forecast.temperature = temp;
+        }
       } else if (height === 80 && data.hourly.temperature_80m) {
-        forecast.temperature = data.hourly.temperature_80m[timeIndex];
+        const temp = data.hourly.temperature_80m[timeIndex];
+        if (temp != null && !isNaN(temp)) {
+          forecast.temperature = temp;
+        }
       } else if (height === 120 && data.hourly.temperature_120m) {
-        forecast.temperature = data.hourly.temperature_120m[timeIndex];
+        const temp = data.hourly.temperature_120m[timeIndex];
+        if (temp != null && !isNaN(temp)) {
+          forecast.temperature = temp;
+        }
       } else if (height === 180 && data.hourly.temperature_180m) {
-        forecast.temperature = data.hourly.temperature_180m[timeIndex];
+        const temp = data.hourly.temperature_180m[timeIndex];
+        if (temp != null && !isNaN(temp)) {
+          forecast.temperature = temp;
+        }
       }
 
       forecasts.push(forecast);
@@ -163,10 +186,18 @@ const extractPressureLevelData = (
       
       // Only include if above ground level
       if (altitudeAGL > 0) {
+        const speed = data.hourly[windspeedKey][timeIndex];
+        const direction = data.hourly[winddirectionKey][timeIndex];
+        
+        // Skip if data is missing (null, undefined, or NaN)
+        if (speed == null || direction == null || isNaN(speed) || isNaN(direction)) {
+          continue;
+        }
+        
         const forecast: ForecastData = {
           altitude: altitudeAGL, // Convert to AGL
-          speed: data.hourly[windspeedKey][timeIndex] / 3.6, // Convert km/h to m/s
-          direction: data.hourly[winddirectionKey][timeIndex],
+          speed: speed / 3.6, // Convert km/h to m/s
+          direction: direction,
         };
 
         forecasts.push(forecast);
