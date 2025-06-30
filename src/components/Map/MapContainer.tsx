@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Button, ButtonGroup, Paper, Typography, FormControlLabel, Switch } from '@mui/material';
+import { Box, Button, ButtonGroup, Paper, Typography, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Navigation, Edit, LocationOn } from '@mui/icons-material';
 import { MapView } from './MapView';
 import { useAppContext } from '../../contexts/AppContext';
@@ -18,6 +18,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const { jumpParameters, setJumpParameters } = useAppContext();
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [isSettingLandingZone, setIsSettingLandingZone] = useState(false);
+  const [mapLayer, setMapLayer] = useState('osm');
 
   const handleFlightPathComplete = useCallback((bearing: number) => {
     setJumpParameters({
@@ -58,7 +59,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           Jump Visualization
         </Typography>
         
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
           <ButtonGroup size="small" variant="outlined">
             <Button
               startIcon={<Navigation />}
@@ -86,6 +87,21 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           >
             Set Landing Zone
           </Button>
+
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Map Layer</InputLabel>
+            <Select
+              value={mapLayer}
+              label="Map Layer"
+              onChange={(e) => setMapLayer(e.target.value)}
+            >
+              <MenuItem value="osm">OpenStreetMap</MenuItem>
+              <MenuItem value="google-satellite">Google Satellite</MenuItem>
+              <MenuItem value="google-hybrid">Google Hybrid</MenuItem>
+              <MenuItem value="esri-satellite">Esri Satellite</MenuItem>
+              <MenuItem value="cartodb">CartoDB Positron</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
         <Box sx={{ mt: 1 }}>
@@ -127,6 +143,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           isSettingLandingZone={isSettingLandingZone}
           onLandingZoneSet={handleLandingZoneSet}
           onCancelLandingZone={handleCancelLandingZone}
+          mapLayer={mapLayer}
         />
       </Box>
     </Paper>

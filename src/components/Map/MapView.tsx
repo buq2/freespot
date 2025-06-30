@@ -22,6 +22,7 @@ interface MapViewProps {
   isSettingLandingZone?: boolean;
   onLandingZoneSet?: (lat: number, lon: number) => void;
   onCancelLandingZone?: () => void;
+  mapLayer?: string;
 }
 
 // Component to handle map centering
@@ -109,6 +110,34 @@ const calculateDriftPaths = (
   return paths;
 };
 
+// Get tile layer configuration based on selected layer
+const getTileLayerConfig = (layerId: string) => {
+  const configs = {
+    'osm': {
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    },
+    'google-satellite': {
+      url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+      attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+    },
+    'google-hybrid': {
+      url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+      attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+    },
+    'esri-satellite': {
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community'
+    },
+    'cartodb': {
+      url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    },
+  };
+  
+  return configs[layerId] || configs['osm'];
+};
+
 export const MapView: React.FC<MapViewProps> = ({ 
   exitCalculation, 
   groundWindData,
@@ -117,7 +146,8 @@ export const MapView: React.FC<MapViewProps> = ({
   onCancelDrawing,
   isSettingLandingZone = false,
   onLandingZoneSet,
-  onCancelLandingZone
+  onCancelLandingZone,
+  mapLayer = 'osm'
 }) => {
   const { jumpParameters, userPreferences } = useAppContext();
   const [mapCenter, setMapCenter] = useState<LatLng>(
@@ -178,6 +208,9 @@ export const MapView: React.FC<MapViewProps> = ({
   // Calculate drift paths for visualization
   const driftPaths = calculateDriftPaths(exitCalculation, groundWindData, jumpParameters, userPreferences.showDriftVisualization);
 
+  // Get tile layer configuration
+  const tileConfig = getTileLayerConfig(mapLayer);
+
   return (
     <MapContainer
       center={mapCenter}
@@ -191,8 +224,8 @@ export const MapView: React.FC<MapViewProps> = ({
       <MapController center={mapCenter} />
       
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution={tileConfig.attribution}
+        url={tileConfig.url}
       />
 
       {/* Landing Zone */}
