@@ -8,17 +8,18 @@ import {
   MenuItem,
   Typography,
   Paper,
-  Box,
   Switch,
   FormControlLabel,
   InputAdornment,
-  Divider
+  Divider,
 } from '@mui/material';
 import { useAppContext } from '../../contexts/AppContext';
+import { useResponsive } from '../../hooks/useResponsive';
 import type { Units } from '../../types';
 
 export const UserPreferencesForm: React.FC = () => {
   const { userPreferences, setUserPreferences } = useAppContext();
+  const responsive = useResponsive();
 
   const handleUnitsChange = (unitType: keyof Units) => (event: React.ChangeEvent<{ value: unknown }>) => {
     setUserPreferences({
@@ -48,12 +49,12 @@ export const UserPreferencesForm: React.FC = () => {
     };
 
   return (
-    <Paper elevation={2} sx={{ p: 3 }}>
+    <Paper elevation={2} sx={{ p: responsive.spacing.container }}>
       <Typography variant="h6" gutterBottom>
         User Preferences
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={responsive.spacing.gap}>
         {/* Units */}
         <Grid item xs={12}>
           <Typography variant="subtitle2" color="textSecondary" gutterBottom>

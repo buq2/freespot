@@ -16,6 +16,11 @@ import { Warning, CheckCircle } from '@mui/icons-material';
 import type { ForecastData } from '../../types';
 import { useAppContext } from '../../contexts/AppContext';
 import { formatAltitude, formatSpeed, formatTemperature } from '../../utils/units';
+import { 
+  getWindWarningLevel, 
+  getWindWarningLabel, 
+  hasWindWarnings 
+} from '../../utils/windWarnings';
 
 interface WeatherTableProps {
   data: ForecastData[];
@@ -30,31 +35,12 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
 }) => {
   const { userPreferences } = useAppContext();
 
-  const getWindWarningColor = (speed: number, gustSpeed?: number, altitude: number) => {
-    // Only show warnings for ground wind (< 50m AGL)
-    if (altitude >= 50) {
-      return 'default';
-    }
-    
-    const maxSpeed = Math.max(speed, gustSpeed || 0);
-    
-    if (maxSpeed >= userPreferences.sportWindLimit) {
-      return 'error';
-    } else if (maxSpeed >= userPreferences.studentWindLimit) {
-      return 'warning';
-    }
-    return 'success';
-  };
-
-  const getWindWarningIcon = (speed: number, gustSpeed?: number, altitude: number) => {
-    // Only show warnings for ground wind (< 50m AGL)
-    if (altitude >= 50) {
+  const getWindWarningIcon = (warningLevel: string) => {
+    if (warningLevel === 'default') {
       return null;
     }
     
-    const maxSpeed = Math.max(speed, gustSpeed || 0);
-    
-    if (maxSpeed >= userPreferences.studentWindLimit) {
+    if (warningLevel === 'warning' || warningLevel === 'error') {
       return <Warning fontSize="small" />;
     }
     return <CheckCircle fontSize="small" />;
@@ -83,8 +69,13 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
           </TableHead>
           <TableBody>
             {data.map((forecast, index) => {
-              const warningColor = getWindWarningColor(forecast.speed, forecast.gustSpeed, forecast.altitude);
-              const warningIcon = getWindWarningIcon(forecast.speed, forecast.gustSpeed, forecast.altitude);
+              const warningLevel = getWindWarningLevel(
+                forecast.speed, 
+                forecast.gustSpeed, 
+                forecast.altitude, 
+                userPreferences
+              );
+              const warningIcon = getWindWarningIcon(warningLevel);
               
               return (
                 <TableRow key={index} hover>
@@ -110,16 +101,13 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
                     }
                   </TableCell>
                   <TableCell align="center">
-                    {warningColor === 'default' ? (
+                    {warningLevel === 'default' ? (
                       '-'
                     ) : (
                       <Chip
                         icon={warningIcon}
-                        label={
-                          warningColor === 'error' ? 'High' :
-                          warningColor === 'warning' ? 'Moderate' : 'OK'
-                        }
-                        color={warningColor}
+                        label={getWindWarningLabel(warningLevel)}
+                        color={warningLevel}
                         size="small"
                       />
                     )}
@@ -134,23 +122,15 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
       {/* Wind warnings - only for ground wind */}
       <Box sx={{ p: 2 }}>
         {(() => {
-          const groundWindData = data.filter(d => d.altitude < 50);
-          const hasHighWind = groundWindData.some(d => {
-            const maxSpeed = Math.max(d.speed, d.gustSpeed || 0);
-            return maxSpeed >= userPreferences.sportWindLimit;
-          });
-          const hasModerateWind = groundWindData.some(d => {
-            const maxSpeed = Math.max(d.speed, d.gustSpeed || 0);
-            return maxSpeed >= userPreferences.studentWindLimit;
-          });
+          const { hasHigh, hasModerate } = hasWindWarnings(data, userPreferences);
 
-          if (hasHighWind) {
+          if (hasHigh) {
             return (
               <Alert severity="error" sx={{ mb: 1 }}>
                 High ground wind speeds detected! Conditions may be unsuitable for jumping.
               </Alert>
             );
-          } else if (hasModerateWind) {
+          } else if (hasModerate) {
             return (
               <Alert severity="warning" sx={{ mb: 1 }}>
                 Moderate ground wind speeds detected. Students should exercise caution.

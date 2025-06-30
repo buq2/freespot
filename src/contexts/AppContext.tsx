@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { JumpParameters, UserPreferences, LatLon, TerrainData, CachedLocationData } from '../types';
+import type { JumpParameters, UserPreferences, LatLon, TerrainData, CachedLocationData, ForecastData } from '../types';
 
 interface AppContextType {
   jumpParameters: JumpParameters;
