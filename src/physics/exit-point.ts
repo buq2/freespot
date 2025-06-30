@@ -1,5 +1,5 @@
 import type { LatLon, JumpParameters, ForecastData, ExitPoint } from '../types';
-import { movePoint, pointsToVector, calculateBearing, calculateDistance } from './geo';
+import { movePoint, pointsToVector, calculateBearing, calculateDistance, getDestinationPoint } from './geo';
 import { calculateFreefallDrift, calculateCanopyDrift } from './wind-drift';
 import type { Vector2D } from './vector';
 import { windToVector, addVectors, scaleVector } from './vector';
@@ -85,7 +85,9 @@ const calculateAircraftHeading = (
   
   // Use headwind at exit altitude
   const windAtExit = interpolateWeatherData(weatherData, exitAltitude);
-  return (windAtExit.direction + 180) % 360; // Fly into the wind
+  // Wind direction is where wind comes FROM, so to fly into the wind (headwind),
+  // aircraft should fly in the same direction as the wind direction
+  return windAtExit.direction;
 };
 
 // Validate jump parameters
@@ -172,7 +174,13 @@ export const calculateExitPoints = (
   const windVector = windToVector(windAtExit.direction, windAtExit.speed);
   
   // Aircraft flight direction unit vector
-  const flightVector = windToVector(aircraftHeading - 180, 1);
+  // aircraftHeading is the direction the aircraft is flying TO (e.g., 0° = flying north)
+  // Convert to unit vector
+  const headingRad = aircraftHeading * Math.PI / 180;
+  const flightVector: Vector2D = {
+    x: Math.sin(headingRad), // East component
+    y: Math.cos(headingRad), // North component
+  };
   
   // Wind component along flight direction (positive = tailwind, negative = headwind)
   const windAlongFlight = windVector.x * flightVector.x + windVector.y * flightVector.y;
@@ -207,7 +215,13 @@ export const calculateExitPoints = (
     const groupOffset = (i - halfGroups) * spacingDistance;
     
     // Move along aircraft flight path from center point
-    const offsetVector = windToVector(aircraftHeading - 180, groupOffset);
+    // Negative offset means earlier groups (opposite to flight direction)
+    // Positive offset means later groups (along flight direction)
+    const offsetRad = aircraftHeading * Math.PI / 180;
+    const offsetVector: Vector2D = {
+      x: groupOffset * Math.sin(offsetRad),
+      y: groupOffset * Math.cos(offsetRad)
+    };
     const exitLocation = movePoint(groupCenterPoint, offsetVector);
     
     exitPoints.push({
