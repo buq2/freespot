@@ -8,7 +8,6 @@ import { calculateCanopyAirSpeed } from './constants';
 
 // Safety margins
 const SAFETY_RADIUS_MARGIN = 0.7; // 70% of theoretical maximum distance
-const REACHABILITY_MARGIN = 0.9; // 90% of theoretical maximum distance
 
 export interface ExitCalculationResult {
   optimalExitPoint: LatLon;
@@ -207,30 +206,3 @@ export const calculateExitPoints = (
   };
 };
 
-// Check if a given exit point can reach the landing zone
-export const canReachLandingZone = (
-  exitPoint: LatLon,
-  landingZone: LatLon,
-  weatherData: ForecastData[],
-  params: JumpParameters
-): boolean => {
-  // Calculate freefall drift
-  const freefallDrift = calculateFreefallDrift(
-    weatherData,
-    params.jumpAltitude,
-    params.openingAltitude,
-    params.freefallSpeed
-  );
-  
-  // Position after freefall
-  const openingPosition = movePoint(exitPoint, freefallDrift.driftVector);
-  
-  // Calculate distance to landing zone
-  const distanceToTarget = calculateDistance(openingPosition, landingZone);
-  
-  // Maximum canopy range (simplified - doesn't account for wind)
-  const canopyAirSpeed = calculateCanopyAirSpeed(params.canopyDescentRate, params.glideRatio);
-  const maxCanopyRange = canopyAirSpeed * (params.openingAltitude / params.canopyDescentRate);
-  
-  return distanceToTarget <= maxCanopyRange * REACHABILITY_MARGIN;
-};
