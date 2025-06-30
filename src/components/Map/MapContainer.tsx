@@ -52,13 +52,20 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   }, []);
 
   return (
-    <Paper elevation={3} sx={{ height: '100%', overflow: 'hidden' }}>
-      {/* Map controls */}
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Typography variant="h6" gutterBottom>
-          Jump Visualization
-        </Typography>
-        
+    <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
+      {/* Map controls overlay */}
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          position: 'absolute', 
+          top: 16, 
+          right: 16, 
+          zIndex: 999,
+          p: 2,
+          maxWidth: '400px',
+          pointerEvents: 'auto'
+        }}
+      >
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
           <ButtonGroup size="small" variant="outlined">
             <Button
@@ -130,22 +137,20 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             Flight direction: {Math.round(jumpParameters.flightDirection)}°
           </Typography>
         )}
-      </Box>
+      </Paper>
 
-      {/* Map */}
-      <Box sx={{ position: 'relative', height: 'calc(100% - 100px)' }}>
-        <MapView
-          exitCalculation={exitCalculation}
-          groundWindData={groundWindData}
-          isDrawingMode={isDrawingMode}
-          onFlightPathComplete={handleFlightPathComplete}
-          onCancelDrawing={handleCancelDrawing}
-          isSettingLandingZone={isSettingLandingZone}
-          onLandingZoneSet={handleLandingZoneSet}
-          onCancelLandingZone={handleCancelLandingZone}
-          mapLayer={mapLayer}
-        />
-      </Box>
-    </Paper>
+      {/* Full Screen Map */}
+      <MapView
+        exitCalculation={exitCalculation}
+        groundWindData={groundWindData}
+        isDrawingMode={isDrawingMode}
+        onFlightPathComplete={handleFlightPathComplete}
+        onCancelDrawing={handleCancelDrawing}
+        isSettingLandingZone={isSettingLandingZone}
+        onLandingZoneSet={handleLandingZoneSet}
+        onCancelLandingZone={handleCancelLandingZone}
+        mapLayer={mapLayer}
+      />
+    </Box>
   );
 };

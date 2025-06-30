@@ -5,10 +5,36 @@
 .leaflet-container {
   height: 100%;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 /* Ensure markers are visible */
 .leaflet-marker-icon {
   background: transparent;
   border: none;
+}
+
+/* Custom icon styles */
+.landing-zone-icon,
+.exit-point-icon,
+.group-exit-icon,
+.wind-arrow-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Ensure map tiles load properly */
+.leaflet-tile {
+  max-width: none !important;
+}
+
+/* Fix for potential Material-UI conflicts */
+.leaflet-container * {
+  box-sizing: content-box !important;
+}
+
+/* Force leaflet container to be visible */
+.leaflet-container {
+  background: #e0e0e0 !important; /* Temporary to see if container is there */
 }

@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Circle, Polyline, Popup, useMap } from
 import { LatLng } from 'leaflet';
 import { useAppContext } from '../../contexts/AppContext';
 import type { ExitCalculationResult } from '../../physics/exit-point';
+import './icons'; // Import to trigger Leaflet icon fixes
 import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIcon } from './icons';
 import type { ForecastData, JumpParameters } from '../../types';
 import { formatSpeed, formatAltitude } from '../../utils/units';
@@ -25,13 +26,23 @@ interface MapViewProps {
   mapLayer?: string;
 }
 
-// Component to handle map centering
+// Component to handle map centering and initialization
 const MapController: React.FC<{ center: LatLng }> = ({ center }) => {
   const map = useMap();
   
   useEffect(() => {
     map.setView(center, map.getZoom());
   }, [center, map]);
+  
+  useEffect(() => {
+    // Force map to resize and invalidate when first loaded
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+      console.log('Map invalidated and resized');
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [map]);
   
   return null;
 };
@@ -154,6 +165,9 @@ export const MapView: React.FC<MapViewProps> = ({
     new LatLng(jumpParameters.landingZone.lat, jumpParameters.landingZone.lon)
   );
 
+  // Debug: Log when component renders
+  console.log('MapView rendering with center:', mapCenter, 'exitCalculation:', !!exitCalculation);
+
   useEffect(() => {
     if (exitCalculation) {
       // Center between landing zone and optimal exit point
@@ -211,16 +225,21 @@ export const MapView: React.FC<MapViewProps> = ({
   // Get tile layer configuration
   const tileConfig = getTileLayerConfig(mapLayer);
 
-  return (
-    <MapContainer
-      center={mapCenter}
-      zoom={13}
-      style={{ 
-        height: '600px', 
-        width: '100%',
-        cursor: isSettingLandingZone ? 'crosshair' : 'default'
-      }}
-    >
+  // Error boundary for the map
+  try {
+    return (
+      <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+        <MapContainer
+          center={mapCenter}
+          zoom={13}
+          style={{ 
+            height: '100%', 
+            width: '100%',
+            cursor: isSettingLandingZone ? 'crosshair' : 'default',
+            minHeight: '400px'
+          }}
+          key={`map-${mapCenter.lat}-${mapCenter.lng}`} // Force re-render on center change
+        >
       <MapController center={mapCenter} />
       
       <TileLayer
@@ -408,6 +427,27 @@ export const MapView: React.FC<MapViewProps> = ({
           onCancel={onCancelLandingZone}
         />
       )}
-    </MapContainer>
-  );
+        </MapContainer>
+      </div>
+    );
+  } catch (error) {
+    console.error('Error rendering map:', error);
+    return (
+      <div style={{ 
+        height: '100%', 
+        width: '100%', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: '#f5f5f5',
+        border: '1px solid #ddd'
+      }}>
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <h3>Map Loading Error</h3>
+          <p>Unable to initialize map. Please refresh the page.</p>
+          <p>Error: {error instanceof Error ? error.message : 'Unknown error'}</p>
+        </div>
+      </div>
+    );
+  }
 };
