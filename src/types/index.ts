@@ -22,6 +22,7 @@ export interface JumpParameters {
   timeBetweenGroups: number; // seconds
   landingZone: LatLon;
   flightDirection?: number; // degrees, undefined means headwind
+  flightOverLandingZone: boolean; // if true, airplane flies directly over landing zone
   jumpTime: Date;
 }
 

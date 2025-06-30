@@ -26,6 +26,7 @@ const defaultJumpParameters: JumpParameters = {
   timeBetweenGroups: 6, // seconds
   landingZone: { lat: 61.7807, lon: 22.7221 },
   flightDirection: undefined, // headwind
+  flightOverLandingZone: false, // default to normal offset exit
   jumpTime: new Date(),
 };
 

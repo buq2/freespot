@@ -58,3 +58,5 @@ App should remember user choice in units.
 Cached weather data should be available offline.
 Mobile interface should have same features as desktop interface.
 Visualize ground wind direction at the set landing position (direction and speed (both average wind speend and gusts speed) with a text).
+There should be user toggleable option to make the flight path go over the landing area.
+While weather data is loaded for new location, we should indicate to the user that we are fetching content.

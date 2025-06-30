@@ -62,20 +62,41 @@ export const MapView: React.FC<MapViewProps> = ({
   // Create aircraft flight path
   const flightPath = exitCalculation ? (() => {
     const points = exitCalculation.exitPoints;
-    if (points.length < 2) return null;
+    if (points.length === 0) return null;
     
-    // Extend the line 1km before first and after last exit
     const heading = exitCalculation.aircraftHeading;
     const extendDistance = 1000; // meters
     
-    const firstPoint = points[0].location;
-    const lastPoint = points[points.length - 1].location;
-    
-    // Use proper geo calculations instead of rough approximations
-    const startPoint = getDestinationPoint(firstPoint, extendDistance, heading + 180);
-    const endPoint = getDestinationPoint(lastPoint, extendDistance, heading);
-    
-    return [startPoint, ...points.map(p => p.location), endPoint];
+    if (jumpParameters.flightOverLandingZone) {
+      // For overhead flight, show the flight path passing over the landing zone
+      // Extend beyond the landing zone in both directions
+      const landingZone = jumpParameters.landingZone;
+      const startPoint = getDestinationPoint(landingZone, extendDistance * 2, heading + 180);
+      const endPoint = getDestinationPoint(landingZone, extendDistance * 2, heading);
+      
+      if (points.length === 1) {
+        return [startPoint, points[0].location, endPoint];
+      } else {
+        return [startPoint, ...points.map(p => p.location), endPoint];
+      }
+    } else {
+      // Normal offset flight path
+      if (points.length < 2) {
+        // Single exit point - show short line
+        const exitPoint = points[0].location;
+        const startPoint = getDestinationPoint(exitPoint, extendDistance / 2, heading + 180);
+        const endPoint = getDestinationPoint(exitPoint, extendDistance / 2, heading);
+        return [startPoint, exitPoint, endPoint];
+      }
+      
+      const firstPoint = points[0].location;
+      const lastPoint = points[points.length - 1].location;
+      
+      const startPoint = getDestinationPoint(firstPoint, extendDistance, heading + 180);
+      const endPoint = getDestinationPoint(lastPoint, extendDistance, heading);
+      
+      return [startPoint, ...points.map(p => p.location), endPoint];
+    }
   })() : null;
 
   return (

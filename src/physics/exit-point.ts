@@ -48,10 +48,30 @@ const calculateOptimalExitPoint = (
   const totalDrift = addVectors(freefallDrift.driftVector, canopyDrift.driftVector);
   
   // Optimal exit point is upwind from landing zone by the total drift amount
-  // We negate the drift vector to go upwind
+  // This is the same calculation regardless of flight path type
   const negatedDrift = scaleVector(totalDrift, -1);
-  
   return movePoint(landingZone, negatedDrift);
+};
+
+// Project a point onto a flight line that passes through a given point with a given heading
+const projectPointOntoFlightLine = (
+  pointToProject: LatLon,
+  linePassesThrough: LatLon,
+  heading: number // degrees
+): LatLon => {
+  // Vector from linePassesThrough to pointToProject
+  const toPoint = pointsToVector(linePassesThrough, pointToProject);
+  
+  // Flight direction unit vector
+  const flightVector = windToVector(heading - 180, 1); // unit vector in flight direction
+  
+  // Project toPoint onto flightVector
+  // projection = (toPoint · flightVector) * flightVector
+  const dotProduct = toPoint.x * flightVector.x + toPoint.y * flightVector.y;
+  const projectedVector = scaleVector(flightVector, dotProduct);
+  
+  // The projected point is linePassesThrough + projectedVector
+  return movePoint(linePassesThrough, projectedVector);
 };
 
 // Calculate aircraft heading based on wind or user preference
@@ -145,12 +165,28 @@ export const calculateExitPoints = (
   const exitPoints: ExitPoint[] = [];
   const halfGroups = Math.floor(params.numberOfGroups / 2);
   
+  let groupCenterPoint: LatLon;
+  
+  if (params.flightOverLandingZone) {
+    // When flying over landing zone, project the optimal exit point onto the flight line
+    // that passes through the landing zone
+    groupCenterPoint = projectPointOntoFlightLine(
+      optimalExit,
+      params.landingZone,
+      aircraftHeading
+    );
+  } else {
+    // Normal offset exit - groups positioned around the optimal exit point
+    groupCenterPoint = optimalExit;
+  }
+  
+  // Position all groups around the center point
   for (let i = 0; i < params.numberOfGroups; i++) {
     const groupOffset = (i - halfGroups) * spacingDistance;
     
-    // Move along aircraft flight path
+    // Move along aircraft flight path from center point
     const offsetVector = windToVector(aircraftHeading - 180, groupOffset);
-    const exitLocation = movePoint(optimalExit, offsetVector);
+    const exitLocation = movePoint(groupCenterPoint, offsetVector);
     
     exitPoints.push({
       location: exitLocation,

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Button, ButtonGroup, Paper, Typography } from '@mui/material';
+import { Box, Button, ButtonGroup, Paper, Typography, FormControlLabel, Switch } from '@mui/material';
 import { Navigation, Edit, LocationOn } from '@mui/icons-material';
 import { MapView } from './MapView';
 import { useAppContext } from '../../contexts/AppContext';
@@ -86,6 +86,27 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           >
             Set Landing Zone
           </Button>
+        </Box>
+
+        <Box sx={{ mt: 1 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={jumpParameters.flightOverLandingZone}
+                onChange={(e) => setJumpParameters({
+                  ...jumpParameters,
+                  flightOverLandingZone: e.target.checked
+                })}
+                size="small"
+              />
+            }
+            label="Fly directly over landing zone"
+            sx={{ 
+              '& .MuiFormControlLabel-label': { 
+                fontSize: '0.875rem' 
+              } 
+            }}
+          />
         </Box>
 
         {jumpParameters.flightDirection !== undefined && (
