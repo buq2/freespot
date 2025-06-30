@@ -8,6 +8,7 @@ import type { ForecastData } from '../../types';
 import { formatSpeed } from '../../utils/units';
 import { getDestinationPoint } from '../../physics/geo';
 import { DrawingManager } from './DrawingManager';
+import { LandingZoneManager } from './LandingZoneManager';
 import './leaflet.css';
 
 interface MapViewProps {
@@ -16,6 +17,9 @@ interface MapViewProps {
   isDrawingMode?: boolean;
   onFlightPathComplete?: (bearing: number) => void;
   onCancelDrawing?: () => void;
+  isSettingLandingZone?: boolean;
+  onLandingZoneSet?: (lat: number, lon: number) => void;
+  onCancelLandingZone?: () => void;
 }
 
 // Component to handle map centering
@@ -34,7 +38,10 @@ export const MapView: React.FC<MapViewProps> = ({
   groundWindData,
   isDrawingMode = false,
   onFlightPathComplete,
-  onCancelDrawing
+  onCancelDrawing,
+  isSettingLandingZone = false,
+  onLandingZoneSet,
+  onCancelLandingZone
 }) => {
   const { jumpParameters, userPreferences } = useAppContext();
   const [mapCenter, setMapCenter] = useState<LatLng>(
@@ -75,7 +82,11 @@ export const MapView: React.FC<MapViewProps> = ({
     <MapContainer
       center={mapCenter}
       zoom={13}
-      style={{ height: '600px', width: '100%' }}
+      style={{ 
+        height: '600px', 
+        width: '100%',
+        cursor: isSettingLandingZone ? 'crosshair' : 'default'
+      }}
     >
       <MapController center={mapCenter} />
       
@@ -209,6 +220,15 @@ export const MapView: React.FC<MapViewProps> = ({
           isActive={isDrawingMode}
           onFlightPathComplete={onFlightPathComplete}
           onCancel={onCancelDrawing}
+        />
+      )}
+
+      {/* Landing Zone Manager - must be inside MapContainer */}
+      {isSettingLandingZone && onLandingZoneSet && onCancelLandingZone && (
+        <LandingZoneManager
+          isActive={isSettingLandingZone}
+          onLandingZoneSet={onLandingZoneSet}
+          onCancel={onCancelLandingZone}
         />
       )}
     </MapContainer>

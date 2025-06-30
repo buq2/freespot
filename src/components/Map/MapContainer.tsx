@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Box, Button, ButtonGroup, Paper, Typography } from '@mui/material';
-import { Navigation, Edit } from '@mui/icons-material';
+import { Navigation, Edit, LocationOn } from '@mui/icons-material';
 import { MapView } from './MapView';
 import { useAppContext } from '../../contexts/AppContext';
 import type { ExitCalculationResult } from '../../physics/exit-point';
@@ -17,6 +17,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 }) => {
   const { jumpParameters, setJumpParameters } = useAppContext();
   const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [isSettingLandingZone, setIsSettingLandingZone] = useState(false);
 
   const handleFlightPathComplete = useCallback((bearing: number) => {
     setJumpParameters({
@@ -37,6 +38,18 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     setIsDrawingMode(false);
   }, []);
 
+  const handleLandingZoneSet = useCallback((lat: number, lon: number) => {
+    setJumpParameters({
+      ...jumpParameters,
+      landingZone: { lat, lon }
+    });
+    setIsSettingLandingZone(false);
+  }, [jumpParameters, setJumpParameters]);
+
+  const handleCancelLandingZone = useCallback(() => {
+    setIsSettingLandingZone(false);
+  }, []);
+
   return (
     <Paper elevation={3} sx={{ height: '100%', overflow: 'hidden' }}>
       {/* Map controls */}
@@ -45,22 +58,35 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           Jump Visualization
         </Typography>
         
-        <ButtonGroup size="small" variant="outlined">
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <ButtonGroup size="small" variant="outlined">
+            <Button
+              startIcon={<Navigation />}
+              onClick={handleUseHeadwind}
+              variant={jumpParameters.flightDirection === undefined ? 'contained' : 'outlined'}
+            >
+              Auto Headwind
+            </Button>
+            <Button
+              startIcon={<Edit />}
+              onClick={() => setIsDrawingMode(true)}
+              variant={isDrawingMode ? 'contained' : 'outlined'}
+              disabled={isSettingLandingZone}
+            >
+              Draw Flight Path
+            </Button>
+          </ButtonGroup>
+          
           <Button
-            startIcon={<Navigation />}
-            onClick={handleUseHeadwind}
-            variant={jumpParameters.flightDirection === undefined ? 'contained' : 'outlined'}
+            size="small"
+            variant={isSettingLandingZone ? 'contained' : 'outlined'}
+            startIcon={<LocationOn />}
+            onClick={() => setIsSettingLandingZone(true)}
+            disabled={isDrawingMode}
           >
-            Auto Headwind
+            Set Landing Zone
           </Button>
-          <Button
-            startIcon={<Edit />}
-            onClick={() => setIsDrawingMode(true)}
-            variant={isDrawingMode ? 'contained' : 'outlined'}
-          >
-            Draw Flight Path
-          </Button>
-        </ButtonGroup>
+        </Box>
 
         {jumpParameters.flightDirection !== undefined && (
           <Typography variant="body2" sx={{ mt: 1 }}>
@@ -77,6 +103,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           isDrawingMode={isDrawingMode}
           onFlightPathComplete={handleFlightPathComplete}
           onCancelDrawing={handleCancelDrawing}
+          isSettingLandingZone={isSettingLandingZone}
+          onLandingZoneSet={handleLandingZoneSet}
+          onCancelLandingZone={handleCancelLandingZone}
         />
       </Box>
     </Paper>
