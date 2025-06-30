@@ -156,9 +156,24 @@ export const calculateExitPoints = (
     params.flightDirection
   );
   
-  // Calculate spacing between groups
+  // Calculate spacing between groups accounting for wind effect on ground speed
   const spacingTime = params.timeBetweenGroups;
-  const spacingDistance = params.aircraftSpeed * spacingTime;
+  
+  // Get wind at exit altitude
+  const windAtExit = interpolateWeatherData(weatherData, params.jumpAltitude);
+  const windVector = windToVector(windAtExit.direction, windAtExit.speed);
+  
+  // Aircraft flight direction unit vector
+  const flightVector = windToVector(aircraftHeading - 180, 1);
+  
+  // Wind component along flight direction (positive = tailwind, negative = headwind)
+  const windAlongFlight = windVector.x * flightVector.x + windVector.y * flightVector.y;
+  
+  // Ground speed = air speed + wind component along flight
+  const groundSpeed = params.aircraftSpeed + windAlongFlight;
+  
+  // Distance between groups based on ground speed
+  const spacingDistance = groundSpeed * spacingTime;
   
   // Generate exit points for all groups
   const exitPoints: ExitPoint[] = [];
