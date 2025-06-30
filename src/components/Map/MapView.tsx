@@ -4,11 +4,13 @@ import { LatLng } from 'leaflet';
 import { useAppContext } from '../../contexts/AppContext';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIcon } from './icons';
-import type { ForecastData } from '../../types';
+import type { ForecastData, JumpParameters } from '../../types';
 import { formatSpeed } from '../../utils/units';
-import { getDestinationPoint } from '../../physics/geo';
+import { getDestinationPoint, movePoint } from '../../physics/geo';
 import { DrawingManager } from './DrawingManager';
 import { LandingZoneManager } from './LandingZoneManager';
+import { calculateFreefallDrift, calculateCanopyDrift } from '../../physics/wind-drift';
+import { interpolateWeatherData } from '../../services/weather/openmeteo';
 import './leaflet.css';
 
 interface MapViewProps {
@@ -31,6 +33,80 @@ const MapController: React.FC<{ center: LatLng }> = ({ center }) => {
   }, [center, map]);
   
   return null;
+};
+
+// Calculate drift paths for visualization
+const calculateDriftPaths = (
+  exitCalculation: ExitCalculationResult | null,
+  groundWindData: ForecastData | undefined,
+  jumpParameters: JumpParameters,
+  showDriftVisualization: boolean
+) => {
+  if (!exitCalculation || !showDriftVisualization) {
+    return [];
+  }
+
+  const paths = [];
+  
+  for (const exitPoint of exitCalculation.exitPoints) {
+    try {
+      // Get weather data (we'll need to fetch it - for now use a simple approach)
+      // This is a simplified approach - in a real implementation, we'd need the weather data
+      if (!groundWindData) continue;
+      
+      // Create simplified weather data array for this visualization
+      // In reality, we'd need the full weather profile
+      const simpleWeatherData = [
+        // High altitude (jump level)
+        { altitude: jumpParameters.jumpAltitude, direction: groundWindData.direction, speed: groundWindData.speed * 1.5 },
+        // Mid altitude
+        { altitude: (jumpParameters.jumpAltitude + jumpParameters.openingAltitude) / 2, direction: groundWindData.direction, speed: groundWindData.speed * 1.2 },
+        // Opening altitude
+        { altitude: jumpParameters.openingAltitude, direction: groundWindData.direction, speed: groundWindData.speed },
+        // Ground level
+        { altitude: 0, direction: groundWindData.direction, speed: groundWindData.speed }
+      ];
+      
+      // Calculate freefall drift
+      const freefallDrift = calculateFreefallDrift(
+        simpleWeatherData,
+        jumpParameters.jumpAltitude,
+        jumpParameters.openingAltitude,
+        jumpParameters.freefallSpeed
+      );
+      
+      // Position after freefall
+      const openingPosition = movePoint(exitPoint.location, freefallDrift.driftVector);
+      
+      // Calculate canopy drift (pure drift - no forward speed)
+      const canopyDrift = calculateCanopyDrift(
+        simpleWeatherData,
+        jumpParameters.openingAltitude,
+        0,
+        0, // no forward speed for this visualization
+        jumpParameters.canopyDescentRate,
+        jumpParameters.glideRatio,
+        0
+      );
+      
+      // Final landing position
+      const landingPosition = movePoint(openingPosition, canopyDrift.driftVector);
+      
+      paths.push({
+        groupNumber: exitPoint.groupNumber,
+        path: [
+          exitPoint.location,
+          openingPosition,
+          landingPosition
+        ]
+      });
+    } catch (error) {
+      // Skip this path if calculation fails
+      continue;
+    }
+  }
+  
+  return paths;
 };
 
 export const MapView: React.FC<MapViewProps> = ({ 
@@ -98,6 +174,9 @@ export const MapView: React.FC<MapViewProps> = ({
       return [startPoint, ...points.map(p => p.location), endPoint];
     }
   })() : null;
+
+  // Calculate drift paths for visualization
+  const driftPaths = calculateDriftPaths(exitCalculation, groundWindData, jumpParameters, userPreferences.showDriftVisualization);
 
   return (
     <MapContainer
@@ -226,12 +305,56 @@ export const MapView: React.FC<MapViewProps> = ({
           )}
 
           {/* Drift visualization (if enabled) */}
-          {userPreferences.showDriftVisualization && exitCalculation.exitPoints.length > 0 && (
-            <>
-              {/* This would show drift paths from exit to landing */}
-              {/* Implementation would require additional data from physics calculations */}
-            </>
-          )}
+          {driftPaths.map((driftPath) => (
+            <React.Fragment key={`drift-${driftPath.groupNumber}`}>
+              {/* Freefall drift path */}
+              <Polyline
+                positions={[
+                  [driftPath.path[0].lat, driftPath.path[0].lon], // Exit point
+                  [driftPath.path[1].lat, driftPath.path[1].lon]  // Opening position
+                ]}
+                pathOptions={{
+                  color: '#ff4444',
+                  weight: 2,
+                  opacity: 0.7,
+                  dashArray: '5, 5'
+                }}
+              >
+                <Popup>
+                  Group {driftPath.groupNumber} - Freefall drift
+                </Popup>
+              </Polyline>
+              
+              {/* Canopy drift path */}
+              <Polyline
+                positions={[
+                  [driftPath.path[1].lat, driftPath.path[1].lon], // Opening position
+                  [driftPath.path[2].lat, driftPath.path[2].lon]  // Landing position
+                ]}
+                pathOptions={{
+                  color: '#4444ff',
+                  weight: 2,
+                  opacity: 0.7,
+                  dashArray: '10, 5'
+                }}
+              >
+                <Popup>
+                  Group {driftPath.groupNumber} - Canopy drift
+                </Popup>
+              </Polyline>
+              
+              {/* Opening position marker */}
+              <Marker
+                position={[driftPath.path[1].lat, driftPath.path[1].lon]}
+                icon={createGroupExitIcon(driftPath.groupNumber)}
+                opacity={0.6}
+              >
+                <Popup>
+                  Group {driftPath.groupNumber} - Opening position
+                </Popup>
+              </Marker>
+            </React.Fragment>
+          ))}
         </>
       )}
 
