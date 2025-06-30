@@ -30,7 +30,12 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
 }) => {
   const { userPreferences } = useAppContext();
 
-  const getWindWarningColor = (speed: number, gustSpeed?: number) => {
+  const getWindWarningColor = (speed: number, gustSpeed?: number, altitude: number) => {
+    // Only show warnings for ground wind (< 50m AGL)
+    if (altitude >= 50) {
+      return 'default';
+    }
+    
     const maxSpeed = Math.max(speed, gustSpeed || 0);
     
     if (maxSpeed >= userPreferences.sportWindLimit) {
@@ -41,7 +46,12 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
     return 'success';
   };
 
-  const getWindWarningIcon = (speed: number, gustSpeed?: number) => {
+  const getWindWarningIcon = (speed: number, gustSpeed?: number, altitude: number) => {
+    // Only show warnings for ground wind (< 50m AGL)
+    if (altitude >= 50) {
+      return null;
+    }
+    
     const maxSpeed = Math.max(speed, gustSpeed || 0);
     
     if (maxSpeed >= userPreferences.studentWindLimit) {
@@ -73,8 +83,8 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
           </TableHead>
           <TableBody>
             {data.map((forecast, index) => {
-              const warningColor = getWindWarningColor(forecast.speed, forecast.gustSpeed);
-              const warningIcon = getWindWarningIcon(forecast.speed, forecast.gustSpeed);
+              const warningColor = getWindWarningColor(forecast.speed, forecast.gustSpeed, forecast.altitude);
+              const warningIcon = getWindWarningIcon(forecast.speed, forecast.gustSpeed, forecast.altitude);
               
               return (
                 <TableRow key={index} hover>
@@ -100,15 +110,19 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
                     }
                   </TableCell>
                   <TableCell align="center">
-                    <Chip
-                      icon={warningIcon}
-                      label={
-                        warningColor === 'error' ? 'High' :
-                        warningColor === 'warning' ? 'Moderate' : 'OK'
-                      }
-                      color={warningColor}
-                      size="small"
-                    />
+                    {warningColor === 'default' ? (
+                      '-'
+                    ) : (
+                      <Chip
+                        icon={warningIcon}
+                        label={
+                          warningColor === 'error' ? 'High' :
+                          warningColor === 'warning' ? 'Moderate' : 'OK'
+                        }
+                        color={warningColor}
+                        size="small"
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               );
@@ -117,19 +131,34 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
         </Table>
       </TableContainer>
 
-      {/* Wind warnings */}
+      {/* Wind warnings - only for ground wind */}
       <Box sx={{ p: 2 }}>
-        {data.some(d => d.speed >= userPreferences.sportWindLimit || (d.gustSpeed && d.gustSpeed >= userPreferences.sportWindLimit)) && (
-          <Alert severity="error" sx={{ mb: 1 }}>
-            High wind speeds detected! Conditions may be unsuitable for jumping.
-          </Alert>
-        )}
-        {data.some(d => d.speed >= userPreferences.studentWindLimit || (d.gustSpeed && d.gustSpeed >= userPreferences.studentWindLimit)) && 
-         !data.some(d => d.speed >= userPreferences.sportWindLimit || (d.gustSpeed && d.gustSpeed >= userPreferences.sportWindLimit)) && (
-          <Alert severity="warning" sx={{ mb: 1 }}>
-            Moderate wind speeds detected. Students should exercise caution.
-          </Alert>
-        )}
+        {(() => {
+          const groundWindData = data.filter(d => d.altitude < 50);
+          const hasHighWind = groundWindData.some(d => {
+            const maxSpeed = Math.max(d.speed, d.gustSpeed || 0);
+            return maxSpeed >= userPreferences.sportWindLimit;
+          });
+          const hasModerateWind = groundWindData.some(d => {
+            const maxSpeed = Math.max(d.speed, d.gustSpeed || 0);
+            return maxSpeed >= userPreferences.studentWindLimit;
+          });
+
+          if (hasHighWind) {
+            return (
+              <Alert severity="error" sx={{ mb: 1 }}>
+                High ground wind speeds detected! Conditions may be unsuitable for jumping.
+              </Alert>
+            );
+          } else if (hasModerateWind) {
+            return (
+              <Alert severity="warning" sx={{ mb: 1 }}>
+                Moderate ground wind speeds detected. Students should exercise caution.
+              </Alert>
+            );
+          }
+          return null;
+        })()}
       </Box>
     </Paper>
   );
