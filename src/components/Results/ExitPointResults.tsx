@@ -16,6 +16,7 @@ import { Flight, LocationOn, Speed, Height } from '@mui/icons-material';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import { useAppContext } from '../../contexts/AppContext';
 import { formatAltitude } from '../../utils/units';
+import { calculateDistance } from '../../physics/geo';
 
 interface ExitPointResultsProps {
   result: ExitCalculationResult;
@@ -23,6 +24,13 @@ interface ExitPointResultsProps {
 
 export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) => {
   const { userPreferences } = useAppContext();
+  
+  // Calculate actual exit spread distance
+  const exitSpread = result.exitPoints.length > 1 ? 
+    calculateDistance(
+      result.exitPoints[0].location,
+      result.exitPoints[result.exitPoints.length - 1].location
+    ) : 0;
 
   return (
     <Paper elevation={2} sx={{ p: 3 }}>
@@ -168,10 +176,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
                     Exit Spread
                   </Typography>
                   <Typography variant="h6">
-                    {result.exitPoints.length > 1 ? 
-                      `${Math.round((result.exitPoints.length - 1) * 300)}m` : // Rough estimate
-                      '0m'
-                    }
+                    {formatAltitude(exitSpread, userPreferences.units.altitude)}
                   </Typography>
                 </Grid>
               </Grid>
