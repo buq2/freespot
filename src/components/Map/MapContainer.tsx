@@ -73,7 +73,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               variant={isDrawingMode ? 'contained' : 'outlined'}
               disabled={isSettingLandingZone}
             >
-              Draw Flight Path
+              Draw Flight Direction
             </Button>
           </ButtonGroup>
           

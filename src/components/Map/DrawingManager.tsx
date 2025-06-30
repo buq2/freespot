@@ -107,7 +107,7 @@ export const DrawingManager: React.FC<DrawingManagerProps> = ({
         boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
       }}>
         <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>
-          Draw Flight Path
+          Draw Flight Direction
         </div>
         <div style={{ fontSize: '12px', marginBottom: '8px' }}>
           Click two points to set direction
