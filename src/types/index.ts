@@ -16,7 +16,6 @@ export interface JumpParameters {
   aircraftSpeed: number; // m/s
   freefallSpeed: number; // m/s
   openingAltitude: number; // meters
-  canopyAirSpeed: number; // m/s
   canopyDescentRate: number; // m/s
   glideRatio: number;
   numberOfGroups: number;

@@ -4,6 +4,7 @@ import { calculateFreefallDrift, calculateCanopyDrift } from './wind-drift';
 import type { Vector2D } from './vector';
 import { windToVector, addVectors, scaleVector } from './vector';
 import { interpolateWeatherData } from '../services/weather/openmeteo';
+import { calculateCanopyAirSpeed } from './constants';
 
 // Safety margins
 const SAFETY_RADIUS_MARGIN = 0.7; // 70% of theoretical maximum distance
@@ -86,9 +87,6 @@ const validateParameters = (params: JumpParameters): string | null => {
     return 'Freefall speed must be greater than 0';
   }
   
-  if (params.canopyAirSpeed <= 0) {
-    return 'Canopy air speed must be greater than 0';
-  }
   
   if (params.canopyDescentRate <= 0) {
     return 'Canopy descent rate must be greater than 0';
@@ -161,7 +159,8 @@ export const calculateExitPoints = (
   }
   
   // Calculate safety radius (maximum distance from which landing zone can be reached)
-  const maxCanopyDistance = params.canopyAirSpeed * (params.openingAltitude / params.canopyDescentRate);
+  const canopyAirSpeed = calculateCanopyAirSpeed(params.canopyDescentRate, params.glideRatio);
+  const maxCanopyDistance = canopyAirSpeed * (params.openingAltitude / params.canopyDescentRate);
   const safetyRadius = maxCanopyDistance * SAFETY_RADIUS_MARGIN;
   
   return {
@@ -194,7 +193,8 @@ export const canReachLandingZone = (
   const distanceToTarget = calculateDistance(openingPosition, landingZone);
   
   // Maximum canopy range (simplified - doesn't account for wind)
-  const maxCanopyRange = params.canopyAirSpeed * (params.openingAltitude / params.canopyDescentRate);
+  const canopyAirSpeed = calculateCanopyAirSpeed(params.canopyDescentRate, params.glideRatio);
+  const maxCanopyRange = canopyAirSpeed * (params.openingAltitude / params.canopyDescentRate);
   
   return distanceToTarget <= maxCanopyRange * REACHABILITY_MARGIN;
 };

@@ -18,6 +18,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useAppContext } from '../../contexts/AppContext';
 import { convertSpeed, convertAltitude } from '../../utils/units';
+import { calculateCanopyAirSpeed } from '../../physics/constants';
 
 export const JumpParametersForm: React.FC = () => {
   const { jumpParameters, setJumpParameters, userPreferences } = useAppContext();
@@ -63,8 +64,11 @@ export const JumpParametersForm: React.FC = () => {
   const displayOpeningAltitude = convertAltitude(jumpParameters.openingAltitude, 'meters', userPreferences.units.altitude);
   const displayAircraftSpeed = convertSpeed(jumpParameters.aircraftSpeed, 'ms', userPreferences.units.speed);
   const displayFreefallSpeed = convertSpeed(jumpParameters.freefallSpeed, 'ms', userPreferences.units.speed);
-  const displayCanopyAirSpeed = convertSpeed(jumpParameters.canopyAirSpeed, 'ms', userPreferences.units.speed);
   const displayCanopyDescentRate = convertSpeed(jumpParameters.canopyDescentRate, 'ms', userPreferences.units.speed);
+  
+  // Calculate derived canopy air speed for display
+  const canopyAirSpeed = calculateCanopyAirSpeed(jumpParameters.canopyDescentRate, jumpParameters.glideRatio);
+  const displayCanopyAirSpeed = convertSpeed(canopyAirSpeed, 'ms', userPreferences.units.speed);
 
   return (
     <Paper elevation={2} sx={{ p: 3 }}>
@@ -175,28 +179,6 @@ export const JumpParametersForm: React.FC = () => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Canopy Air Speed"
-            value={displayCanopyAirSpeed.toFixed(1)}
-            onChange={(e) => {
-              const displayValue = parseFloat(e.target.value) || 0;
-              const msValue = convertSpeed(displayValue, userPreferences.units.speed, 'ms');
-              setJumpParameters({
-                ...jumpParameters,
-                canopyAirSpeed: msValue
-              });
-            }}
-            InputProps={{
-              endAdornment: <InputAdornment position="end">
-                {userPreferences.units.speed === 'ms' ? 'm/s' : 
-                 userPreferences.units.speed === 'kmh' ? 'km/h' :
-                 userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
-              </InputAdornment>
-            }}
-          />
-        </Grid>
 
         <Grid item xs={12} sm={6}>
           <TextField
@@ -238,6 +220,27 @@ export const JumpParametersForm: React.FC = () => {
             step="0.1"
             InputProps={{
               endAdornment: <InputAdornment position="end">:1</InputAdornment>
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Canopy Air Speed (calculated)"
+            value={displayCanopyAirSpeed.toFixed(1)}
+            InputProps={{
+              readOnly: true,
+              endAdornment: <InputAdornment position="end">
+                {userPreferences.units.speed === 'ms' ? 'm/s' : 
+                 userPreferences.units.speed === 'kmh' ? 'km/h' :
+                 userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
+              </InputAdornment>
+            }}
+            sx={{ 
+              '& .MuiInputBase-input': { 
+                backgroundColor: 'action.hover' 
+              } 
             }}
           />
         </Grid>
