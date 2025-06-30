@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMapEvents } from 'react-leaflet';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, Tooltip, Box, Typography, Paper, useTheme } from '@mui/material';
 import { Clear } from '@mui/icons-material';
 
 interface LandingZoneManagerProps {
@@ -14,6 +14,8 @@ export const LandingZoneManager: React.FC<LandingZoneManagerProps> = ({
   isActive,
   onCancel
 }) => {
+  const theme = useTheme();
+  
   const map = useMapEvents({
     click: (e) => {
       if (isActive) {
@@ -29,36 +31,39 @@ export const LandingZoneManager: React.FC<LandingZoneManagerProps> = ({
   if (!isActive) return null;
 
   return (
-    <>
-      {/* Control buttons */}
-      <div style={{
+    <Paper
+      elevation={3}
+      sx={{
         position: 'absolute',
-        top: '10px',
-        right: '10px',
-        zIndex: 1000,
-        background: 'white',
-        padding: '10px',
-        borderRadius: '4px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-      }}>
-        <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>
-          Set Landing Zone
-        </div>
-        <div style={{ fontSize: '12px', marginBottom: '8px' }}>
-          Click on map to set landing location
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <Tooltip title="Cancel">
-            <IconButton
-              size="small"
-              color="error"
-              onClick={handleCancel}
-            >
-              <Clear />
-            </IconButton>
-          </Tooltip>
-        </div>
-      </div>
-    </>
+        top: 16,
+        left: 16, // Position on left to avoid conflict with map controls
+        zIndex: theme.zIndex.modal + 1, // Use Material-UI's modal z-index + 1
+        p: 2,
+        minWidth: 200,
+        maxWidth: 280
+      }}
+    >
+      <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+        Set Landing Zone
+      </Typography>
+      <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+        Click on map to set landing location
+      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+        <Tooltip title="Cancel">
+          <IconButton
+            size="small"
+            color="error"
+            onClick={handleCancel}
+            sx={{ 
+              minWidth: 40,
+              minHeight: 40 // Better touch target
+            }}
+          >
+            <Clear />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    </Paper>
   );
 };

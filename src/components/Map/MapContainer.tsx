@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Button, ButtonGroup, Paper, Typography, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Button, ButtonGroup, Paper, Typography, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem, useTheme, useMediaQuery } from '@mui/material';
 import { Navigation, Edit, LocationOn } from '@mui/icons-material';
 import { MapView } from './MapView';
 import { useAppContext } from '../../contexts/AppContext';
@@ -16,6 +16,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   groundWindData
 }) => {
   const { jumpParameters, setJumpParameters } = useAppContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [isSettingLandingZone, setIsSettingLandingZone] = useState(false);
   const [mapLayer, setMapLayer] = useState('osm');
@@ -60,14 +62,29 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           position: 'absolute', 
           top: 16, 
           right: 16, 
-          zIndex: 999,
-          p: 2,
-          maxWidth: '400px',
+          zIndex: theme.zIndex.speedDial, // Use proper Material-UI z-index
+          p: isMobile ? 1.5 : 2,
+          maxWidth: isMobile ? '90vw' : '400px',
           pointerEvents: 'auto'
         }}
       >
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-          <ButtonGroup size="small" variant="outlined">
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 1, 
+          flexWrap: 'wrap', 
+          alignItems: 'center',
+          flexDirection: isMobile ? 'column' : 'row'
+        }}>
+          <ButtonGroup 
+            size={isMobile ? "medium" : "small"} 
+            variant="outlined"
+            orientation={isMobile ? "vertical" : "horizontal"}
+            sx={{ 
+              '& .MuiButton-root': {
+                minHeight: isMobile ? 48 : 'auto' // Better touch targets on mobile
+              }
+            }}
+          >
             <Button
               startIcon={<Navigation />}
               onClick={handleUseHeadwind}
@@ -77,25 +94,46 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             </Button>
             <Button
               startIcon={<Edit />}
-              onClick={() => setIsDrawingMode(true)}
+              onClick={() => setIsDrawingMode(!isDrawingMode)}
               variant={isDrawingMode ? 'contained' : 'outlined'}
+              color={isDrawingMode ? 'primary' : 'inherit'}
               disabled={isSettingLandingZone}
+              sx={{
+                ...(isDrawingMode && {
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  }
+                })
+              }}
             >
-              Draw Flight Direction
+              {isDrawingMode ? 'Cancel Drawing' : 'Draw Flight Direction'}
             </Button>
           </ButtonGroup>
           
           <Button
-            size="small"
+            size={isMobile ? "medium" : "small"}
             variant={isSettingLandingZone ? 'contained' : 'outlined'}
+            color={isSettingLandingZone ? 'primary' : 'inherit'}
             startIcon={<LocationOn />}
-            onClick={() => setIsSettingLandingZone(true)}
+            onClick={() => setIsSettingLandingZone(!isSettingLandingZone)}
             disabled={isDrawingMode}
+            sx={{ 
+              minHeight: isMobile ? 48 : 'auto', // Better touch target on mobile
+              ...(isSettingLandingZone && {
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                }
+              })
+            }}
           >
-            Set Landing Zone
+            {isSettingLandingZone ? 'Cancel Change' : 'Set Landing Zone'}
           </Button>
 
-          <FormControl size="small" sx={{ minWidth: 120 }}>
+          <FormControl size={isMobile ? "medium" : "small"} sx={{ minWidth: isMobile ? '100%' : 120 }}>
             <InputLabel>Map Layer</InputLabel>
             <Select
               value={mapLayer}
@@ -120,14 +158,17 @@ export const MapContainer: React.FC<MapContainerProps> = ({
                   ...jumpParameters,
                   flightOverLandingZone: e.target.checked
                 })}
-                size="small"
+                size={isMobile ? "medium" : "small"}
               />
             }
             label="Fly directly over landing zone"
             sx={{ 
               '& .MuiFormControlLabel-label': { 
-                fontSize: '0.875rem' 
-              } 
+                fontSize: isMobile ? '0.9rem' : '0.875rem'
+              },
+              '& .MuiSwitch-root': {
+                minHeight: isMobile ? 40 : 'auto' // Better touch target
+              }
             }}
           />
         </Box>

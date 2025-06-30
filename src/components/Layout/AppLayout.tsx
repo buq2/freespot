@@ -17,7 +17,7 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import { Settings, Map as MapIcon, CloudDownload, Menu, Close, ChevronLeft } from '@mui/icons-material';
+import { Settings, Map as MapIcon, CloudDownload, Menu, Close, ChevronLeft, Fullscreen, FullscreenExit } from '@mui/icons-material';
 import { useAppContext } from '../../contexts/AppContext';
 import { JumpParametersForm, UserPreferencesForm, WeatherModelSelector } from '../Parameters';
 import { WeatherTable, WindCompass } from '../Weather';
@@ -65,6 +65,7 @@ export const AppLayout: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
+  const [isFullScreenMap, setIsFullScreenMap] = useState(false);
   
   const drawerWidth = 400; // Fixed width for drawer
 
@@ -132,20 +133,60 @@ export const AppLayout: React.FC = () => {
   return (
     <Box sx={{ height: '100vh', overflow: 'hidden' }}>
       {/* App Bar */}
-      <AppBar position="fixed" elevation={1} sx={{ zIndex: theme.zIndex.drawer + 1 }}>
+      <AppBar 
+        position="fixed" 
+        elevation={1} 
+        sx={{ 
+          zIndex: theme.zIndex.drawer + 1,
+          display: isFullScreenMap && isMobile ? 'none' : 'block'
+        }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
             edge="start"
             onClick={() => setDrawerOpen(!drawerOpen)}
-            sx={{ mr: 2 }}
+            sx={{ 
+              mr: 2,
+              minWidth: 48,
+              minHeight: 48 // Improve touch target
+            }}
+            aria-label={drawerOpen ? "Close menu" : "Open menu"}
           >
             {drawerOpen ? <ChevronLeft /> : <Menu />}
           </IconButton>
+          
+          <Typography variant="h6" component="div" sx={{ 
+            flexGrow: 1,
+            display: { xs: 'none', sm: 'block' } // Hide title on mobile to save space
+          }}>
+            FreeSpot
+          </Typography>
+
+          {/* Full Screen Toggle for Mobile */}
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              onClick={() => setIsFullScreenMap(!isFullScreenMap)}
+              sx={{ 
+                mr: 1,
+                minWidth: 48,
+                minHeight: 48
+              }}
+              aria-label={isFullScreenMap ? "Exit fullscreen map" : "Enter fullscreen map"}
+            >
+              {isFullScreenMap ? <FullscreenExit /> : <Fullscreen />}
+            </IconButton>
+          )}
+
           {loading && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CircularProgress size={20} color="inherit" />
-              <Typography variant="body2" color="inherit">
+              <Typography 
+                variant="body2" 
+                color="inherit"
+                sx={{ display: { xs: 'none', sm: 'inline' } }} // Hide text on small screens
+              >
                 Calculating...
               </Typography>
             </Box>
@@ -157,7 +198,7 @@ export const AppLayout: React.FC = () => {
       <Drawer
         variant={isMobile ? "temporary" : "persistent"}
         anchor="left"
-        open={drawerOpen}
+        open={drawerOpen && !(isMobile && isFullScreenMap)}
         onClose={() => setDrawerOpen(false)}
         sx={{
           width: isMobile ? '100%' : drawerWidth,
@@ -166,24 +207,61 @@ export const AppLayout: React.FC = () => {
           '& .MuiDrawer-paper': {
             width: isMobile ? '100%' : drawerWidth,
             boxSizing: 'border-box',
-            pt: 8, // Account for app bar
+            pt: isFullScreenMap && isMobile ? 0 : 8, // Account for app bar unless fullscreen
             zIndex: theme.zIndex.drawer,
+            // Add better backdrop for mobile
+            '& .MuiBackdrop-root': {
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            }
           },
+        }}
+        // Close drawer when clicking outside on mobile
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile
         }}
       >
         <Box sx={{ overflow: 'auto', height: '100%' }}>
-          {/* App Title */}
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="h6" component="div">
+          {/* App Title with Close Button for Mobile */}
+          <Box sx={{ 
+            p: 2, 
+            borderBottom: 1, 
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <Typography variant="h6" component="div" sx={{ 
+              fontSize: isMobile ? '1.1rem' : '1.25rem' 
+            }}>
               FreeSpot - Skydiving Exit Point Calculator
             </Typography>
+            {isMobile && (
+              <IconButton
+                onClick={() => setDrawerOpen(false)}
+                size="small"
+                sx={{ 
+                  minWidth: 40,
+                  minHeight: 40
+                }}
+                aria-label="Close menu"
+              >
+                <Close />
+              </IconButton>
+            )}
           </Box>
           
           <Tabs 
             value={tabValue} 
             onChange={handleTabChange}
             variant="fullWidth"
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
+            sx={{ 
+              borderBottom: 1, 
+              borderColor: 'divider',
+              '& .MuiTab-root': {
+                minHeight: isMobile ? 56 : 48, // Larger touch targets on mobile
+                fontSize: isMobile ? '0.9rem' : '0.875rem'
+              }
+            }}
           >
             <Tab label="Parameters" />
             <Tab label="Weather" />
@@ -259,7 +337,7 @@ export const AppLayout: React.FC = () => {
         component="main"
         sx={{
           position: 'fixed',
-          top: '64px',
+          top: isFullScreenMap && isMobile ? 0 : '64px',
           left: 0,
           right: 0,
           bottom: 0,
@@ -291,6 +369,47 @@ export const AppLayout: React.FC = () => {
             exitCalculation={exitCalculation}
             groundWindData={groundWindData}
           />
+          
+          {/* Mobile Fullscreen Controls */}
+          {isMobile && isFullScreenMap && (
+            <>
+              {/* Menu FAB */}
+              <Fab
+                color="primary"
+                size="medium"
+                onClick={() => setDrawerOpen(true)}
+                sx={{
+                  position: 'absolute',
+                  top: 16,
+                  left: 16,
+                  zIndex: 1000,
+                  minWidth: 56,
+                  minHeight: 56
+                }}
+                aria-label="Open menu"
+              >
+                <Menu />
+              </Fab>
+              
+              {/* Exit Fullscreen FAB */}
+              <Fab
+                color="secondary"
+                size="small"
+                onClick={() => setIsFullScreenMap(false)}
+                sx={{
+                  position: 'absolute',
+                  top: 16,
+                  right: 16,
+                  zIndex: 1000,
+                  minWidth: 48,
+                  minHeight: 48
+                }}
+                aria-label="Exit fullscreen"
+              >
+                <FullscreenExit />
+              </Fab>
+            </>
+          )}
           
           {/* Loading Overlay */}
           {initialLoad && loading && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMapEvents, Polyline, Marker } from 'react-leaflet';
 import { LatLng, divIcon } from 'leaflet';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, Tooltip, Box, Typography, Paper, useTheme } from '@mui/material';
 import { Clear } from '@mui/icons-material';
 import { calculateBearing } from '../../physics/geo';
 
@@ -32,6 +32,7 @@ export const DrawingManager: React.FC<DrawingManagerProps> = ({
   isActive,
   onCancel
 }) => {
+  const theme = useTheme();
   const [points, setPoints] = useState<LatLng[]>([]);
   
   const map = useMapEvents({
@@ -96,39 +97,47 @@ export const DrawingManager: React.FC<DrawingManagerProps> = ({
       ))}
 
       {/* Control buttons */}
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        zIndex: 1000,
-        background: 'white',
-        padding: '10px',
-        borderRadius: '4px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-      }}>
-        <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>
+      <Paper
+        elevation={3}
+        sx={{
+          position: 'absolute',
+          top: 16,
+          left: 16, // Position on left to avoid conflict with map controls
+          zIndex: theme.zIndex.modal + 1, // Use Material-UI's modal z-index + 1
+          p: 2,
+          minWidth: 200,
+          maxWidth: 280
+        }}
+      >
+        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
           Draw Flight Direction
-        </div>
-        <div style={{ fontSize: '12px', marginBottom: '8px' }}>
+        </Typography>
+        <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
           Click two points to set direction
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
           {points.length === 1 && (
-            <div style={{ fontSize: '12px', color: '#666' }}>
+            <Typography variant="caption" color="text.secondary">
               Click one more point...
-            </div>
+            </Typography>
           )}
-          <Tooltip title="Cancel">
-            <IconButton
-              size="small"
-              color="error"
-              onClick={handleCancel}
-            >
-              <Clear />
-            </IconButton>
-          </Tooltip>
-        </div>
-      </div>
+          <Box sx={{ ml: 'auto' }}>
+            <Tooltip title="Cancel">
+              <IconButton
+                size="small"
+                color="error"
+                onClick={handleCancel}
+                sx={{ 
+                  minWidth: 40,
+                  minHeight: 40 // Better touch target
+                }}
+              >
+                <Clear />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+      </Paper>
     </>
   );
 };
