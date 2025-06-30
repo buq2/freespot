@@ -264,7 +264,8 @@ export const AppLayout: React.FC = () => {
                       const modelName = modelId === 'best_match' ? 'Best Match' :
                                        modelId === 'gfs_global' ? 'GFS Global' :
                                        modelId === 'icon_eu' ? 'ICON EU' :
-                                       modelId === 'ecmwf_ifs04' ? 'ECMWF' : modelId;
+                                       modelId === 'ecmwf_ifs04' ? 'ECMWF' :
+                                       modelId === 'custom' ? 'Custom Weather Data' : modelId;
                       
                       return (
                         <Grid item xs={12} lg={selectedModels.length > 1 ? 6 : 12} key={modelId}>

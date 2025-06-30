@@ -52,7 +52,10 @@ export const WeatherModelSelector: React.FC<WeatherModelSelectorProps> = ({
 
   const handleCustomWeatherSave = (weatherData: any[]) => {
     setCustomWeatherData(weatherData);
-    onModelSelectionChange([...selectedModels, 'custom']);
+    // Only add 'custom' if it's not already selected
+    if (!selectedModels.includes('custom')) {
+      onModelSelectionChange([...selectedModels, 'custom']);
+    }
   };
 
   return (
