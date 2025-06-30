@@ -46,7 +46,7 @@ export const JumpParametersForm: React.FC = () => {
     const value = event.target.value;
     setJumpParameters({
       ...jumpParameters,
-      flightDirection: value === '' ? undefined : parseFloat(value)
+      flightDirection: value === '' ? undefined : Math.round(parseFloat(value) * 10) / 10
     });
   };
 
@@ -345,7 +345,7 @@ export const JumpParametersForm: React.FC = () => {
           <TextField
             fullWidth
             label="Flight Direction"
-            value={jumpParameters.flightDirection ?? ''}
+            value={jumpParameters.flightDirection !== undefined ? jumpParameters.flightDirection.toFixed(1) : ''}
             onChange={handleFlightDirectionChange}
             placeholder="Auto (headwind)"
             InputProps={{

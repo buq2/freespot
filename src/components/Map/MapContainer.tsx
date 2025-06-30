@@ -25,7 +25,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const handleFlightPathComplete = useCallback((bearing: number) => {
     setJumpParameters({
       ...jumpParameters,
-      flightDirection: bearing
+      flightDirection: Math.round(bearing * 10) / 10
     });
     setIsDrawingMode(false);
   }, [jumpParameters, setJumpParameters]);
