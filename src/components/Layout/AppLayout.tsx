@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -6,14 +6,13 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   CircularProgress,
   Alert,
   Paper,
   Tabs,
   Tab
 } from '@mui/material';
-import { Calculate, Settings, Map as MapIcon, CloudDownload } from '@mui/icons-material';
+import { Settings, Map as MapIcon, CloudDownload } from '@mui/icons-material';
 import { useAppContext } from '../../contexts/AppContext';
 import { JumpParametersForm, UserPreferencesForm, WeatherModelSelector } from '../Parameters';
 import { WeatherTable, WindCompass } from '../Weather';
@@ -62,7 +61,7 @@ export const AppLayout: React.FC = () => {
     setTabValue(newValue);
   };
 
-  const handleCalculate = async () => {
+  const handleCalculate = useCallback(async () => {
     if (selectedModels.length === 0) {
       setError('Please select at least one weather model');
       return;
@@ -100,7 +99,19 @@ export const AppLayout: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jumpParameters, selectedModels]);
+
+  // Auto-calculate when parameters change
+  useEffect(() => {
+    // Only calculate if we have selected models and a valid landing zone
+    if (selectedModels.length > 0 && jumpParameters.landingZone.lat && jumpParameters.landingZone.lon) {
+      const delayDebounce = setTimeout(() => {
+        handleCalculate();
+      }, 500); // 500ms debounce to avoid too many API calls
+
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [jumpParameters, selectedModels, handleCalculate]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -110,15 +121,14 @@ export const AppLayout: React.FC = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             FreeSpot - Skydiving Exit Point Calculator
           </Typography>
-          <Button
-            color="inherit"
-            variant="outlined"
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Calculate />}
-            onClick={handleCalculate}
-            disabled={loading || selectedModels.length === 0}
-          >
-            {loading ? 'Calculating...' : 'Calculate'}
-          </Button>
+          {loading && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CircularProgress size={20} color="inherit" />
+              <Typography variant="body2" color="inherit">
+                Calculating...
+              </Typography>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
 
