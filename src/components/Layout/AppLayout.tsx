@@ -142,11 +142,8 @@ export const AppLayout: React.FC = () => {
           >
             {drawerOpen ? <ChevronLeft /> : <Menu />}
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            FreeSpot - Skydiving Exit Point Calculator
-          </Typography>
           {loading && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
               <CircularProgress size={20} color="inherit" />
               <Typography variant="body2" color="inherit">
                 Calculating...
@@ -175,6 +172,13 @@ export const AppLayout: React.FC = () => {
         }}
       >
         <Box sx={{ overflow: 'auto', height: '100%' }}>
+          {/* App Title */}
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+            <Typography variant="h6" component="div">
+              FreeSpot - Skydiving Exit Point Calculator
+            </Typography>
+          </Box>
+          
           <Tabs 
             value={tabValue} 
             onChange={handleTabChange}
