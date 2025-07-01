@@ -1,41 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Sky background gradient -->
-  <defs>
-    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#87CEEB;stop-opacity:1" />
-    </linearGradient>
-  </defs>
+  <!-- Rounded background -->
+  <circle cx="256" cy="256" r="256" fill="#4A90E2"/>
   
-  <!-- Background circle -->
-  <circle cx="256" cy="256" r="240" fill="url(#skyGradient)"/>
+  <!-- Large parachute shape -->
+  <path d="M256,80 Q120,80 80,180 Q120,160 256,160 Q392,160 432,180 Q392,80 256,80" 
+        fill="#FF6B6B" stroke="none"/>
   
-  <!-- Simplified airplane -->
-  <g transform="translate(256,120)">
-    <path d="M0,0 L-80,0 L-90,-30 L-80,-20 L-20,-20 L-20,-40 L0,-30 L0,-10 L20,-10 L20,10 L0,10 L0,30 L-20,40 L-20,20 L-80,20 L-90,30 L-80,0" 
-          fill="#2C3E50" stroke="none"/>
-  </g>
+  <!-- Three bold lines -->
+  <rect x="236" y="160" width="40" height="200" fill="#2C3E50"/>
+  <rect x="156" y="160" width="40" height="200" fill="#2C3E50" transform="rotate(-15 176 260)"/>
+  <rect x="316" y="160" width="40" height="200" fill="#2C3E50" transform="rotate(15 336 260)"/>
   
-  <!-- Simplified parachute (larger and clearer) -->
-  <g transform="translate(256,280)">
-    <!-- Parachute canopy -->
-    <path d="M0,-60 Q-60,-80 -70,-40 Q-60,-20 0,-20 Q60,-20 70,-40 Q60,-80 0,-60" 
-          fill="#FF6B6B" stroke="#CC0000" stroke-width="6"/>
-    <!-- Simplified lines -->
-    <line x1="-50" y1="-40" x2="-15" y2="30" stroke="#2C3E50" stroke-width="8"/>
-    <line x1="50" y1="-40" x2="15" y2="30" stroke="#2C3E50" stroke-width="8"/>
-    <line x1="0" y1="-40" x2="0" y2="30" stroke="#2C3E50" stroke-width="8"/>
-    <!-- Simplified skydiver -->
-    <circle cx="0" cy="45" r="20" fill="#2C3E50"/>
-  </g>
-  
-  <!-- Landing zone target (simplified and larger) -->
-  <g transform="translate(256,420)">
-    <circle cx="0" cy="0" r="50" fill="#FFF" stroke="#FF6B6B" stroke-width="12"/>
-    <circle cx="0" cy="0" r="25" fill="#FF6B6B"/>
-  </g>
-  
-  <!-- Simple drift line -->
-  <path d="M256,120 Q256,250 256,420" 
-        stroke="#FFF" stroke-width="12" stroke-dasharray="30,20" fill="none" opacity="0.8"/>
+  <!-- Landing target -->
+  <circle cx="256" cy="400" r="80" fill="#FFF"/>
+  <circle cx="256" cy="400" r="40" fill="#FF6B6B"/>
 </svg>
