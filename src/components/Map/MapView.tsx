@@ -272,8 +272,8 @@ export const MapView: React.FC<MapViewProps> = ({
       });
     }
 
-    // Fallback to backward compatibility mode
-    if (data.length === 0 && exitCalculation && primaryProfile && commonParameters) {
+    // Fallback to backward compatibility mode - only if we have enabled profiles
+    if (data.length === 0 && exitCalculation && primaryProfile && commonParameters && enabledProfiles.length > 0) {
       const flightPath = createFlightPath(exitCalculation);
       const driftPaths = calculateDriftPaths(
         exitCalculation,
@@ -292,7 +292,7 @@ export const MapView: React.FC<MapViewProps> = ({
     }
 
     return data;
-  }, [multiProfileResults, activeProfiles, primaryWeatherData, exitCalculation, primaryProfile, groundWindData]);
+  }, [multiProfileResults, activeProfiles, enabledProfiles, primaryWeatherData, exitCalculation, primaryProfile, groundWindData]);
 
   // Get tile layer configuration
   const tileConfig = getTileLayerConfig(mapLayer);

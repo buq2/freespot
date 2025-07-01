@@ -64,8 +64,13 @@ export const AppLayout: React.FC = () => {
   const exitPointCalculations = useExitPointCalculations();
   
   // Backward compatibility - use primary result for legacy components
-  const exitCalculation = exitPointCalculations.primaryResult?.calculation || null;
-  const groundWindData = exitPointCalculations.primaryResult?.groundWind || null;
+  // Only show calculation data if there are enabled profiles
+  const exitCalculation = exitPointCalculations.enabledProfiles.length > 0 
+    ? exitPointCalculations.primaryResult?.calculation || null 
+    : null;
+  const groundWindData = exitPointCalculations.enabledProfiles.length > 0 
+    ? exitPointCalculations.primaryResult?.groundWind || null 
+    : null;
   const primaryWeatherData = weatherCalculations.result?.primaryWeatherData || null;
   const weatherData = weatherCalculations.result?.weatherData || {};
   const terrainElevation = weatherCalculations.result?.terrainElevation || 0;
@@ -388,7 +393,7 @@ export const AppLayout: React.FC = () => {
         {/* Full Screen Map */}
         <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
           <MapContainer
-            multiProfileResults={exitPointCalculations.results}
+            multiProfileResults={exitPointCalculations.enabledProfiles.length > 0 ? exitPointCalculations.results : []}
             profiles={profiles}
             primaryWeatherData={primaryWeatherData}
             showControls={showMapControls}
