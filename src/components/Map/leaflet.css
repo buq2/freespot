@@ -38,3 +38,8 @@
 .leaflet-container {
   background: #e0e0e0 !important; /* Temporary to see if container is there */
 }
+
+/* Move zoom controls below app bar */
+.leaflet-control-zoom {
+  margin-top: 80px !important; /* Below 65px app bar with spacing */
+}
