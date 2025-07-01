@@ -72,9 +72,15 @@ const calculateDriftPaths = (
     return [];
   }
 
+  // Check if exitPoints exists and is iterable
+  const exitPoints = exitCalculation.exitPoints;
+  if (!exitPoints || !Array.isArray(exitPoints) || exitPoints.length === 0) {
+    return [];
+  }
+
   const paths = [];
   
-  for (const exitPoint of exitCalculation.exitPoints) {
+  for (const exitPoint of exitPoints) {
     try {
       // Use the same weather data and functions as optimal exit point calculation
       
@@ -186,7 +192,7 @@ export const MapView: React.FC<MapViewProps> = ({
   useEffect(() => {
     const firstResult = multiProfileResults[0] || (exitCalculation ? { calculation: exitCalculation } : null);
     
-    if (firstResult && commonParameters && !hasInitializedRef.current) {
+    if (firstResult && commonParameters && !hasInitializedRef.current && firstResult.calculation.optimalExitPoint) {
       // Center between landing zone and optimal exit point only on first successful calculation
       const centerLat = (commonParameters.landingZone.lat + firstResult.calculation.optimalExitPoint.lat) / 2;
       const centerLon = (commonParameters.landingZone.lon + firstResult.calculation.optimalExitPoint.lon) / 2;
@@ -197,8 +203,8 @@ export const MapView: React.FC<MapViewProps> = ({
 
   // Helper function to create flight path for a calculation
   const createFlightPath = (calculation: ExitCalculationResult) => {
-    const points = calculation.exitPoints;
-    if (points.length === 0 || !commonParameters) return null;
+    const points = calculation?.exitPoints;
+    if (!points || points.length === 0 || !commonParameters) return null;
     
     const heading = calculation.aircraftHeading;
     const extendDistance = 1000; // meters
@@ -246,7 +252,7 @@ export const MapView: React.FC<MapViewProps> = ({
     // Process multi-profile results
     for (const result of multiProfileResults) {
       const profile = activeProfiles.find(p => p.id === result.profileId);
-      if (!profile) continue;
+      if (!profile || !result.calculation) continue;
 
       const flightPath = createFlightPath(result.calculation);
 
@@ -361,9 +367,10 @@ export const MapView: React.FC<MapViewProps> = ({
       {profileVisualizationData.map((profileData, profileIndex) => (
         <React.Fragment key={`profile-${profileData.profile.id}`}>
           {/* Safety circle */}
-          <Circle
-            center={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
-            radius={profileData.calculation.safetyRadius}
+          {profileData.calculation.optimalExitPoint && (
+            <Circle
+              center={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
+              radius={profileData.calculation.safetyRadius}
             pathOptions={{
               color: profileData.profile.color,
               fillColor: profileData.profile.color,
@@ -378,23 +385,26 @@ export const MapView: React.FC<MapViewProps> = ({
               Safety radius: {formatAltitude(profileData.calculation.safetyRadius, userPreferences.units.altitude)}
             </Popup>
           </Circle>
+          )}
 
           {/* Optimal exit point */}
-          <Marker
-            position={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
-            icon={exitPointIcon}
-          >
-            <Popup>
-              <strong>{profileData.profile.name} - Optimal Exit Point</strong>
-              <br />
-              Lat: {profileData.calculation.optimalExitPoint.lat.toFixed(4)}
-              <br />
-              Lon: {profileData.calculation.optimalExitPoint.lon.toFixed(4)}
-            </Popup>
-          </Marker>
+          {profileData.calculation.optimalExitPoint && (
+            <Marker
+              position={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
+              icon={exitPointIcon}
+            >
+              <Popup>
+                <strong>{profileData.profile.name} - Optimal Exit Point</strong>
+                <br />
+                Lat: {profileData.calculation.optimalExitPoint.lat.toFixed(4)}
+                <br />
+                Lon: {profileData.calculation.optimalExitPoint.lon.toFixed(4)}
+              </Popup>
+            </Marker>
+          )}
 
           {/* Individual group exits */}
-          {profileData.calculation.exitPoints.map((exit) => (
+          {profileData.calculation.exitPoints?.map((exit) => (
             <Marker
               key={`${profileData.profile.id}-group-${exit.groupNumber}`}
               position={[exit.location.lat, exit.location.lon]}

@@ -181,9 +181,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     }
   }, [
     isOptimalDirectionMode,
-    commonParameters,
-    customWeatherData,
-    calculateOptimalDirection
+    commonParameters.flightOverLandingZone, // Only depend on the specific property
+    customWeatherData
+    // Removed calculateOptimalDirection from dependencies
   ]);
 
   return (

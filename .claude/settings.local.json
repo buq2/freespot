@@ -19,7 +19,8 @@
       "Bash(node test-headwind.js)",
       "Bash(node:*)",
       "Bash(timeout 10s npm run dev)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

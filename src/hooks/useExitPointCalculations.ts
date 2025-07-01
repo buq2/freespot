@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { JumpProfile, ForecastData, CommonParameters, FullJumpParameters } from '../types';
-import { calculateExitPoints } from '../physics/exit-point';
+import { calculateExitPoints as calculateExitPointsPhysics } from '../physics/exit-point';
 import type { ExitCalculationResult } from '../physics/exit-point';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { useParametersContext } from '../contexts/ParametersContext';
@@ -79,10 +79,10 @@ export const useExitPointCalculations = (): UseExitPointCalculationsReturn => {
   );
 
   // Get primary result (first enabled profile)
-  const primaryResult = useMemo(() => 
-    results.find(r => r.profileId === getEnabledProfile()?.id) || results[0] || null,
-    [results, getEnabledProfile]
-  );
+  const primaryResult = useMemo(() => {
+    const enabledProfile = getEnabledProfile();
+    return results.find(r => r.profileId === enabledProfile?.id) || results[0] || null;
+  }, [results, getEnabledProfile]);
 
   // Generate full parameters for each enabled profile
   const fullParameters = useMemo((): FullJumpParameters[] => 
@@ -106,7 +106,7 @@ export const useExitPointCalculations = (): UseExitPointCalculationsReturn => {
       };
       
       // Calculate exit points for this profile
-      const calculation = calculateExitPoints(fullParams, weatherData);
+      const calculation = calculateExitPointsPhysics(fullParams, weatherData);
       
       return {
         profileId: profile.id,
@@ -129,7 +129,7 @@ export const useExitPointCalculations = (): UseExitPointCalculationsReturn => {
         error: errorMessage
       };
     }
-  }, [commonParameters]);
+  }, [commonParameters]); // Restore commonParameters dependency for reactivity
 
   const calculateExitPoints = useCallback(async (
     weatherData: ForecastData[],
@@ -177,7 +177,7 @@ export const useExitPointCalculations = (): UseExitPointCalculationsReturn => {
     } finally {
       setIsCalculating(false);
     }
-  }, [enabledProfiles, calculateForProfile]);
+  }, [enabledProfiles, calculateForProfile]); // Restore enabledProfiles dependency for proper reactivity
 
   const clearError = useCallback(() => {
     setError(null);

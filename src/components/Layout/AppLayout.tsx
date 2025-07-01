@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Container,
@@ -83,18 +83,39 @@ export const AppLayout: React.FC = () => {
     setTabValue(newValue);
   };
 
+  // Use ref to store current values to avoid stale closures
+  const currentValuesRef = useRef({
+    selectedModels,
+    commonParameters,
+    customWeatherData,
+    weatherCalculations,
+    exitPointCalculations
+  });
+
+  // Update ref with current values
+  currentValuesRef.current = {
+    selectedModels,
+    commonParameters,
+    customWeatherData,
+    weatherCalculations,
+    exitPointCalculations
+  };
+
   const handleCalculate = useCallback(async () => {
     try {
+      // Get current values from ref to avoid stale closure
+      const current = currentValuesRef.current;
+      
       // First fetch weather data
-      const weatherResult = await weatherCalculations.fetchWeather(
-        commonParameters.landingZone,
-        selectedModels,
-        commonParameters.jumpTime,
-        customWeatherData
+      const weatherResult = await current.weatherCalculations.fetchWeather(
+        current.commonParameters.landingZone,
+        current.selectedModels,
+        current.commonParameters.jumpTime,
+        current.customWeatherData
       );
 
       // Then calculate exit points using the weather data
-      await exitPointCalculations.calculateExitPoints(
+      await current.exitPointCalculations.calculateExitPoints(
         weatherResult.primaryWeatherData || [],
         weatherResult.groundWindData
       );
@@ -106,7 +127,7 @@ export const AppLayout: React.FC = () => {
       console.error('Calculation failed:', err);
       // Error handling is done by the hooks
     }
-  }, [selectedModels, commonParameters, customWeatherData, weatherCalculations, exitPointCalculations]);
+  }, []); // Empty dependency array to prevent recreation
 
   // Auto-calculate when parameters change
   useEffect(() => {
@@ -118,7 +139,7 @@ export const AppLayout: React.FC = () => {
 
       return () => clearTimeout(delayDebounce);
     }
-  }, [exitPointCalculations.enabledProfiles, commonParameters, selectedModels, customWeatherData, handleCalculate]);
+  }, [exitPointCalculations.enabledProfiles, commonParameters, selectedModels, customWeatherData, handleCalculate]); // Restore handleCalculate dependency
 
   return (
     <Box sx={{ height: '100vh', overflow: 'hidden' }}>
