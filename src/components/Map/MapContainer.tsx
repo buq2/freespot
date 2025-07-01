@@ -1,8 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { Box, Button, ButtonGroup, Paper, Typography, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem, useTheme, useMediaQuery } from '@mui/material';
-import { Navigation, Edit, LocationOn } from '@mui/icons-material';
+import { Navigation, Edit, LocationOn, Explore } from '@mui/icons-material';
 import { MapView } from './MapView';
 import { useAppContext } from '../../contexts/AppContext';
+import { calculateExitPoints } from '../../physics/exit-point';
+import { calculateBearing } from '../../physics/geo';
+import { fetchWeatherData } from '../../services/weather';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import type { ForecastData } from '../../types';
 
@@ -17,7 +20,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   groundWindData,
   showControls = true
 }) => {
-  const { jumpParameters, setJumpParameters } = useAppContext();
+  const { jumpParameters, setJumpParameters, customWeatherData } = useAppContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isDrawingMode, setIsDrawingMode] = useState(false);
@@ -38,6 +41,49 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       flightDirection: undefined
     });
   }, [jumpParameters, setJumpParameters]);
+
+  const handleSetOptimalFlightDirection = useCallback(async () => {
+    try {
+      // Use custom weather data if available, otherwise fetch weather data
+      let weatherData = customWeatherData;
+      
+      if (!weatherData) {
+        // Fetch weather data for the current location and time
+        const result = await fetchWeatherData(
+          jumpParameters.landingZone,
+          'best_match', // Use best match model
+          jumpParameters.jumpTime
+        );
+        weatherData = result.data;
+      }
+      
+      if (!weatherData || weatherData.length === 0) {
+        console.warn('No weather data available for optimal flight direction calculation');
+        return;
+      }
+      
+      let optimalDirection: number;
+      
+      if (jumpParameters.flightOverLandingZone) {
+        // When flying over landing zone, direction should be from landing zone to optimal exit point
+        // This is the direction the aircraft needs to fly to reach the optimal exit point and continue over landing zone
+        const exitResult = calculateExitPoints(jumpParameters, weatherData);
+        optimalDirection = calculateBearing(jumpParameters.landingZone, exitResult.optimalExitPoint);
+      } else {
+        // Normal case: use the standard aircraft heading calculation (headwind)
+        const exitResult = calculateExitPoints(jumpParameters, weatherData);
+        optimalDirection = exitResult.aircraftHeading;
+      }
+      
+      setJumpParameters({
+        ...jumpParameters,
+        flightDirection: Math.round(optimalDirection * 10) / 10
+      });
+      
+    } catch (error) {
+      console.error('Failed to calculate optimal flight direction:', error);
+    }
+  }, [jumpParameters, setJumpParameters, customWeatherData]);
 
   const handleCancelDrawing = useCallback(() => {
     setIsDrawingMode(false);
@@ -94,6 +140,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               variant={jumpParameters.flightDirection === undefined ? 'contained' : 'outlined'}
             >
               Auto Headwind
+            </Button>
+            <Button
+              startIcon={<Explore />}
+              onClick={handleSetOptimalFlightDirection}
+              variant="outlined"
+              disabled={isDrawingMode || isSettingLandingZone}
+            >
+              Optimal Direction
             </Button>
             <Button
               startIcon={<Edit />}
