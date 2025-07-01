@@ -13,52 +13,37 @@ import { CoordinateField } from '../Common/FormFields';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { useAppContext } from '../../contexts/AppContext';
+import { useParametersContext } from '../../contexts/ParametersContext';
 
 export const CommonParametersForm: React.FC = () => {
-  const { commonParameters, setCommonParameters } = useAppContext();
+  const { commonParameters, updateCommonParameter } = useParametersContext();
 
   const handleLocationChange = (field: 'lat' | 'lon') => (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value) || 0;
-    setCommonParameters({
-      ...commonParameters,
-      landingZone: {
-        ...commonParameters.landingZone,
-        [field]: value
-      }
+    updateCommonParameter('landingZone', {
+      ...commonParameters.landingZone,
+      [field]: value
     });
   };
 
   const handleFlightDirectionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setCommonParameters({
-      ...commonParameters,
-      flightDirection: value === '' ? undefined : Math.round(parseFloat(value) * 10) / 10
-    });
+    updateCommonParameter('flightDirection', value === '' ? undefined : Math.round(parseFloat(value) * 10) / 10);
   };
 
   const handleDateChange = (date: Date | null) => {
     if (date) {
-      setCommonParameters({
-        ...commonParameters,
-        jumpTime: date
-      });
+      updateCommonParameter('jumpTime', date);
     }
   };
 
   const handleFlightOverLandingZoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCommonParameters({
-      ...commonParameters,
-      flightOverLandingZone: event.target.checked
-    });
+    updateCommonParameter('flightOverLandingZone', event.target.checked);
   };
 
   const handleParameterChange = (field: keyof typeof commonParameters) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value) || 0;
-    setCommonParameters({
-      ...commonParameters,
-      [field]: value
-    });
+    updateCommonParameter(field, value);
   };
 
   return (
@@ -81,9 +66,8 @@ export const CommonParametersForm: React.FC = () => {
             size="small"
             label="Latitude"
             value={commonParameters.landingZone.lat}
-            onChange={(lat) => setCommonParameters({
-              ...commonParameters,
-              landingZone: { ...commonParameters.landingZone, lat }
+            onChange={(lat) => updateCommonParameter('landingZone', {
+              ...commonParameters.landingZone, lat
             })}
             coordinateType="latitude"
           />
@@ -95,9 +79,8 @@ export const CommonParametersForm: React.FC = () => {
             size="small"
             label="Longitude"
             value={commonParameters.landingZone.lon}
-            onChange={(lon) => setCommonParameters({
-              ...commonParameters,
-              landingZone: { ...commonParameters.landingZone, lon }
+            onChange={(lon) => updateCommonParameter('landingZone', {
+              ...commonParameters.landingZone, lon
             })}
             coordinateType="longitude"
           />

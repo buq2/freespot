@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, Polyline, Popup, useMap } from 'react-leaflet';
 import { LatLng } from 'leaflet';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import './icons'; // Import to trigger Leaflet icon fixes
 import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIcon } from './icons';

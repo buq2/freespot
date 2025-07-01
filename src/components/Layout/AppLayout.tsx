@@ -18,7 +18,7 @@ import {
   useMediaQuery
 } from '@mui/material';
 import { Settings, Map as MapIcon, CloudDownload, Menu, Close, ChevronLeft, Tune } from '@mui/icons-material';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import { JumpParametersForm, UserPreferencesForm, WeatherModelSelector } from '../Parameters';
 import { WeatherTable, WindCompass } from '../Weather';
 import { ExitPointResults } from '../Results';

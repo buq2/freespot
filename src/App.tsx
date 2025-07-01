@@ -1,7 +1,8 @@
 import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AppProvider } from './contexts/AppContext';
+import { CombinedProvider } from './contexts/CombinedProvider';
+import { AppProviderCompat } from './contexts/AppContextCompat';
 import { AppLayout } from './components/Layout';
 import './App.css';
 
@@ -42,9 +43,11 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppProvider>
-        <AppLayout />
-      </AppProvider>
+      <CombinedProvider>
+        <AppProviderCompat>
+          <AppLayout />
+        </AppProviderCompat>
+      </CombinedProvider>
     </ThemeProvider>
   );
 }

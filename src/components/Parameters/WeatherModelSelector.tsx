@@ -10,7 +10,7 @@ import {
   Button
 } from '@mui/material';
 import { Settings } from '@mui/icons-material';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import { WEATHER_MODELS } from '../../services/weather';
 import { CustomWeatherInput } from '../Weather/CustomWeatherInput';
 

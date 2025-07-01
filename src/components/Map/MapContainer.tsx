@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, Button, ButtonGroup, Paper, Typography, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem, useTheme, useMediaQuery } from '@mui/material';
 import { Navigation, Edit, LocationOn, Explore } from '@mui/icons-material';
 import { MapView } from './MapView';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import { calculateExitPoints } from '../../physics/exit-point';
 import { calculateBearing } from '../../physics/geo';
 import { fetchWeatherData } from '../../services/weather';

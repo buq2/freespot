@@ -31,7 +31,7 @@ import {
   GetApp, 
   Palette 
 } from '@mui/icons-material';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import { convertSpeed, convertAltitude } from '../../utils/units';
 import { calculateCanopyAirSpeed } from '../../physics/constants';
 import type { JumpProfile } from '../../types';

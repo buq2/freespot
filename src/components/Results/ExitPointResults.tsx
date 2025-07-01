@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { Flight, LocationOn, Speed, Height } from '@mui/icons-material';
 import type { ExitCalculationResult } from '../../physics/exit-point';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import { formatAltitude } from '../../utils/units';
 import { calculateDistance } from '../../physics/geo';
 

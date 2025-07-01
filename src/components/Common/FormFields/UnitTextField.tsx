@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextField, InputAdornment } from '@mui/material';
 import { convertSpeed, convertAltitude } from '../../../utils/units';
-import { useAppContext } from '../../../contexts/AppContext';
+import { usePreferencesContext } from '../../../contexts/PreferencesContext';
 import type { Units } from '../../../types';
 
 interface UnitTextFieldProps extends Omit<React.ComponentProps<typeof TextField>, 'value' | 'onChange'> {
@@ -40,7 +40,7 @@ export const UnitTextField: React.FC<UnitTextFieldProps> = ({
   decimals = 1,
   ...textFieldProps
 }) => {
-  const { userPreferences } = useAppContext();
+  const { userPreferences } = usePreferencesContext();
   
   // Convert value from base units to display units
   const getDisplayValue = (): number => {

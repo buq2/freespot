@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { Warning, CheckCircle } from '@mui/icons-material';
 import type { ForecastData } from '../../types';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import { formatAltitude, formatSpeed, formatTemperature } from '../../utils/units';
 import { 
   getWindWarningLevel, 

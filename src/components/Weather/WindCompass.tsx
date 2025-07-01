@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import type { ForecastData } from '../../types';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import { formatSpeed } from '../../utils/units';
 
 interface WindCompassProps {

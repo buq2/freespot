@@ -13,31 +13,22 @@ import {
   Divider,
 } from '@mui/material';
 import { CollapsibleSection } from '../Common/CollapsibleSection';
-import { useAppContext } from '../../contexts/AppContext';
+import { usePreferencesContext } from '../../contexts/PreferencesContext';
 import { useResponsive } from '../../hooks/useResponsive';
 import type { Units } from '../../types';
 
 export const UserPreferencesForm: React.FC = () => {
-  const { userPreferences, setUserPreferences } = useAppContext();
+  const { userPreferences, updatePreference, updateUnits } = usePreferencesContext();
   const responsive = useResponsive();
 
   const handleUnitsChange = (unitType: keyof Units) => (event: React.ChangeEvent<{ value: unknown }>) => {
-    setUserPreferences({
-      ...userPreferences,
-      units: {
-        ...userPreferences.units,
-        [unitType]: event.target.value
-      }
-    });
+    updateUnits({ [unitType]: event.target.value as Units[typeof unitType] });
   };
 
   const handleWindLimitChange = (field: 'studentWindLimit' | 'sportWindLimit') => 
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = parseFloat(event.target.value) || 0;
-      setUserPreferences({
-        ...userPreferences,
-        [field]: value
-      });
+      updatePreference(field, value);
     };
 
 

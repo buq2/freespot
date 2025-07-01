@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts';
 import { CommonParametersForm } from './CommonParametersForm';
 import { ProfileManager } from './ProfileManager';
 import { ProfileSection } from './ProfileSection';
