@@ -7,8 +7,6 @@ import {
   Typography,
   Paper,
   Box,
-  Chip,
-  Stack,
   Button
 } from '@mui/material';
 import { Settings } from '@mui/icons-material';
@@ -27,35 +25,29 @@ export const WeatherModelSelector: React.FC<WeatherModelSelectorProps> = ({
 }) => {
   const { customWeatherData, setCustomWeatherData } = useAppContext();
   const [showCustomWeatherDialog, setShowCustomWeatherDialog] = useState(false);
+  
+  // Get the currently selected model (first one from the array)
+  const selectedModel = selectedModels[0] || 'best_match';
 
-  const handleModelToggle = (modelId: string) => {
+  const handleModelChange = (event: any) => {
+    const modelId = event.target.value;
+    
     if (modelId === 'custom') {
-      if (selectedModels.includes(modelId)) {
-        // Remove custom model
-        onModelSelectionChange(selectedModels.filter(id => id !== modelId));
-      } else {
-        // Add custom model - open dialog if no data exists
-        if (!customWeatherData) {
-          setShowCustomWeatherDialog(true);
-        } else {
-          onModelSelectionChange([...selectedModels, modelId]);
-        }
-      }
-    } else {
-      if (selectedModels.includes(modelId)) {
-        onModelSelectionChange(selectedModels.filter(id => id !== modelId));
-      } else {
-        onModelSelectionChange([...selectedModels, modelId]);
+      // If custom is selected but no data exists, open dialog
+      if (!customWeatherData) {
+        setShowCustomWeatherDialog(true);
+        return;
       }
     }
+    
+    // Always replace with single selection
+    onModelSelectionChange([modelId]);
   };
 
   const handleCustomWeatherSave = (weatherData: any[]) => {
     setCustomWeatherData(weatherData);
-    // Only add 'custom' if it's not already selected
-    if (!selectedModels.includes('custom')) {
-      onModelSelectionChange([...selectedModels, 'custom']);
-    }
+    // Set custom as the only selected model
+    onModelSelectionChange(['custom']);
   };
 
   return (
@@ -65,38 +57,36 @@ export const WeatherModelSelector: React.FC<WeatherModelSelectorProps> = ({
       </Typography>
       
       <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-        Select one or more weather models for comparison
+        Select weather model for calculations
       </Typography>
 
-      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-        {WEATHER_MODELS.map((model) => (
-          <Box key={model.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Chip
-              label={model.name}
-              clickable
-              color={selectedModels.includes(model.id) ? 'primary' : 'default'}
-              variant={selectedModels.includes(model.id) ? 'filled' : 'outlined'}
-              onClick={() => handleModelToggle(model.id)}
-            />
-            {model.id === 'custom' && customWeatherData && (
-              <Button
-                size="small"
-                startIcon={<Settings />}
-                onClick={() => setShowCustomWeatherDialog(true)}
-                sx={{ minWidth: 'auto', p: 0.5 }}
-              >
-                Edit
-              </Button>
-            )}
-          </Box>
-        ))}
-      </Stack>
-
-      {selectedModels.length === 0 && (
-        <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-          Please select at least one weather model
-        </Typography>
-      )}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <FormControl fullWidth>
+          <InputLabel>Weather Model</InputLabel>
+          <Select
+            value={selectedModel}
+            label="Weather Model"
+            onChange={handleModelChange}
+          >
+            {WEATHER_MODELS.map((model) => (
+              <MenuItem key={model.id} value={model.id}>
+                {model.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        
+        {selectedModel === 'custom' && customWeatherData && (
+          <Button
+            variant="outlined"
+            startIcon={<Settings />}
+            onClick={() => setShowCustomWeatherDialog(true)}
+            sx={{ minWidth: 120 }}
+          >
+            Edit Custom
+          </Button>
+        )}
+      </Box>
 
       <CustomWeatherInput
         open={showCustomWeatherDialog}

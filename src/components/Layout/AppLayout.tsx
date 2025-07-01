@@ -90,7 +90,7 @@ export const AppLayout: React.FC = () => {
 
   const handleCalculate = useCallback(async () => {
     if (selectedModels.length === 0) {
-      setError('Please select at least one weather model');
+      setError('Please select a weather model');
       return;
     }
 
