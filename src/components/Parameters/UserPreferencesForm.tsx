@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Grid,
   TextField,
@@ -12,7 +12,11 @@ import {
   FormControlLabel,
   InputAdornment,
   Divider,
+  Box,
+  IconButton,
+  Collapse,
 } from '@mui/material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useAppContext } from '../../contexts/AppContext';
 import { useResponsive } from '../../hooks/useResponsive';
 import type { Units } from '../../types';
@@ -20,6 +24,7 @@ import type { Units } from '../../types';
 export const UserPreferencesForm: React.FC = () => {
   const { userPreferences, setUserPreferences } = useAppContext();
   const responsive = useResponsive();
+  const [expanded, setExpanded] = useState(false);
 
   const handleUnitsChange = (unitType: keyof Units) => (event: React.ChangeEvent<{ value: unknown }>) => {
     setUserPreferences({
@@ -40,21 +45,32 @@ export const UserPreferencesForm: React.FC = () => {
       });
     };
 
-  const handleSwitchChange = (field: keyof typeof userPreferences) => 
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setUserPreferences({
-        ...userPreferences,
-        [field]: event.target.checked
-      });
-    };
 
   return (
-    <Paper elevation={2} sx={{ p: responsive.spacing.container }}>
-      <Typography variant="h6" gutterBottom>
-        User Preferences
-      </Typography>
+    <Paper elevation={2} sx={{ mb: 3 }}>
+      <Box sx={{ p: 2 }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6">
+              User Preferences
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Units, wind limits, and display preferences
+            </Typography>
+          </Box>
+          <IconButton
+            size="small"
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+        </Box>
 
-      <Grid container spacing={responsive.spacing.gap}>
+        {/* Collapsible Content */}
+        <Collapse in={expanded}>
+          <Box sx={{ mt: 2 }}>
+            <Grid container spacing={responsive.spacing.gap}>
         {/* Units */}
         <Grid item xs={12}>
           <Typography variant="subtitle2" color="textSecondary" gutterBottom>
@@ -147,29 +163,11 @@ export const UserPreferencesForm: React.FC = () => {
           />
         </Grid>
 
-        <Grid item xs={12}>
-          <Divider sx={{ my: 2 }} />
-        </Grid>
 
-        {/* Display Options */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Display Options
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={userPreferences.showDriftVisualization}
-                onChange={handleSwitchChange('showDriftVisualization')}
-              />
-            }
-            label="Show freefall drift visualization"
-          />
-        </Grid>
-      </Grid>
+            </Grid>
+          </Box>
+        </Collapse>
+      </Box>
     </Paper>
   );
 };

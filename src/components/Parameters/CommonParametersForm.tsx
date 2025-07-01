@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Grid,
   TextField,
@@ -8,7 +8,10 @@ import {
   InputAdornment,
   Switch,
   FormControlLabel,
+  IconButton,
+  Collapse,
 } from '@mui/material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -16,6 +19,7 @@ import { useAppContext } from '../../contexts/AppContext';
 
 export const CommonParametersForm: React.FC = () => {
   const { commonParameters, setCommonParameters } = useAppContext();
+  const [expanded, setExpanded] = useState(true);
 
   const handleLocationChange = (field: 'lat' | 'lon') => (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value) || 0;
@@ -61,15 +65,30 @@ export const CommonParametersForm: React.FC = () => {
   };
 
   return (
-    <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Common Parameters
-      </Typography>
-      <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mb: 3 }}>
-        These parameters are shared across all profiles
-      </Typography>
-      
-      <Grid container spacing={3}>
+    <Paper elevation={2} sx={{ mb: 3 }}>
+      <Box sx={{ p: 2 }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6">
+              Common Parameters
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              These parameters are shared across all profiles
+            </Typography>
+          </Box>
+          <IconButton
+            size="small"
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+        </Box>
+
+        {/* Collapsible Content */}
+        <Collapse in={expanded}>
+          <Box sx={{ mt: 2 }}>
+            <Grid container spacing={3}>
         {/* Landing Zone */}
         <Grid item xs={12}>
           <Typography variant="subtitle2" color="textSecondary" gutterBottom>
@@ -198,7 +217,10 @@ export const CommonParametersForm: React.FC = () => {
             />
           </LocalizationProvider>
         </Grid>
-      </Grid>
+            </Grid>
+          </Box>
+        </Collapse>
+      </Box>
     </Paper>
   );
 };
