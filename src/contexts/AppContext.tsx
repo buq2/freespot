@@ -17,6 +17,23 @@ interface AppContextType {
   setCustomWeatherData: (data: ForecastData[] | null) => void;
 }
 
+// Helper function to round time to nearest hour
+const roundToNearestHour = (date: Date): Date => {
+  const rounded = new Date(date);
+  const minutes = rounded.getMinutes();
+  
+  if (minutes >= 30) {
+    // Round up to next hour
+    rounded.setHours(rounded.getHours() + 1);
+  }
+  
+  rounded.setMinutes(0);
+  rounded.setSeconds(0);
+  rounded.setMilliseconds(0);
+  
+  return rounded;
+};
+
 export const defaultJumpParameters: JumpParameters = {
   jumpAltitude: 4000, // meters
   aircraftSpeed: 36, // m/s (130 km/h)
@@ -30,7 +47,7 @@ export const defaultJumpParameters: JumpParameters = {
   landingZone: { lat: 61.7807, lon: 22.7221 },
   flightDirection: undefined, // headwind
   flightOverLandingZone: false, // default to normal offset exit
-  jumpTime: new Date(),
+  jumpTime: roundToNearestHour(new Date()),
 };
 
 export const defaultUserPreferences: UserPreferences = {
@@ -73,8 +90,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const stored = loadFromStorage('jumpParameters', defaultJumpParameters);
     // Merge with defaults to ensure all fields exist (for backward compatibility)
     const merged = { ...defaultJumpParameters, ...stored };
-    // Convert stored date string back to Date object
-    return { ...merged, jumpTime: new Date(merged.jumpTime) };
+    // Convert stored date string back to Date object and round to nearest hour
+    return { ...merged, jumpTime: roundToNearestHour(new Date(merged.jumpTime)) };
   });
 
   const [userPreferences, setUserPreferencesState] = useState<UserPreferences>(() => 

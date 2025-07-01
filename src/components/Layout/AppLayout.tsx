@@ -328,6 +328,7 @@ export const AppLayout: React.FC = () => {
                           data={modelData}
                           modelName={modelName}
                           terrainElevation={terrainElevation}
+                          jumpTime={jumpParameters.jumpTime}
                         />
                       </Box>
                     );

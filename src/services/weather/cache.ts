@@ -11,7 +11,8 @@ const weatherStore = localforage.createInstance({
 export class WeatherCache {
   private getCacheKey(location: LatLon, forecastDate: Date): string {
     const dateStr = forecastDate.toISOString().split('T')[0];
-    return `${location.lat.toFixed(4)},${location.lon.toFixed(4)}-${dateStr}`;
+    const hour = forecastDate.getHours();
+    return `${location.lat.toFixed(4)},${location.lon.toFixed(4)}-${dateStr}-${hour.toString().padStart(2, '0')}`;
   }
 
   private getExpirationTime(forecastDate: Date): number {

@@ -26,12 +26,14 @@ interface WeatherTableProps {
   data: ForecastData[];
   modelName: string;
   terrainElevation: number;
+  jumpTime: Date;
 }
 
 export const WeatherTable: React.FC<WeatherTableProps> = ({ 
   data, 
   modelName, 
-  terrainElevation 
+  terrainElevation,
+  jumpTime 
 }) => {
   const { userPreferences } = useAppContext();
 
@@ -46,10 +48,25 @@ export const WeatherTable: React.FC<WeatherTableProps> = ({
     return <CheckCircle fontSize="small" />;
   };
 
+  // Format the jump time for display
+  const formatJumpTime = (date: Date) => {
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  };
+
   return (
     <Paper elevation={2}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Typography variant="h6">{modelName}</Typography>
+        <Typography variant="body2" color="textSecondary">
+          Forecast for: {formatJumpTime(jumpTime)}
+        </Typography>
         <Typography variant="body2" color="textSecondary">
           Terrain elevation: {formatAltitude(terrainElevation, userPreferences.units.altitude)}
         </Typography>

@@ -9,9 +9,9 @@ export const fetchWeatherData = async (
   model: string,
   date: Date
 ): Promise<{ data: ForecastData[], terrainElevation: number }> => {
-  // Normalize date to start of day for caching
+  // Round to nearest hour for caching (weather data is hourly)
   const forecastDate = new Date(date);
-  forecastDate.setHours(0, 0, 0, 0);
+  forecastDate.setMinutes(0, 0, 0);
   
   // Try to get from cache first
   const cached = await weatherCache.get(location, forecastDate);
@@ -38,8 +38,8 @@ export const fetchWeatherData = async (
     }
   }
   
-  // Fetch fresh weather data
-  const result = await fetchFromAPI(location, model, date);
+  // Fetch fresh weather data using the exact forecast time
+  const result = await fetchFromAPI(location, model, forecastDate);
   
   // Cache the data
   await weatherCache.set(location, forecastDate, terrain, model, result.data);

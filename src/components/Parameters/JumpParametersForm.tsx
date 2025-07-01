@@ -12,9 +12,10 @@ import {
   InputAdornment,
   Switch,
   FormControlLabel,
-  Button
+  Button,
+  IconButton
 } from '@mui/material';
-import { RestartAlt } from '@mui/icons-material';
+import { RestartAlt, Add, Remove, Schedule } from '@mui/icons-material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -59,6 +60,32 @@ export const JumpParametersForm: React.FC = () => {
         jumpTime: date
       });
     }
+  };
+
+  const handleHourAdjustment = (hours: number) => {
+    const newTime = new Date(jumpParameters.jumpTime);
+    newTime.setHours(newTime.getHours() + hours);
+    setJumpParameters({
+      ...jumpParameters,
+      jumpTime: newTime
+    });
+  };
+
+  const handleSetToNow = () => {
+    const now = new Date();
+    const minutes = now.getMinutes();
+    
+    // Round to nearest hour
+    if (minutes >= 30) {
+      now.setHours(now.getHours() + 1);
+    }
+    
+    now.setMinutes(0, 0, 0);
+    
+    setJumpParameters({
+      ...jumpParameters,
+      jumpTime: now
+    });
   };
 
   const handleResetToDefaults = () => {
@@ -398,9 +425,59 @@ export const JumpParametersForm: React.FC = () => {
                 label="Jump Date & Time"
                 value={jumpParameters.jumpTime}
                 onChange={handleDateChange}
-                slotProps={{ textField: { fullWidth: true } }}
+                ampm={false}
+                slotProps={{ 
+                  textField: { fullWidth: true },
+                  actionBar: {
+                    actions: ['clear', 'today']
+                  }
+                }}
               />
             </LocalizationProvider>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, height: '56px', flexWrap: 'wrap' }}>
+              <Typography variant="body2" color="textSecondary" sx={{ minWidth: 'fit-content' }}>
+                Adjust:
+              </Typography>
+              <IconButton 
+                onClick={() => handleHourAdjustment(-1)}
+                color="primary"
+                size="large"
+                sx={{ 
+                  border: '1px solid',
+                  borderColor: 'primary.main',
+                  borderRadius: 1
+                }}
+              >
+                <Remove />
+              </IconButton>
+              <IconButton 
+                onClick={() => handleHourAdjustment(1)}
+                color="primary"
+                size="large"
+                sx={{ 
+                  border: '1px solid',
+                  borderColor: 'primary.main',
+                  borderRadius: 1
+                }}
+              >
+                <Add />
+              </IconButton>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Schedule />}
+                onClick={handleSetToNow}
+                sx={{ 
+                  textTransform: 'none',
+                  borderRadius: 1,
+                  ml: 1
+                }}
+              >
+                Now
+              </Button>
+            </Box>
           </Grid>
         </Grid>
       </Paper>
