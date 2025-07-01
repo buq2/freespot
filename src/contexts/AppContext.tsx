@@ -17,7 +17,7 @@ interface AppContextType {
   setCustomWeatherData: (data: ForecastData[] | null) => void;
 }
 
-const defaultJumpParameters: JumpParameters = {
+export const defaultJumpParameters: JumpParameters = {
   jumpAltitude: 4000, // meters
   aircraftSpeed: 36, // m/s (130 km/h)
   freefallSpeed: 55.56, // m/s (200 km/h)
@@ -33,7 +33,7 @@ const defaultJumpParameters: JumpParameters = {
   jumpTime: new Date(),
 };
 
-const defaultUserPreferences: UserPreferences = {
+export const defaultUserPreferences: UserPreferences = {
   units: {
     altitude: 'meters',
     speed: 'ms',

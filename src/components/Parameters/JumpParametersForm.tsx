@@ -11,12 +11,14 @@ import {
   Box,
   InputAdornment,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  Button
 } from '@mui/material';
+import { RestartAlt } from '@mui/icons-material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext, defaultJumpParameters } from '../../contexts/AppContext';
 import { convertSpeed, convertAltitude } from '../../utils/units';
 import { calculateCanopyAirSpeed } from '../../physics/constants';
 
@@ -59,6 +61,15 @@ export const JumpParametersForm: React.FC = () => {
     }
   };
 
+  const handleResetToDefaults = () => {
+    // Keep current landing zone and jump time, reset everything else
+    setJumpParameters({
+      ...defaultJumpParameters,
+      landingZone: jumpParameters.landingZone,
+      jumpTime: jumpParameters.jumpTime
+    });
+  };
+
   // Convert values for display
   const displayJumpAltitude = convertAltitude(jumpParameters.jumpAltitude, 'meters', userPreferences.units.altitude);
   const displayOpeningAltitude = convertAltitude(jumpParameters.openingAltitude, 'meters', userPreferences.units.altitude);
@@ -73,9 +84,20 @@ export const JumpParametersForm: React.FC = () => {
 
   return (
     <Paper elevation={2} sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Jump Parameters
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">
+          Jump Parameters
+        </Typography>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<RestartAlt />}
+          onClick={handleResetToDefaults}
+          sx={{ textTransform: 'none' }}
+        >
+          Reset to Defaults
+        </Button>
+      </Box>
 
       <Grid container spacing={3}>
         {/* Altitudes */}
