@@ -17,7 +17,8 @@
       "mcp__playwright__browser_navigate",
       "Bash(find:*)",
       "Bash(node test-headwind.js)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(timeout 10s npm run dev)"
     ],
     "deny": []
   }

@@ -1,11 +1,18 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, Polyline, Popup, useMap } from 'react-leaflet';
 import { LatLng } from 'leaflet';
 import { useAppContext } from '../../contexts/AppContext';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import './icons'; // Import to trigger Leaflet icon fixes
 import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIcon } from './icons';
-import type { ForecastData, JumpParameters } from '../../types';
+import type { ForecastData, JumpParameters, JumpProfile } from '../../types';
+
+// Multi-profile calculation result
+interface MultiProfileResult {
+  profileId: string;
+  calculation: ExitCalculationResult;
+  groundWind: ForecastData | undefined;
+}
 import { formatSpeed, formatAltitude } from '../../utils/units';
 import { getDestinationPoint, movePoint } from '../../physics/geo';
 import { DrawingManager } from './DrawingManager';
@@ -15,8 +22,8 @@ import { interpolateWeatherData } from '../../services/weather/openmeteo';
 import './leaflet.css';
 
 interface MapViewProps {
-  exitCalculation: ExitCalculationResult | null;
-  groundWindData?: ForecastData;
+  multiProfileResults?: MultiProfileResult[];
+  profiles?: JumpProfile[];
   primaryWeatherData?: ForecastData[] | null;
   isDrawingMode?: boolean;
   onFlightPathComplete?: (bearing: number) => void;
@@ -25,6 +32,9 @@ interface MapViewProps {
   onLandingZoneSet?: (lat: number, lon: number) => void;
   onCancelLandingZone?: () => void;
   mapLayer?: string;
+  // Backward compatibility
+  exitCalculation?: ExitCalculationResult | null;
+  groundWindData?: ForecastData;
 }
 
 // Component to handle map centering and initialization
@@ -141,8 +151,8 @@ const getTileLayerConfig = (layerId: string) => {
 };
 
 export const MapView: React.FC<MapViewProps> = ({ 
-  exitCalculation, 
-  groundWindData,
+  multiProfileResults = [],
+  profiles = [],
   primaryWeatherData,
   isDrawingMode = false,
   onFlightPathComplete,
@@ -150,40 +160,52 @@ export const MapView: React.FC<MapViewProps> = ({
   isSettingLandingZone = false,
   onLandingZoneSet,
   onCancelLandingZone,
-  mapLayer = 'osm'
+  mapLayer = 'osm',
+  // Backward compatibility
+  exitCalculation,
+  groundWindData
 }) => {
-  const { jumpParameters, userPreferences } = useAppContext();
+  const { profiles: contextProfiles, userPreferences } = useAppContext();
+  
+  // Use props profiles or context profiles
+  const activeProfiles = profiles.length > 0 ? profiles : contextProfiles;
+  const enabledProfiles = activeProfiles.filter(p => p.enabled);
+  const primaryProfile = enabledProfiles[0] || activeProfiles[0];
   const [mapCenter, setMapCenter] = useState<LatLng>(
-    new LatLng(jumpParameters.landingZone.lat, jumpParameters.landingZone.lon)
+    new LatLng(
+      primaryProfile?.parameters.landingZone.lat || 0, 
+      primaryProfile?.parameters.landingZone.lon || 0
+    )
   );
   const hasInitializedRef = useRef(false);
 
   // Debug: Log when component renders
-  console.log('MapView rendering with center:', mapCenter, 'exitCalculation:', !!exitCalculation);
+  console.log('MapView rendering with center:', mapCenter, 'multiProfileResults:', multiProfileResults.length);
 
-  // Only center the map on the very first time we get exit calculation data
+  // Only center the map on the very first time we get calculation data
   useEffect(() => {
-    if (exitCalculation && !hasInitializedRef.current) {
+    const firstResult = multiProfileResults[0] || (exitCalculation ? { calculation: exitCalculation } : null);
+    
+    if (firstResult && primaryProfile && !hasInitializedRef.current) {
       // Center between landing zone and optimal exit point only on first successful calculation
-      const centerLat = (jumpParameters.landingZone.lat + exitCalculation.optimalExitPoint.lat) / 2;
-      const centerLon = (jumpParameters.landingZone.lon + exitCalculation.optimalExitPoint.lon) / 2;
+      const centerLat = (primaryProfile.parameters.landingZone.lat + firstResult.calculation.optimalExitPoint.lat) / 2;
+      const centerLon = (primaryProfile.parameters.landingZone.lon + firstResult.calculation.optimalExitPoint.lon) / 2;
       setMapCenter(new LatLng(centerLat, centerLon));
       hasInitializedRef.current = true;
     }
-  }, [exitCalculation, jumpParameters.landingZone]);
+  }, [multiProfileResults, exitCalculation, primaryProfile]);
 
-  // Create aircraft flight path
-  const flightPath = exitCalculation ? (() => {
-    const points = exitCalculation.exitPoints;
+  // Helper function to create flight path for a calculation
+  const createFlightPath = (calculation: ExitCalculationResult, parameters: JumpParameters) => {
+    const points = calculation.exitPoints;
     if (points.length === 0) return null;
     
-    const heading = exitCalculation.aircraftHeading;
+    const heading = calculation.aircraftHeading;
     const extendDistance = 1000; // meters
     
-    if (jumpParameters.flightOverLandingZone) {
+    if (parameters.flightOverLandingZone) {
       // For overhead flight, show the flight path passing over the landing zone
-      // Extend beyond the landing zone in both directions
-      const landingZone = jumpParameters.landingZone;
+      const landingZone = parameters.landingZone;
       const startPoint = getDestinationPoint(landingZone, extendDistance * 2, heading + 180);
       const endPoint = getDestinationPoint(landingZone, extendDistance * 2, heading);
       
@@ -195,7 +217,6 @@ export const MapView: React.FC<MapViewProps> = ({
     } else {
       // Normal offset flight path
       if (points.length < 2) {
-        // Single exit point - show short line
         const exitPoint = points[0].location;
         const startPoint = getDestinationPoint(exitPoint, extendDistance / 2, heading + 180);
         const endPoint = getDestinationPoint(exitPoint, extendDistance / 2, heading);
@@ -210,10 +231,65 @@ export const MapView: React.FC<MapViewProps> = ({
       
       return [startPoint, ...points.map(p => p.location), endPoint];
     }
-  })() : null;
+  };
 
-  // Calculate drift paths for visualization using real weather data
-  const driftPaths = calculateDriftPaths(exitCalculation, primaryWeatherData, jumpParameters, userPreferences.showDriftVisualization);
+  // Create multi-profile flight paths and drift paths
+  const profileVisualizationData = useMemo(() => {
+    const data: Array<{
+      profile: JumpProfile;
+      calculation: ExitCalculationResult;
+      groundWind: ForecastData | undefined;
+      flightPath: any[] | null;
+      driftPaths: any[];
+    }> = [];
+
+    // Process multi-profile results
+    for (const result of multiProfileResults) {
+      const profile = activeProfiles.find(p => p.id === result.profileId);
+      if (!profile) continue;
+
+      const flightPath = createFlightPath(
+        result.calculation,
+        profile.parameters
+      );
+
+      const driftPaths = calculateDriftPaths(
+        result.calculation,
+        primaryWeatherData,
+        profile.parameters,
+        profile.showDriftVisualization
+      );
+
+      data.push({
+        profile,
+        calculation: result.calculation,
+        groundWind: result.groundWind,
+        flightPath,
+        driftPaths
+      });
+    }
+
+    // Fallback to backward compatibility mode
+    if (data.length === 0 && exitCalculation && primaryProfile) {
+      const flightPath = createFlightPath(exitCalculation, primaryProfile.parameters);
+      const driftPaths = calculateDriftPaths(
+        exitCalculation,
+        primaryWeatherData,
+        primaryProfile.parameters,
+        primaryProfile.showDriftVisualization
+      );
+
+      data.push({
+        profile: primaryProfile,
+        calculation: exitCalculation,
+        groundWind,
+        flightPath,
+        driftPaths
+      });
+    }
+
+    return data;
+  }, [multiProfileResults, activeProfiles, primaryWeatherData, exitCalculation, primaryProfile, groundWindData]);
 
   // Get tile layer configuration
   const tileConfig = getTileLayerConfig(mapLayer);
@@ -241,30 +317,31 @@ export const MapView: React.FC<MapViewProps> = ({
       />
 
       {/* Landing Zone */}
-      <Marker
-        position={[jumpParameters.landingZone.lat, jumpParameters.landingZone.lon]}
-        icon={landingZoneIcon}
-      >
-        <Popup>
-          <div>
-            <strong>Landing Zone</strong>
-            <br />
-            Lat: {jumpParameters.landingZone.lat.toFixed(4)}
-            <br />
-            Lon: {jumpParameters.landingZone.lon.toFixed(4)}
-            {groundWindData && (
-              <>
-                <br />
-                <br />
-                <strong>Ground Wind:</strong>
-                <br />
-                Direction: {Math.round(groundWindData.direction)}°
-                <br />
-                Speed: {formatSpeed(groundWindData.speed, userPreferences.units.speed)}
-                {groundWindData.gustSpeed && (
-                  <>
-                    <br />
-                    Gusts: {formatSpeed(groundWindData.gustSpeed, userPreferences.units.speed)}
+      {primaryProfile && (
+        <Marker
+          position={[primaryProfile.parameters.landingZone.lat, primaryProfile.parameters.landingZone.lon]}
+          icon={landingZoneIcon}
+        >
+          <Popup>
+            <div>
+              <strong>Landing Zone</strong>
+              <br />
+              Lat: {primaryProfile.parameters.landingZone.lat.toFixed(4)}
+              <br />
+              Lon: {primaryProfile.parameters.landingZone.lon.toFixed(4)}
+              {profileVisualizationData[0]?.groundWind && (
+                <>
+                  <br />
+                  <br />
+                  <strong>Ground Wind:</strong>
+                  <br />
+                  Direction: {Math.round(profileVisualizationData[0].groundWind.direction)}°
+                  <br />
+                  Speed: {formatSpeed(profileVisualizationData[0].groundWind.speed, userPreferences.units.speed)}
+                  {profileVisualizationData[0].groundWind.gustSpeed && (
+                    <>
+                      <br />
+                    Gusts: {formatSpeed(profileVisualizationData[0].groundWind.gustSpeed, userPreferences.units.speed)}
                   </>
                 )}
               </>
@@ -272,58 +349,62 @@ export const MapView: React.FC<MapViewProps> = ({
           </div>
         </Popup>
       </Marker>
+      )}
 
       {/* Ground wind visualization */}
-      {groundWindData && groundWindData.speed > 0.5 && (
+      {primaryProfile && profileVisualizationData[0]?.groundWind && profileVisualizationData[0].groundWind.speed > 0.5 && (
         <Marker
-          position={[jumpParameters.landingZone.lat, jumpParameters.landingZone.lon]}
-          icon={createWindArrowIcon(groundWindData.direction, groundWindData.speed)}
+          position={[primaryProfile.parameters.landingZone.lat, primaryProfile.parameters.landingZone.lon]}
+          icon={createWindArrowIcon(profileVisualizationData[0].groundWind.direction, profileVisualizationData[0].groundWind.speed)}
           interactive={false}
         />
       )}
 
-      {exitCalculation && (
-        <>
+      {/* Multi-profile visualization */}
+      {profileVisualizationData.map((profileData, profileIndex) => (
+        <React.Fragment key={`profile-${profileData.profile.id}`}>
           {/* Safety circle */}
           <Circle
-            center={[exitCalculation.optimalExitPoint.lat, exitCalculation.optimalExitPoint.lon]}
-            radius={exitCalculation.safetyRadius}
+            center={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
+            radius={profileData.calculation.safetyRadius}
             pathOptions={{
-              color: 'green',
-              fillColor: 'green',
+              color: profileData.profile.color,
+              fillColor: profileData.profile.color,
               fillOpacity: 0.1,
               weight: 2,
               dashArray: '5, 10'
             }}
           >
             <Popup>
-              Safety radius: {formatAltitude(exitCalculation.safetyRadius, userPreferences.units.altitude)}
+              <strong>{profileData.profile.name}</strong>
+              <br />
+              Safety radius: {formatAltitude(profileData.calculation.safetyRadius, userPreferences.units.altitude)}
             </Popup>
           </Circle>
 
           {/* Optimal exit point */}
           <Marker
-            position={[exitCalculation.optimalExitPoint.lat, exitCalculation.optimalExitPoint.lon]}
+            position={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
             icon={exitPointIcon}
           >
             <Popup>
-              <strong>Optimal Exit Point</strong>
+              <strong>{profileData.profile.name} - Optimal Exit Point</strong>
               <br />
-              Lat: {exitCalculation.optimalExitPoint.lat.toFixed(4)}
+              Lat: {profileData.calculation.optimalExitPoint.lat.toFixed(4)}
               <br />
-              Lon: {exitCalculation.optimalExitPoint.lon.toFixed(4)}
+              Lon: {profileData.calculation.optimalExitPoint.lon.toFixed(4)}
             </Popup>
           </Marker>
 
           {/* Individual group exits */}
-          {exitCalculation.exitPoints.map((exit) => (
+          {profileData.calculation.exitPoints.map((exit) => (
             <Marker
-              key={exit.groupNumber}
+              key={`${profileData.profile.id}-group-${exit.groupNumber}`}
               position={[exit.location.lat, exit.location.lon]}
               icon={createGroupExitIcon(exit.groupNumber)}
             >
               <Popup>
-                <strong>Group {exit.groupNumber}</strong>
+                <strong>{profileData.profile.name} - Group {exit.groupNumber}</strong>
                 <br />
                 Lat: {exit.location.lat.toFixed(4)}
                 <br />
@@ -333,25 +414,27 @@ export const MapView: React.FC<MapViewProps> = ({
           ))}
 
           {/* Aircraft flight path */}
-          {flightPath && (
+          {profileData.flightPath && (
             <Polyline
-              positions={flightPath.map(p => [p.lat, p.lon])}
+              positions={profileData.flightPath.map(p => [p.lat, p.lon])}
               pathOptions={{
-                color: 'blue',
+                color: profileData.profile.color,
                 weight: 3,
                 opacity: 0.8,
-                dashArray: '10, 5'
+                dashArray: profileIndex === 0 ? '10, 5' : '15, 10' // Vary dash pattern for different profiles
               }}
             >
               <Popup>
-                Aircraft heading: {Math.round(exitCalculation.aircraftHeading)}°
+                <strong>{profileData.profile.name}</strong>
+                <br />
+                Aircraft heading: {Math.round(profileData.calculation.aircraftHeading)}°
               </Popup>
             </Polyline>
           )}
 
-          {/* Drift visualization (if enabled) */}
-          {driftPaths.map((driftPath) => (
-            <React.Fragment key={`drift-${driftPath.groupNumber}`}>
+          {/* Drift visualization (if enabled for this profile) */}
+          {profileData.driftPaths.map((driftPath) => (
+            <React.Fragment key={`${profileData.profile.id}-drift-${driftPath.groupNumber}`}>
               {/* Freefall drift path */}
               <Polyline
                 positions={[
@@ -359,14 +442,14 @@ export const MapView: React.FC<MapViewProps> = ({
                   [driftPath.path[1].lat, driftPath.path[1].lon]  // Opening position
                 ]}
                 pathOptions={{
-                  color: '#ff4444',
+                  color: profileData.profile.color,
                   weight: 2,
-                  opacity: 0.7,
+                  opacity: 0.5,
                   dashArray: '5, 5'
                 }}
               >
                 <Popup>
-                  Group {driftPath.groupNumber} - Freefall drift
+                  {profileData.profile.name} - Group {driftPath.groupNumber} - Freefall drift
                 </Popup>
               </Polyline>
               
@@ -377,14 +460,14 @@ export const MapView: React.FC<MapViewProps> = ({
                   [driftPath.path[2].lat, driftPath.path[2].lon]  // Landing position
                 ]}
                 pathOptions={{
-                  color: '#4444ff',
+                  color: profileData.profile.color,
                   weight: 2,
                   opacity: 0.7,
                   dashArray: '10, 5'
                 }}
               >
                 <Popup>
-                  Group {driftPath.groupNumber} - Canopy drift
+                  {profileData.profile.name} - Group {driftPath.groupNumber} - Canopy drift
                 </Popup>
               </Polyline>
               
@@ -395,13 +478,13 @@ export const MapView: React.FC<MapViewProps> = ({
                 opacity={0.6}
               >
                 <Popup>
-                  Group {driftPath.groupNumber} - Opening position
+                  {profileData.profile.name} - Group {driftPath.groupNumber} - Opening position
                 </Popup>
               </Marker>
             </React.Fragment>
           ))}
-        </>
-      )}
+        </React.Fragment>
+      ))}
 
       {/* Drawing Manager - must be inside MapContainer */}
       {isDrawingMode && onFlightPathComplete && onCancelDrawing && (

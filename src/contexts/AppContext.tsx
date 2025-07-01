@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { JumpParameters, UserPreferences, LatLon, TerrainData, CachedLocationData, ForecastData } from '../types';
+import type { JumpParameters, JumpProfile, UserPreferences, LatLon, TerrainData, CachedLocationData, ForecastData } from '../types';
 
 interface AppContextType {
-  jumpParameters: JumpParameters;
-  setJumpParameters: (params: JumpParameters) => void;
+  profiles: JumpProfile[];
+  setProfiles: (profiles: JumpProfile[]) => void;
+  addProfile: (profile: Omit<JumpProfile, 'id'>) => void;
+  updateProfile: (id: string, updates: Partial<JumpProfile>) => void;
+  deleteProfile: (id: string) => void;
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
   weatherCache: CachedLocationData[];
@@ -15,6 +18,9 @@ interface AppContextType {
   setSelectedWeatherModel: (model: string) => void;
   customWeatherData: ForecastData[] | null;
   setCustomWeatherData: (data: ForecastData[] | null) => void;
+  // Backward compatibility
+  jumpParameters: JumpParameters;
+  setJumpParameters: (params: JumpParameters) => void;
 }
 
 // Helper function to round time to nearest hour
@@ -58,8 +64,65 @@ export const defaultUserPreferences: UserPreferences = {
   },
   studentWindLimit: 8, // m/s
   sportWindLimit: 11, // m/s
-  showDriftVisualization: true,
 };
+
+// Generate unique ID for profiles
+const generateProfileId = (): string => {
+  return 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+};
+
+// Default profile templates
+export const createDefaultProfiles = (landingZone: LatLon): JumpProfile[] => [
+  {
+    id: 'sport_jumpers',
+    name: 'Sport Jumpers',
+    enabled: true,
+    color: '#2196F3', // Blue
+    showDriftVisualization: true,
+    parameters: {
+      ...defaultJumpParameters,
+      landingZone,
+      jumpAltitude: 4000,
+      openingAltitude: 800,
+      canopyDescentRate: 6,
+      glideRatio: 2.5,
+    },
+  },
+  {
+    id: 'tandem',
+    name: 'Tandem',
+    enabled: false,
+    color: '#FF9800', // Orange
+    showDriftVisualization: false,
+    parameters: {
+      ...defaultJumpParameters,
+      landingZone,
+      jumpAltitude: 3000,
+      openingAltitude: 1500,
+      canopyDescentRate: 8,
+      glideRatio: 2.0,
+      numberOfGroups: 3,
+      timeBetweenGroups: 15,
+    },
+  },
+  {
+    id: 'student',
+    name: 'Student',
+    enabled: false,
+    color: '#4CAF50', // Green
+    showDriftVisualization: false,
+    parameters: {
+      ...defaultJumpParameters,
+      landingZone,
+      jumpAltitude: 3500,
+      openingAltitude: 1000,
+      canopyDescentRate: 7,
+      glideRatio: 2.2,
+      numberOfGroups: 2,
+      timeBetweenGroups: 20,
+    },
+  },
+];
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -86,12 +149,36 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   };
 
-  const [jumpParameters, setJumpParametersState] = useState<JumpParameters>(() => {
-    const stored = loadFromStorage('jumpParameters', defaultJumpParameters);
-    // Merge with defaults to ensure all fields exist (for backward compatibility)
-    const merged = { ...defaultJumpParameters, ...stored };
-    // Convert stored date string back to Date object and round to nearest hour
-    return { ...merged, jumpTime: roundToNearestHour(new Date(merged.jumpTime)) };
+  // Migrate existing data and initialize profiles
+  const [profiles, setProfilesState] = useState<JumpProfile[]>(() => {
+    const storedProfiles = loadFromStorage<JumpProfile[]>('jumpProfiles', []);
+    
+    if (storedProfiles.length > 0) {
+      // Update stored dates and ensure all fields exist
+      return storedProfiles.map(profile => ({
+        ...profile,
+        parameters: {
+          ...defaultJumpParameters,
+          ...profile.parameters,
+          jumpTime: roundToNearestHour(new Date(profile.parameters.jumpTime))
+        }
+      }));
+    }
+    
+    // Migrate from old single jumpParameters format
+    const oldParams = loadFromStorage('jumpParameters', null);
+    if (oldParams) {
+      const migratedParams = { ...defaultJumpParameters, ...oldParams };
+      migratedParams.jumpTime = roundToNearestHour(new Date(migratedParams.jumpTime));
+      
+      return createDefaultProfiles(migratedParams.landingZone).map((profile, index) => ({
+        ...profile,
+        parameters: index === 0 ? migratedParams : { ...profile.parameters, landingZone: migratedParams.landingZone, jumpTime: migratedParams.jumpTime }
+      }));
+    }
+    
+    // Create default profiles
+    return createDefaultProfiles(defaultJumpParameters.landingZone);
   });
 
   const [userPreferences, setUserPreferencesState] = useState<UserPreferences>(() => 
@@ -103,10 +190,45 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [selectedWeatherModel, setSelectedWeatherModel] = useState<string>('best_match');
   const [customWeatherData, setCustomWeatherData] = useState<ForecastData[] | null>(null);
 
-  // Save to localStorage whenever state changes
+  // Profile management functions
+  const setProfiles = (newProfiles: JumpProfile[]) => {
+    setProfilesState(newProfiles);
+    localStorage.setItem('jumpProfiles', JSON.stringify(newProfiles));
+  };
+
+  const addProfile = (profileData: Omit<JumpProfile, 'id'>) => {
+    const newProfile: JumpProfile = {
+      ...profileData,
+      id: generateProfileId(),
+    };
+    const newProfiles = [...profiles, newProfile];
+    setProfiles(newProfiles);
+  };
+
+  const updateProfile = (id: string, updates: Partial<JumpProfile>) => {
+    const newProfiles = profiles.map(profile => 
+      profile.id === id ? { ...profile, ...updates } : profile
+    );
+    setProfiles(newProfiles);
+  };
+
+  const deleteProfile = (id: string) => {
+    // Prevent deletion if it's the last profile
+    if (profiles.length <= 1) return;
+    
+    const newProfiles = profiles.filter(profile => profile.id !== id);
+    setProfiles(newProfiles);
+  };
+
+  // Backward compatibility - use first enabled profile or first profile
+  const jumpParameters = profiles.find(p => p.enabled)?.parameters || profiles[0]?.parameters || defaultJumpParameters;
+  
   const setJumpParameters = (params: JumpParameters) => {
-    setJumpParametersState(params);
-    localStorage.setItem('jumpParameters', JSON.stringify(params));
+    // Update the first enabled profile or first profile
+    const targetProfile = profiles.find(p => p.enabled) || profiles[0];
+    if (targetProfile) {
+      updateProfile(targetProfile.id, { parameters: params });
+    }
   };
 
   const setUserPreferences = (prefs: UserPreferences) => {
@@ -116,27 +238,37 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Get user location on mount
   useEffect(() => {
-    if (navigator.geolocation && jumpParameters.landingZone.lat === 0 && jumpParameters.landingZone.lon === 0) {
+    if (navigator.geolocation && profiles.length > 0 && jumpParameters.landingZone.lat === 0 && jumpParameters.landingZone.lon === 0) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setJumpParameters({
-            ...jumpParameters,
-            landingZone: {
-              lat: position.coords.latitude,
-              lon: position.coords.longitude,
-            },
-          });
+          const newLandingZone = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          };
+          
+          // Update all profiles with the new landing zone
+          const updatedProfiles = profiles.map(profile => ({
+            ...profile,
+            parameters: {
+              ...profile.parameters,
+              landingZone: newLandingZone,
+            }
+          }));
+          setProfiles(updatedProfiles);
         },
         (error) => {
           console.error('Error getting location:', error);
         }
       );
     }
-  }, []);
+  }, [profiles]);
 
   const value: AppContextType = {
-    jumpParameters,
-    setJumpParameters,
+    profiles,
+    setProfiles,
+    addProfile,
+    updateProfile,
+    deleteProfile,
     userPreferences,
     setUserPreferences,
     weatherCache,
@@ -147,6 +279,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setSelectedWeatherModel,
     customWeatherData,
     setCustomWeatherData,
+    // Backward compatibility
+    jumpParameters,
+    setJumpParameters,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

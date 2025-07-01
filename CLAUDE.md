@@ -63,3 +63,4 @@ While weather data is loaded for new location, we should indicate to the user th
 
 Development Tips:
 - If you run 'npm run dev' in a task to test something, always also kill the process at the end of the task
+- When running "npm run dev &", the 2min default timeout is too long as it seems that Claude Code does not properly detect that the process detached. Use shorter timeout or run the command some other way.

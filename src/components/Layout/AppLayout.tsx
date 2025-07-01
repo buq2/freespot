@@ -27,7 +27,14 @@ import { fetchWeatherData, fetchMultipleModels } from '../../services/weather';
 import { calculateExitPoints } from '../../physics/exit-point';
 import { getWindDataAtAltitude } from '../../services/weather';
 import type { ExitCalculationResult } from '../../physics/exit-point';
-import type { ForecastData } from '../../types';
+import type { ForecastData, JumpProfile } from '../../types';
+
+// Multi-profile calculation result
+interface MultiProfileResult {
+  profileId: string;
+  calculation: ExitCalculationResult;
+  groundWind: ForecastData | undefined;
+}
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -52,15 +59,22 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const AppLayout: React.FC = () => {
-  const { jumpParameters, customWeatherData } = useAppContext();
+  const { profiles, customWeatherData } = useAppContext();
+  
+  // Get enabled profiles for calculations
+  const enabledProfiles = profiles.filter(p => p.enabled);
+  const primaryProfile = enabledProfiles[0] || profiles[0];
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [selectedModels, setSelectedModels] = useState<string[]>(['best_match']);
   const [weatherData, setWeatherData] = useState<{ [modelId: string]: ForecastData[] }>({});
   const [terrainElevation, setTerrainElevation] = useState<number>(0);
-  const [exitCalculation, setExitCalculation] = useState<ExitCalculationResult | null>(null);
-  const [groundWindData, setGroundWindData] = useState<ForecastData | undefined>();
+  const [multiProfileResults, setMultiProfileResults] = useState<MultiProfileResult[]>([]);
   const [primaryWeatherData, setPrimaryWeatherData] = useState<ForecastData[] | null>(null);
+  
+  // Backward compatibility - use first enabled profile for legacy components
+  const exitCalculation = multiProfileResults[0]?.calculation || null;
+  const groundWindData = multiProfileResults[0]?.groundWind;
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,11 +98,19 @@ export const AppLayout: React.FC = () => {
     setError(null);
 
     try {
+      if (enabledProfiles.length === 0) {
+        setError('Please enable at least one profile');
+        return;
+      }
+
+      // Use the primary profile's location and time for weather data
+      const referenceParams = primaryProfile.parameters;
+      
       // Fetch weather data for all selected models
       const results = await fetchMultipleModels(
-        jumpParameters.landingZone,
+        referenceParams.landingZone,
         selectedModels,
-        jumpParameters.jumpTime,
+        referenceParams.jumpTime,
         customWeatherData
       );
 
@@ -101,39 +123,53 @@ export const AppLayout: React.FC = () => {
       // Store the primary weather data for drift path calculations
       setPrimaryWeatherData(primaryModelData);
       
-      // Calculate exit points
-      const exitResult = calculateExitPoints(jumpParameters, primaryModelData);
-      setExitCalculation(exitResult);
-
-      // Get ground wind data
-      const groundWind = getWindDataAtAltitude(primaryModelData, 10); // 10m AGL
-      setGroundWindData(groundWind);
+      // Calculate exit points for all enabled profiles
+      const profileResults: MultiProfileResult[] = [];
+      
+      for (const profile of enabledProfiles) {
+        try {
+          // Calculate exit points for this profile
+          const exitResult = calculateExitPoints(profile.parameters, primaryModelData);
+          
+          // Get ground wind data
+          const groundWind = getWindDataAtAltitude(primaryModelData, 10); // 10m AGL
+          
+          profileResults.push({
+            profileId: profile.id,
+            calculation: exitResult,
+            groundWind
+          });
+        } catch (profileError) {
+          console.warn(`Failed to calculate for profile ${profile.name}:`, profileError);
+        }
+      }
+      
+      setMultiProfileResults(profileResults);
       
       // Mark initial load as complete
       setInitialLoad(false);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to calculate exit points');
-      setExitCalculation(null);
-      setGroundWindData(undefined);
+      setMultiProfileResults([]);
       setPrimaryWeatherData(null);
     } finally {
       setLoading(false);
       setInitialLoad(false);
     }
-  }, [jumpParameters, selectedModels, customWeatherData]);
+  }, [profiles, selectedModels, customWeatherData]);
 
   // Auto-calculate when parameters change
   useEffect(() => {
-    // Only calculate if we have selected models and a valid landing zone
-    if (selectedModels.length > 0 && jumpParameters.landingZone.lat && jumpParameters.landingZone.lon) {
+    // Only calculate if we have selected models, enabled profiles, and a valid landing zone
+    if (selectedModels.length > 0 && enabledProfiles.length > 0 && primaryProfile?.parameters.landingZone.lat && primaryProfile?.parameters.landingZone.lon) {
       const delayDebounce = setTimeout(() => {
         handleCalculate();
       }, 500); // 500ms debounce to avoid too many API calls
 
       return () => clearTimeout(delayDebounce);
     }
-  }, [jumpParameters, selectedModels, customWeatherData, handleCalculate]);
+  }, [profiles, selectedModels, customWeatherData, handleCalculate]);
 
   return (
     <Box sx={{ height: '100vh', overflow: 'hidden' }}>
@@ -333,7 +369,7 @@ export const AppLayout: React.FC = () => {
                           data={modelData}
                           modelName={modelName}
                           terrainElevation={terrainElevation}
-                          jumpTime={jumpParameters.jumpTime}
+                          jumpTime={primaryProfile?.parameters.jumpTime || new Date()}
                         />
                       </Box>
                     );
@@ -379,10 +415,12 @@ export const AppLayout: React.FC = () => {
         {/* Full Screen Map */}
         <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
           <MapContainer
-            exitCalculation={exitCalculation}
-            groundWindData={groundWindData}
+            multiProfileResults={multiProfileResults}
+            profiles={profiles}
             primaryWeatherData={primaryWeatherData}
             showControls={showMapControls}
+            exitCalculation={exitCalculation}
+            groundWindData={groundWindData}
           />
           
           {/* Loading Overlay */}

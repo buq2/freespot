@@ -7,22 +7,40 @@ import { calculateExitPoints } from '../../physics/exit-point';
 import { calculateBearing } from '../../physics/geo';
 import { fetchWeatherData } from '../../services/weather';
 import type { ExitCalculationResult } from '../../physics/exit-point';
-import type { ForecastData } from '../../types';
+import type { ForecastData, JumpProfile } from '../../types';
+
+// Multi-profile calculation result
+interface MultiProfileResult {
+  profileId: string;
+  calculation: ExitCalculationResult;
+  groundWind: ForecastData | undefined;
+}
 
 interface MapContainerProps {
-  exitCalculation: ExitCalculationResult | null;
-  groundWindData?: ForecastData;
+  multiProfileResults?: MultiProfileResult[];
+  profiles?: JumpProfile[];
   primaryWeatherData?: ForecastData[] | null;
   showControls?: boolean;
+  // Backward compatibility
+  exitCalculation?: ExitCalculationResult | null;
+  groundWindData?: ForecastData;
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({
-  exitCalculation,
-  groundWindData,
+  multiProfileResults = [],
+  profiles = [],
   primaryWeatherData,
-  showControls = true
+  showControls = true,
+  // Backward compatibility
+  exitCalculation,
+  groundWindData
 }) => {
-  const { jumpParameters, setJumpParameters, customWeatherData } = useAppContext();
+  const { profiles: contextProfiles, updateProfile, customWeatherData } = useAppContext();
+  
+  // Use props profiles or context profiles
+  const activeProfiles = profiles.length > 0 ? profiles : contextProfiles;
+  const enabledProfiles = activeProfiles.filter(p => p.enabled);
+  const primaryProfile = enabledProfiles[0] || activeProfiles[0];
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isDrawingMode, setIsDrawingMode] = useState(false);
@@ -33,32 +51,47 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const handleFlightPathComplete = useCallback((bearing: number) => {
     // Disable optimal direction mode when user manually sets direction
     setIsOptimalDirectionMode(false);
-    setJumpParameters({
-      ...jumpParameters,
-      flightDirection: Math.round(bearing * 10) / 10
+    
+    // Update all enabled profiles with the new flight direction
+    enabledProfiles.forEach(profile => {
+      updateProfile(profile.id, {
+        parameters: {
+          ...profile.parameters,
+          flightDirection: Math.round(bearing * 10) / 10
+        }
+      });
     });
+    
     setIsDrawingMode(false);
-  }, [jumpParameters, setJumpParameters]);
+  }, [enabledProfiles, updateProfile]);
 
   const handleUseHeadwind = useCallback(() => {
     setIsOptimalDirectionMode(false);
-    setJumpParameters({
-      ...jumpParameters,
-      flightDirection: undefined
+    
+    // Update all enabled profiles to use headwind
+    enabledProfiles.forEach(profile => {
+      updateProfile(profile.id, {
+        parameters: {
+          ...profile.parameters,
+          flightDirection: undefined
+        }
+      });
     });
-  }, [jumpParameters, setJumpParameters]);
+  }, [enabledProfiles, updateProfile]);
 
   const calculateOptimalDirection = useCallback(async () => {
     try {
+      if (!primaryProfile) return;
+      
       // Use custom weather data if available, otherwise fetch weather data
       let weatherData = customWeatherData;
       
       if (!weatherData) {
         // Fetch weather data for the current location and time
         const result = await fetchWeatherData(
-          jumpParameters.landingZone,
+          primaryProfile.parameters.landingZone,
           'best_match', // Use best match model
-          jumpParameters.jumpTime
+          primaryProfile.parameters.jumpTime
         );
         weatherData = result.data;
       }
@@ -68,36 +101,41 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         return;
       }
       
-      let optimalDirection: number;
-      
-      if (jumpParameters.flightOverLandingZone) {
-        // When flying over landing zone, direction should be from landing zone to optimal exit point
-        // This is the direction the aircraft needs to fly to reach the optimal exit point and continue over landing zone
-        const exitResult = calculateExitPoints(jumpParameters, weatherData);
-        optimalDirection = calculateBearing(jumpParameters.landingZone, exitResult.optimalExitPoint);
-      } else {
-        // Normal case: use the standard aircraft heading calculation (headwind)
-        const exitResult = calculateExitPoints(jumpParameters, weatherData);
-        optimalDirection = exitResult.aircraftHeading;
-      }
-      
-      const newFlightDirection = Math.round(optimalDirection * 10) / 10;
-      
-      // Only update if the value actually changed to prevent infinite loops
-      setJumpParameters(currentParams => {
-        if (currentParams.flightDirection === newFlightDirection) {
-          return currentParams; // No change needed
+      // Calculate optimal direction for each enabled profile
+      enabledProfiles.forEach(profile => {
+        try {
+          let optimalDirection: number;
+          
+          if (profile.parameters.flightOverLandingZone) {
+            // When flying over landing zone, direction should be from landing zone to optimal exit point
+            const exitResult = calculateExitPoints(profile.parameters, weatherData!);
+            optimalDirection = calculateBearing(profile.parameters.landingZone, exitResult.optimalExitPoint);
+          } else {
+            // Normal case: use the standard aircraft heading calculation (headwind)
+            const exitResult = calculateExitPoints(profile.parameters, weatherData!);
+            optimalDirection = exitResult.aircraftHeading;
+          }
+          
+          const newFlightDirection = Math.round(optimalDirection * 10) / 10;
+          
+          // Only update if the value actually changed to prevent infinite loops
+          if (profile.parameters.flightDirection !== newFlightDirection) {
+            updateProfile(profile.id, {
+              parameters: {
+                ...profile.parameters,
+                flightDirection: newFlightDirection
+              }
+            });
+          }
+        } catch (profileError) {
+          console.warn(`Failed to calculate optimal direction for profile ${profile.name}:`, profileError);
         }
-        return {
-          ...currentParams,
-          flightDirection: newFlightDirection
-        };
       });
       
     } catch (error) {
       console.error('Failed to calculate optimal flight direction:', error);
     }
-  }, [jumpParameters, setJumpParameters, customWeatherData]);
+  }, [primaryProfile, enabledProfiles, updateProfile, customWeatherData]);
 
   const handleToggleOptimalDirection = useCallback(() => {
     if (isOptimalDirectionMode) {
@@ -115,12 +153,17 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   }, []);
 
   const handleLandingZoneSet = useCallback((lat: number, lon: number) => {
-    setJumpParameters({
-      ...jumpParameters,
-      landingZone: { lat, lon }
+    // Update all profiles with the new landing zone
+    activeProfiles.forEach(profile => {
+      updateProfile(profile.id, {
+        parameters: {
+          ...profile.parameters,
+          landingZone: { lat, lon }
+        }
+      });
     });
     setIsSettingLandingZone(false);
-  }, [jumpParameters, setJumpParameters]);
+  }, [activeProfiles, updateProfile]);
 
   const handleCancelLandingZone = useCallback(() => {
     setIsSettingLandingZone(false);
@@ -130,15 +173,17 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   // We use useRef to track if we're currently calculating to prevent loops
   const isCalculatingRef = useRef(false);
   
-  // Disable optimal direction mode when "Fly directly over landing zone" is turned off
+  // Disable optimal direction mode when no enabled profiles have "Fly directly over landing zone"
   useEffect(() => {
-    if (isOptimalDirectionMode && !jumpParameters.flightOverLandingZone) {
+    const anyProfileHasFlightOverLandingZone = enabledProfiles.some(p => p.parameters.flightOverLandingZone);
+    if (isOptimalDirectionMode && !anyProfileHasFlightOverLandingZone) {
       setIsOptimalDirectionMode(false);
     }
-  }, [isOptimalDirectionMode, jumpParameters.flightOverLandingZone]);
+  }, [isOptimalDirectionMode, enabledProfiles]);
   
   useEffect(() => {
-    if (isOptimalDirectionMode && !isCalculatingRef.current && jumpParameters.flightOverLandingZone) {
+    const anyProfileHasFlightOverLandingZone = enabledProfiles.some(p => p.parameters.flightOverLandingZone);
+    if (isOptimalDirectionMode && !isCalculatingRef.current && anyProfileHasFlightOverLandingZone) {
       isCalculatingRef.current = true;
       calculateOptimalDirection().finally(() => {
         isCalculatingRef.current = false;
@@ -146,16 +191,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     }
   }, [
     isOptimalDirectionMode,
-    jumpParameters.jumpAltitude,
-    jumpParameters.openingAltitude,
-    jumpParameters.setupAltitude,
-    jumpParameters.freefallSpeed,
-    jumpParameters.canopyDescentRate,
-    jumpParameters.glideRatio,
-    jumpParameters.landingZone.lat,
-    jumpParameters.landingZone.lon,
-    jumpParameters.jumpTime,
-    jumpParameters.flightOverLandingZone,
+    enabledProfiles,
     customWeatherData,
     calculateOptimalDirection
   ]);
@@ -196,7 +232,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             <Button
               startIcon={<Navigation />}
               onClick={handleUseHeadwind}
-              variant={jumpParameters.flightDirection === undefined && !isOptimalDirectionMode ? 'contained' : 'outlined'}
+              variant={enabledProfiles.every(p => p.parameters.flightDirection === undefined) && !isOptimalDirectionMode ? 'contained' : 'outlined'}
             >
               Auto Headwind
             </Button>
@@ -205,7 +241,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               onClick={handleToggleOptimalDirection}
               variant={isOptimalDirectionMode ? 'contained' : 'outlined'}
               color={isOptimalDirectionMode ? 'primary' : 'inherit'}
-              disabled={isDrawingMode || isSettingLandingZone || !jumpParameters.flightOverLandingZone}
+              disabled={isDrawingMode || isSettingLandingZone || !enabledProfiles.some(p => p.parameters.flightOverLandingZone)}
               sx={{
                 ...(isOptimalDirectionMode && {
                   bgcolor: 'primary.main',
@@ -279,11 +315,18 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           <FormControlLabel
             control={
               <Switch
-                checked={jumpParameters.flightOverLandingZone}
-                onChange={(e) => setJumpParameters({
-                  ...jumpParameters,
-                  flightOverLandingZone: e.target.checked
-                })}
+                checked={primaryProfile?.parameters.flightOverLandingZone || false}
+                onChange={(e) => {
+                  // Update all enabled profiles
+                  enabledProfiles.forEach(profile => {
+                    updateProfile(profile.id, {
+                      parameters: {
+                        ...profile.parameters,
+                        flightOverLandingZone: e.target.checked
+                      }
+                    });
+                  });
+                }}
                 size={isMobile ? "medium" : "small"}
               />
             }
@@ -299,9 +342,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           />
         </Box>
 
-        {jumpParameters.flightDirection !== undefined && (
+        {primaryProfile?.parameters.flightDirection !== undefined && (
           <Typography variant="body2" sx={{ mt: 1 }}>
-            Flight direction: {Math.round(jumpParameters.flightDirection)}°
+            Flight direction: {Math.round(primaryProfile.parameters.flightDirection)}°
           </Typography>
         )}
         </Paper>
@@ -309,8 +352,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
       {/* Full Screen Map */}
       <MapView
-        exitCalculation={exitCalculation}
-        groundWindData={groundWindData}
+        multiProfileResults={multiProfileResults}
+        profiles={activeProfiles}
         primaryWeatherData={primaryWeatherData}
         isDrawingMode={isDrawingMode}
         onFlightPathComplete={handleFlightPathComplete}
@@ -319,6 +362,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         onLandingZoneSet={handleLandingZoneSet}
         onCancelLandingZone={handleCancelLandingZone}
         mapLayer={mapLayer}
+        // Backward compatibility
+        exitCalculation={exitCalculation}
+        groundWindData={groundWindData}
       />
     </Box>
   );

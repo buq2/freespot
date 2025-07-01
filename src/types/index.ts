@@ -27,6 +27,15 @@ export interface JumpParameters {
   jumpTime: Date;
 }
 
+export interface JumpProfile {
+  id: string;
+  name: string;
+  enabled: boolean;
+  color: string;
+  showDriftVisualization: boolean;
+  parameters: JumpParameters;
+}
+
 export interface ExitPoint {
   location: LatLon;
   groupNumber: number;
@@ -48,7 +57,6 @@ export interface UserPreferences {
   units: Units;
   studentWindLimit: number; // m/s
   sportWindLimit: number; // m/s
-  showDriftVisualization: boolean;
 }
 
 export interface TerrainData {
