@@ -83,21 +83,22 @@ export const JumpParametersForm: React.FC = () => {
   const displayCanopyAirSpeed = convertSpeed(canopyAirSpeed, 'ms', userPreferences.units.speed);
 
   return (
-    <Paper elevation={2} sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6">
-          Jump Parameters
-        </Typography>
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<RestartAlt />}
-          onClick={handleResetToDefaults}
-          sx={{ textTransform: 'none' }}
-        >
-          Reset to Defaults
-        </Button>
-      </Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Paper elevation={2} sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6">
+            Jump Parameters
+          </Typography>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<RestartAlt />}
+            onClick={handleResetToDefaults}
+            sx={{ textTransform: 'none' }}
+          >
+            Reset to Defaults
+          </Button>
+        </Box>
 
       <Grid container spacing={3}>
         {/* Altitudes */}
@@ -321,80 +322,88 @@ export const JumpParametersForm: React.FC = () => {
           />
         </Grid>
 
-        {/* Landing Zone */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Landing Zone
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Latitude"
-            value={jumpParameters.landingZone.lat}
-            onChange={handleLocationChange('lat')}
-            type="number"
-            step="0.0001"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">°</InputAdornment>
-            }}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Longitude"
-            value={jumpParameters.landingZone.lon}
-            onChange={handleLocationChange('lon')}
-            type="number"
-            step="0.0001"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">°</InputAdornment>
-            }}
-          />
-        </Grid>
-
-        {/* Flight Direction */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Aircraft Flight Direction
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Flight Direction"
-            value={jumpParameters.flightDirection !== undefined ? jumpParameters.flightDirection.toFixed(1) : ''}
-            onChange={handleFlightDirectionChange}
-            placeholder="Auto (headwind)"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">°</InputAdornment>
-            }}
-            helperText="Leave empty for automatic headwind direction"
-          />
-        </Grid>
-
-        {/* Jump Time */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Jump Time
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DateTimePicker
-              label="Jump Date & Time"
-              value={jumpParameters.jumpTime}
-              onChange={handleDateChange}
-              slotProps={{ textField: { fullWidth: true } }}
-            />
-          </LocalizationProvider>
-        </Grid>
       </Grid>
-    </Paper>
+      </Paper>
+
+      {/* Location & Flight Direction Section */}
+      <Paper elevation={2} sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Location & Flight Direction
+        </Typography>
+        <Grid container spacing={3}>
+          {/* Landing Zone */}
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Landing Zone
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Latitude"
+              value={jumpParameters.landingZone.lat}
+              onChange={handleLocationChange('lat')}
+              type="number"
+              step="0.0001"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">°</InputAdornment>
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Longitude"
+              value={jumpParameters.landingZone.lon}
+              onChange={handleLocationChange('lon')}
+              type="number"
+              step="0.0001"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">°</InputAdornment>
+              }}
+            />
+          </Grid>
+
+          {/* Aircraft Flight Direction */}
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Aircraft Flight Direction
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Flight Direction"
+              value={jumpParameters.flightDirection !== undefined ? jumpParameters.flightDirection.toFixed(1) : ''}
+              onChange={handleFlightDirectionChange}
+              placeholder="Auto (headwind)"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">°</InputAdornment>
+              }}
+              helperText="Leave empty for automatic headwind direction"
+            />
+          </Grid>
+        </Grid>
+      </Paper>
+
+      {/* Jump Time Section */}
+      <Paper elevation={2} sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Jump Time
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DateTimePicker
+                label="Jump Date & Time"
+                value={jumpParameters.jumpTime}
+                onChange={handleDateChange}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
+            </LocalizationProvider>
+          </Grid>
+        </Grid>
+      </Paper>
+    </Box>
   );
 };
