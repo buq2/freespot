@@ -17,6 +17,7 @@ import './leaflet.css';
 interface MapViewProps {
   exitCalculation: ExitCalculationResult | null;
   groundWindData?: ForecastData;
+  primaryWeatherData?: ForecastData[] | null;
   isDrawingMode?: boolean;
   onFlightPathComplete?: (bearing: number) => void;
   onCancelDrawing?: () => void;
@@ -47,14 +48,14 @@ const MapController: React.FC<{ center: LatLng }> = ({ center }) => {
   return null;
 };
 
-// Calculate drift paths for visualization
+// Calculate drift paths for visualization using real weather data
 const calculateDriftPaths = (
   exitCalculation: ExitCalculationResult | null,
-  groundWindData: ForecastData | undefined,
+  primaryWeatherData: ForecastData[] | null,
   jumpParameters: JumpParameters,
   showDriftVisualization: boolean
 ) => {
-  if (!exitCalculation || !showDriftVisualization) {
+  if (!exitCalculation || !showDriftVisualization || !primaryWeatherData) {
     return [];
   }
 
@@ -62,26 +63,11 @@ const calculateDriftPaths = (
   
   for (const exitPoint of exitCalculation.exitPoints) {
     try {
-      // Get weather data (we'll need to fetch it - for now use a simple approach)
-      // This is a simplified approach - in a real implementation, we'd need the weather data
-      if (!groundWindData) continue;
+      // Use the same weather data and functions as optimal exit point calculation
       
-      // Create simplified weather data array for this visualization
-      // In reality, we'd need the full weather profile
-      const simpleWeatherData = [
-        // High altitude (jump level)
-        { altitude: jumpParameters.jumpAltitude, direction: groundWindData.direction, speed: groundWindData.speed * 1.5 },
-        // Mid altitude
-        { altitude: (jumpParameters.jumpAltitude + jumpParameters.openingAltitude) / 2, direction: groundWindData.direction, speed: groundWindData.speed * 1.2 },
-        // Opening altitude
-        { altitude: jumpParameters.openingAltitude, direction: groundWindData.direction, speed: groundWindData.speed },
-        // Ground level
-        { altitude: 0, direction: groundWindData.direction, speed: groundWindData.speed }
-      ];
-      
-      // Calculate freefall drift
+      // Calculate freefall drift using real weather data
       const freefallDrift = calculateFreefallDrift(
-        simpleWeatherData,
+        primaryWeatherData,
         jumpParameters.jumpAltitude,
         jumpParameters.openingAltitude,
         jumpParameters.freefallSpeed
@@ -90,15 +76,16 @@ const calculateDriftPaths = (
       // Position after freefall
       const openingPosition = movePoint(exitPoint.location, freefallDrift.driftVector);
       
-      // Calculate canopy drift (pure drift - no forward speed)
+      // Calculate canopy drift using real weather data
+      // Note: Using 0 forward speed to show pure wind drift (same as optimal exit point calculation)
       const canopyDrift = calculateCanopyDrift(
-        simpleWeatherData,
+        primaryWeatherData,
         jumpParameters.openingAltitude,
         jumpParameters.setupAltitude,
-        0, // no forward speed for this visualization
+        0, // no forward canopy speed - pure drift (consistent with optimal exit point calculation)
         jumpParameters.canopyDescentRate,
         jumpParameters.glideRatio,
-        0
+        0 // direction doesn't matter with 0 forward speed
       );
       
       // Final landing position
@@ -114,6 +101,7 @@ const calculateDriftPaths = (
       });
     } catch (error) {
       // Skip this path if calculation fails
+      console.warn(`Failed to calculate drift path for group ${exitPoint.groupNumber}:`, error);
       continue;
     }
   }
@@ -152,6 +140,7 @@ const getTileLayerConfig = (layerId: string) => {
 export const MapView: React.FC<MapViewProps> = ({ 
   exitCalculation, 
   groundWindData,
+  primaryWeatherData,
   isDrawingMode = false,
   onFlightPathComplete,
   onCancelDrawing,
@@ -219,8 +208,8 @@ export const MapView: React.FC<MapViewProps> = ({
     }
   })() : null;
 
-  // Calculate drift paths for visualization
-  const driftPaths = calculateDriftPaths(exitCalculation, groundWindData, jumpParameters, userPreferences.showDriftVisualization);
+  // Calculate drift paths for visualization using real weather data
+  const driftPaths = calculateDriftPaths(exitCalculation, primaryWeatherData, jumpParameters, userPreferences.showDriftVisualization);
 
   // Get tile layer configuration
   const tileConfig = getTileLayerConfig(mapLayer);

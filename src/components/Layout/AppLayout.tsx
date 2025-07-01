@@ -60,6 +60,7 @@ export const AppLayout: React.FC = () => {
   const [terrainElevation, setTerrainElevation] = useState<number>(0);
   const [exitCalculation, setExitCalculation] = useState<ExitCalculationResult | null>(null);
   const [groundWindData, setGroundWindData] = useState<ForecastData | undefined>();
+  const [primaryWeatherData, setPrimaryWeatherData] = useState<ForecastData[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +98,9 @@ export const AppLayout: React.FC = () => {
       // Use the first selected model for calculations
       const primaryModelData = results[selectedModels[0]];
       
+      // Store the primary weather data for drift path calculations
+      setPrimaryWeatherData(primaryModelData);
+      
       // Calculate exit points
       const exitResult = calculateExitPoints(jumpParameters, primaryModelData);
       setExitCalculation(exitResult);
@@ -112,6 +116,7 @@ export const AppLayout: React.FC = () => {
       setError(err instanceof Error ? err.message : 'Failed to calculate exit points');
       setExitCalculation(null);
       setGroundWindData(undefined);
+      setPrimaryWeatherData(null);
     } finally {
       setLoading(false);
       setInitialLoad(false);
@@ -376,6 +381,7 @@ export const AppLayout: React.FC = () => {
           <MapContainer
             exitCalculation={exitCalculation}
             groundWindData={groundWindData}
+            primaryWeatherData={primaryWeatherData}
             showControls={showMapControls}
           />
           

@@ -12,12 +12,14 @@ import type { ForecastData } from '../../types';
 interface MapContainerProps {
   exitCalculation: ExitCalculationResult | null;
   groundWindData?: ForecastData;
+  primaryWeatherData?: ForecastData[] | null;
   showControls?: boolean;
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({
   exitCalculation,
   groundWindData,
+  primaryWeatherData,
   showControls = true
 }) => {
   const { jumpParameters, setJumpParameters, customWeatherData } = useAppContext();
@@ -309,6 +311,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       <MapView
         exitCalculation={exitCalculation}
         groundWindData={groundWindData}
+        primaryWeatherData={primaryWeatherData}
         isDrawingMode={isDrawingMode}
         onFlightPathComplete={handleFlightPathComplete}
         onCancelDrawing={handleCancelDrawing}
