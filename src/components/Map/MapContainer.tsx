@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, Button, ButtonGroup, Paper, Typography, FormControlLabel, Switch, FormControl, InputLabel, Select, MenuItem, useTheme, useMediaQuery } from '@mui/material';
 import { Navigation, Edit, LocationOn, Explore } from '@mui/icons-material';
 import { MapView } from './MapView';
@@ -25,9 +25,12 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [isSettingLandingZone, setIsSettingLandingZone] = useState(false);
+  const [isOptimalDirectionMode, setIsOptimalDirectionMode] = useState(false);
   const [mapLayer, setMapLayer] = useState('osm');
 
   const handleFlightPathComplete = useCallback((bearing: number) => {
+    // Disable optimal direction mode when user manually sets direction
+    setIsOptimalDirectionMode(false);
     setJumpParameters({
       ...jumpParameters,
       flightDirection: Math.round(bearing * 10) / 10
@@ -36,13 +39,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   }, [jumpParameters, setJumpParameters]);
 
   const handleUseHeadwind = useCallback(() => {
+    setIsOptimalDirectionMode(false);
     setJumpParameters({
       ...jumpParameters,
       flightDirection: undefined
     });
   }, [jumpParameters, setJumpParameters]);
 
-  const handleSetOptimalFlightDirection = useCallback(async () => {
+  const calculateOptimalDirection = useCallback(async () => {
     try {
       // Use custom weather data if available, otherwise fetch weather data
       let weatherData = customWeatherData;
@@ -75,15 +79,34 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         optimalDirection = exitResult.aircraftHeading;
       }
       
-      setJumpParameters({
-        ...jumpParameters,
-        flightDirection: Math.round(optimalDirection * 10) / 10
+      const newFlightDirection = Math.round(optimalDirection * 10) / 10;
+      
+      // Only update if the value actually changed to prevent infinite loops
+      setJumpParameters(currentParams => {
+        if (currentParams.flightDirection === newFlightDirection) {
+          return currentParams; // No change needed
+        }
+        return {
+          ...currentParams,
+          flightDirection: newFlightDirection
+        };
       });
       
     } catch (error) {
       console.error('Failed to calculate optimal flight direction:', error);
     }
   }, [jumpParameters, setJumpParameters, customWeatherData]);
+
+  const handleToggleOptimalDirection = useCallback(() => {
+    if (isOptimalDirectionMode) {
+      // Turning off optimal direction mode
+      setIsOptimalDirectionMode(false);
+    } else {
+      // Turning on optimal direction mode
+      setIsOptimalDirectionMode(true);
+      calculateOptimalDirection();
+    }
+  }, [isOptimalDirectionMode, calculateOptimalDirection]);
 
   const handleCancelDrawing = useCallback(() => {
     setIsDrawingMode(false);
@@ -100,6 +123,40 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   const handleCancelLandingZone = useCallback(() => {
     setIsSettingLandingZone(false);
   }, []);
+
+  // Auto-recalculate optimal direction when parameters change
+  // We use useRef to track if we're currently calculating to prevent loops
+  const isCalculatingRef = useRef(false);
+  
+  // Disable optimal direction mode when "Fly directly over landing zone" is turned off
+  useEffect(() => {
+    if (isOptimalDirectionMode && !jumpParameters.flightOverLandingZone) {
+      setIsOptimalDirectionMode(false);
+    }
+  }, [isOptimalDirectionMode, jumpParameters.flightOverLandingZone]);
+  
+  useEffect(() => {
+    if (isOptimalDirectionMode && !isCalculatingRef.current && jumpParameters.flightOverLandingZone) {
+      isCalculatingRef.current = true;
+      calculateOptimalDirection().finally(() => {
+        isCalculatingRef.current = false;
+      });
+    }
+  }, [
+    isOptimalDirectionMode,
+    jumpParameters.jumpAltitude,
+    jumpParameters.openingAltitude,
+    jumpParameters.setupAltitude,
+    jumpParameters.freefallSpeed,
+    jumpParameters.canopyDescentRate,
+    jumpParameters.glideRatio,
+    jumpParameters.landingZone.lat,
+    jumpParameters.landingZone.lon,
+    jumpParameters.jumpTime,
+    jumpParameters.flightOverLandingZone,
+    customWeatherData,
+    calculateOptimalDirection
+  ]);
 
   return (
     <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
@@ -137,15 +194,25 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             <Button
               startIcon={<Navigation />}
               onClick={handleUseHeadwind}
-              variant={jumpParameters.flightDirection === undefined ? 'contained' : 'outlined'}
+              variant={jumpParameters.flightDirection === undefined && !isOptimalDirectionMode ? 'contained' : 'outlined'}
             >
               Auto Headwind
             </Button>
             <Button
               startIcon={<Explore />}
-              onClick={handleSetOptimalFlightDirection}
-              variant="outlined"
-              disabled={isDrawingMode || isSettingLandingZone}
+              onClick={handleToggleOptimalDirection}
+              variant={isOptimalDirectionMode ? 'contained' : 'outlined'}
+              color={isOptimalDirectionMode ? 'primary' : 'inherit'}
+              disabled={isDrawingMode || isSettingLandingZone || !jumpParameters.flightOverLandingZone}
+              sx={{
+                ...(isOptimalDirectionMode && {
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  }
+                })
+              }}
             >
               Optimal Direction
             </Button>
