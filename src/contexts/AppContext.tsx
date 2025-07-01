@@ -106,11 +106,11 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     color: '#FF9800', // Orange
     showDriftVisualization: false,
     parameters: {
-      jumpAltitude: 3000,
+      jumpAltitude: 4000,
       aircraftSpeed: 36,
-      freefallSpeed: 55.56,
-      openingAltitude: 1500,
-      canopyDescentRate: 8,
+      freefallSpeed: 50,
+      openingAltitude: 1200,
+      canopyDescentRate: 4,
       glideRatio: 2.0,
       setupAltitude: 100,
     },
@@ -122,11 +122,11 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     color: '#4CAF50', // Green
     showDriftVisualization: false,
     parameters: {
-      jumpAltitude: 3500,
+      jumpAltitude: 4000,
       aircraftSpeed: 36,
       freefallSpeed: 55.56,
-      openingAltitude: 1000,
-      canopyDescentRate: 7,
+      openingAltitude: 1400,
+      canopyDescentRate: 5,
       glideRatio: 2.2,
       setupAltitude: 100,
     },
