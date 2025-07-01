@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Grid,
   TextField,
@@ -7,16 +7,12 @@ import {
   Select,
   MenuItem,
   Typography,
-  Paper,
   Switch,
   FormControlLabel,
   InputAdornment,
   Divider,
-  Box,
-  IconButton,
-  Collapse,
 } from '@mui/material';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { CollapsibleSection } from '../Common/CollapsibleSection';
 import { useAppContext } from '../../contexts/AppContext';
 import { useResponsive } from '../../hooks/useResponsive';
 import type { Units } from '../../types';
@@ -24,7 +20,6 @@ import type { Units } from '../../types';
 export const UserPreferencesForm: React.FC = () => {
   const { userPreferences, setUserPreferences } = useAppContext();
   const responsive = useResponsive();
-  const [expanded, setExpanded] = useState(false);
 
   const handleUnitsChange = (unitType: keyof Units) => (event: React.ChangeEvent<{ value: unknown }>) => {
     setUserPreferences({
@@ -47,30 +42,12 @@ export const UserPreferencesForm: React.FC = () => {
 
 
   return (
-    <Paper elevation={2} sx={{ mb: 3 }}>
-      <Box sx={{ p: 2 }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h6">
-              User Preferences
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Units, wind limits, and display preferences
-            </Typography>
-          </Box>
-          <IconButton
-            size="small"
-            onClick={() => setExpanded(!expanded)}
-          >
-            {expanded ? <ExpandLess /> : <ExpandMore />}
-          </IconButton>
-        </Box>
-
-        {/* Collapsible Content */}
-        <Collapse in={expanded}>
-          <Box sx={{ mt: 2 }}>
-            <Grid container spacing={responsive.spacing.gap}>
+    <CollapsibleSection
+      title="User Preferences"
+      subtitle="Units, wind limits, and display preferences"
+      defaultExpanded={false}
+    >
+      <Grid container spacing={responsive.spacing.gap}>
         {/* Units */}
         <Grid item xs={12}>
           <Typography variant="subtitle2" color="textSecondary" gutterBottom>
@@ -164,10 +141,7 @@ export const UserPreferencesForm: React.FC = () => {
         </Grid>
 
 
-            </Grid>
-          </Box>
-        </Collapse>
-      </Box>
-    </Paper>
+      </Grid>
+    </CollapsibleSection>
   );
 };

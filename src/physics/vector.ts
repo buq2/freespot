@@ -5,8 +5,24 @@ export interface Vector2D {
   y: number; // North-South component (positive = North)
 }
 
-// Convert wind direction and speed to vector components
-// Wind direction is where the wind is coming FROM (meteorological convention)
+/**
+ * Converts wind direction and speed to vector components.
+ * 
+ * Uses meteorological convention where wind direction is where the wind is
+ * coming FROM (e.g., 270° wind comes from the west, blowing toward the east).
+ * The resulting vector represents the wind effect on a falling object.
+ * 
+ * @param direction - Wind direction in degrees (where wind comes FROM)
+ * @param speed - Wind speed in m/s
+ * @returns Vector with x=East component, y=North component
+ * 
+ * @example
+ * ```typescript
+ * // 270° wind at 10 m/s (west wind)
+ * const windVector = windToVector(270, 10);
+ * // Result: { x: 10, y: 0 } - pushes objects eastward
+ * ```
+ */
 export const windToVector = (direction: number, speed: number): Vector2D => {
   // Convert from "coming from" to "going to" by adding 180°
   const radians = (direction + 180) * Math.PI / 180;
@@ -16,7 +32,21 @@ export const windToVector = (direction: number, speed: number): Vector2D => {
   };
 };
 
-// Convert vector components back to wind direction and speed
+/**
+ * Converts vector components back to wind direction and speed.
+ * 
+ * Converts a drift vector back to meteorological wind notation
+ * (direction is where wind comes FROM).
+ * 
+ * @param vector - Wind vector with x=East, y=North components
+ * @returns Object with direction (degrees) and speed (m/s)
+ * 
+ * @example
+ * ```typescript
+ * const wind = vectorToWind({ x: 10, y: 0 });
+ * // Result: { direction: 270, speed: 10 } - west wind at 10 m/s
+ * ```
+ */
 export const vectorToWind = (vector: Vector2D): { direction: number; speed: number } => {
   const speed = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
   

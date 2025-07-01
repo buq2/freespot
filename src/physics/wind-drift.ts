@@ -9,7 +9,39 @@ export interface DriftResult {
   timeInAir: number; // seconds
 }
 
-// Calculate wind drift during freefall
+/**
+ * Calculates wind drift during freefall using Simpson's rule integration.
+ * 
+ * This function integrates wind effects over the entire freefall phase,
+ * accounting for varying wind conditions at different altitudes. Uses
+ * Simpson's rule for accurate numerical integration of the drift vector.
+ * 
+ * The calculation assumes:
+ * - Constant freefall speed (terminal velocity)
+ * - Linear wind interpolation between data points
+ * - No horizontal acceleration (wind affects position, not speed)
+ * 
+ * @param weatherData - Array of weather data sorted by altitude (ascending)
+ * @param startAltitude - Altitude where freefall begins (meters AGL)
+ * @param endAltitude - Altitude where parachute opens (meters AGL)
+ * @param freefallSpeed - Terminal velocity during freefall (m/s)
+ * @returns Drift result with total displacement vector and time
+ * 
+ * @throws {Error} If altitudes are invalid or weather data is insufficient
+ * 
+ * @example
+ * ```typescript
+ * const drift = calculateFreefallDrift(
+ *   weatherData,
+ *   4000,  // Jump at 4000m AGL
+ *   800,   // Open at 800m AGL
+ *   55.56  // 200 km/h terminal velocity
+ * );
+ * 
+ * console.log(`Drift: ${drift.driftVector.x}m east, ${drift.driftVector.y}m north`);
+ * console.log(`Freefall time: ${drift.timeInAir}s`);
+ * ```
+ */
 export const calculateFreefallDrift = (
   weatherData: ForecastData[],
   startAltitude: number, // AGL in meters
@@ -57,7 +89,40 @@ export const calculateFreefallDrift = (
   };
 };
 
-// Calculate wind drift under canopy
+/**
+ * Calculates wind drift and canopy flight path during the canopy phase.
+ * 
+ * This function models the complex interaction between:
+ * - Canopy airspeed and ground speed
+ * - Wind effects at different altitudes
+ * - Canopy glide performance
+ * - Pilot input (flight direction)
+ * 
+ * The calculation uses Simpson's rule integration to account for varying
+ * wind conditions throughout the descent under canopy.
+ * 
+ * @param weatherData - Weather data array sorted by altitude
+ * @param startAltitude - Altitude where canopy opens (meters AGL)
+ * @param targetAltitude - Target landing altitude (meters AGL, usually 0)
+ * @param canopyAirSpeed - Forward airspeed of canopy (m/s)
+ * @param canopyDescentRate - Vertical descent rate (m/s)
+ * @param glideRatio - Canopy glide ratio (horizontal:vertical)
+ * @param desiredDirection - Desired flight direction in degrees (0=North)
+ * @returns Drift result with ground track vector and flight time
+ * 
+ * @example
+ * ```typescript
+ * const canopyDrift = calculateCanopyDrift(
+ *   weatherData,
+ *   800,    // Open at 800m AGL
+ *   0,      // Land at ground level
+ *   13.4,   // Canopy airspeed
+ *   6,      // Descent rate
+ *   2.5,    // Glide ratio
+ *   270     // Fly west
+ * );
+ * ```
+ */
 export const calculateCanopyDrift = (
   weatherData: ForecastData[],
   startAltitude: number, // AGL in meters

@@ -17,7 +17,35 @@ export interface ExitCalculationResult {
 }
 
 
-// Calculate optimal exit point using pure drift method
+/**
+ * Calculates the optimal exit point for skydiving based on wind drift compensation.
+ * Uses pure drift method to account for both freefall and canopy drift.
+ * 
+ * This function determines where skydivers should exit the aircraft so that after
+ * accounting for wind drift during freefall and under canopy, they will land at
+ * the specified landing zone.
+ * 
+ * @param landingZone - Target landing coordinates
+ * @param weatherData - Array of weather data at different altitudes, sorted by altitude
+ * @param params - Complete jump parameters including altitudes, speeds, and canopy characteristics
+ * @returns Calculated optimal exit point coordinates
+ * 
+ * @example
+ * ```typescript
+ * const exitPoint = calculateOptimalExitPoint(
+ *   { lat: 61.7807, lon: 22.7221 },
+ *   weatherData,
+ *   {
+ *     jumpAltitude: 4000,
+ *     openingAltitude: 800,
+ *     freefallSpeed: 55.56,
+ *     canopyDescentRate: 6,
+ *     glideRatio: 2.5,
+ *     // ... other parameters
+ *   }
+ * );
+ * ```
+ */
 const calculateOptimalExitPoint = (
   landingZone: LatLon,
   weatherData: ForecastData[],
@@ -141,6 +169,43 @@ const validateParameters = (params: FullJumpParameters): string | null => {
 };
 
 // Calculate exit points for multiple groups
+/**
+ * Calculates exit points for multiple jump groups with optimal spacing and timing.
+ * 
+ * This is the main calculation function that determines:
+ * - Optimal exit point for the middle group
+ * - Individual exit points for each group with proper spacing
+ * - Aircraft heading for optimal wind conditions
+ * - Safety radius for emergency landings
+ * 
+ * The calculation ensures that all groups have equal flight time under canopy
+ * to reach the landing zone, accounting for wind conditions at all altitudes.
+ * 
+ * @param params - Complete jump parameters including all profiles and common settings
+ * @param weatherData - Weather forecast data with wind conditions at different altitudes
+ * @returns Complete calculation result with exit points, heading, and safety information
+ * 
+ * @throws {Error} If parameters are invalid or calculation fails
+ * 
+ * @example
+ * ```typescript
+ * const result = calculateExitPoints(
+ *   {
+ *     jumpAltitude: 4000,
+ *     openingAltitude: 800,
+ *     numberOfGroups: 5,
+ *     timeBetweenGroups: 10,
+ *     landingZone: { lat: 61.7807, lon: 22.7221 },
+ *     // ... other parameters
+ *   },
+ *   weatherData
+ * );
+ * 
+ * console.log(`Optimal exit: ${result.optimalExitPoint.lat}, ${result.optimalExitPoint.lon}`);
+ * console.log(`Aircraft heading: ${result.aircraftHeading}°`);
+ * console.log(`Safety radius: ${result.safetyRadius}m`);
+ * ```
+ */
 export const calculateExitPoints = (
   params: FullJumpParameters,
   weatherData: ForecastData[]

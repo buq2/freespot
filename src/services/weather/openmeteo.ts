@@ -49,7 +49,27 @@ const interpolateLinear = (lower: number, upper: number, ratio: number): number 
   return lower + (upper - lower) * ratio;
 };
 
-// Circular interpolation for angles (0-360 degrees)
+/**
+ * Performs circular interpolation for wind direction angles (0-360 degrees).
+ * 
+ * This function correctly handles the circular nature of compass directions,
+ * ensuring that interpolation between 350° and 10° goes through 0° rather
+ * than taking the long way around through 180°.
+ * 
+ * @param lower - Starting angle in degrees (0-360)
+ * @param upper - Ending angle in degrees (0-360)
+ * @param ratio - Interpolation ratio (0-1)
+ * @returns Interpolated angle in degrees (0-360)
+ * 
+ * @example
+ * ```typescript
+ * // Normal interpolation: 90° to 180° at 50%
+ * interpolateCircular(90, 180, 0.5); // Returns 135°
+ * 
+ * // Circular interpolation: 350° to 10° at 50%
+ * interpolateCircular(350, 10, 0.5); // Returns 0° (not 180°)
+ * ```
+ */
 const interpolateCircular = (lower: number, upper: number, ratio: number): number => {
   // Normalize angles to 0-360
   lower = ((lower % 360) + 360) % 360;
@@ -225,6 +245,32 @@ export const getAvailableAltitudeLevels = async (
   return allLevels.filter(alt => alt >= 0).sort((a, b) => a - b);
 };
 
+/**
+ * Fetches comprehensive weather data from OpenMeteo API for skydiving calculations.
+ * 
+ * This function retrieves wind data at multiple altitude levels (both height-based
+ * and pressure-based) and combines them into a complete atmospheric profile.
+ * Also fetches terrain elevation to convert pressure levels from MSL to AGL.
+ * 
+ * @param location - Geographic coordinates for weather data
+ * @param modelId - Weather model to use ('best_match', 'gfs_global', 'icon_eu', 'ecmwf_ifs04')
+ * @param date - Target date and time for the forecast
+ * @returns Promise containing weather data array and terrain elevation
+ * 
+ * @throws {Error} If API request fails or returns invalid data
+ * 
+ * @example
+ * ```typescript
+ * const { data, terrainElevation } = await fetchWeatherData(
+ *   { lat: 61.7807, lon: 22.7221 },
+ *   'gfs_global',
+ *   new Date('2024-07-01T12:00:00Z')
+ * );
+ * 
+ * console.log(`Found ${data.length} altitude levels`);
+ * console.log(`Terrain elevation: ${terrainElevation}m`);
+ * ```
+ */
 export const fetchWeatherData = async (
   location: LatLon,
   modelId: string,
@@ -291,7 +337,37 @@ export const fetchTerrainElevation = async (location: LatLon): Promise<number> =
   return data.elevation[0] || 0;
 };
 
-// Interpolate weather data for altitudes between measured levels
+/**
+ * Interpolates weather data for altitudes between measured levels using linear interpolation.
+ * 
+ * This function provides smooth transitions between discrete weather measurement points,
+ * essential for accurate drift calculations at any altitude. Uses circular interpolation
+ * for wind direction to handle the 0°/360° boundary correctly.
+ * 
+ * The interpolation logic:
+ * - Returns nearest data point if target is outside the range
+ * - Uses linear interpolation for wind speed, temperature, and gust speed
+ * - Uses circular interpolation for wind direction to handle angle wraparound
+ * 
+ * @param data - Array of weather forecast data sorted by altitude (ascending)
+ * @param targetAltitude - Desired altitude for interpolation (meters AGL)
+ * @returns Interpolated weather data at the target altitude
+ * 
+ * @throws {Error} If data array is empty or not properly sorted
+ * 
+ * @example
+ * ```typescript
+ * const weatherAt1500m = interpolateWeatherData(
+ *   [
+ *     { altitude: 1000, speed: 10, direction: 270 },
+ *     { altitude: 2000, speed: 15, direction: 280 }
+ *   ],
+ *   1500  // Interpolate at 1500m
+ * );
+ * 
+ * // Result: { altitude: 1500, speed: 12.5, direction: 275 }
+ * ```
+ */
 export const interpolateWeatherData = (
   data: ForecastData[],
   targetAltitude: number
