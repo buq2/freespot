@@ -7,7 +7,11 @@ import {
   InputAdornment,
   Switch,
   FormControlLabel,
+  IconButton,
+  Stack,
+  Tooltip,
 } from '@mui/material';
+import { Add, Remove, Schedule } from '@mui/icons-material';
 import { CollapsibleSection } from '../Common/CollapsibleSection';
 import { CoordinateField } from '../Common/FormFields';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -35,6 +39,30 @@ export const CommonParametersForm: React.FC = () => {
     if (date) {
       updateCommonParameter('jumpTime', date);
     }
+  };
+
+  // Time control handlers
+  const handleTimeIncrement = () => {
+    const newTime = new Date(commonParameters.jumpTime);
+    newTime.setHours(newTime.getHours() + 1);
+    updateCommonParameter('jumpTime', newTime);
+  };
+
+  const handleTimeDecrement = () => {
+    const newTime = new Date(commonParameters.jumpTime);
+    newTime.setHours(newTime.getHours() - 1);
+    updateCommonParameter('jumpTime', newTime);
+  };
+
+  const handleSetToNow = () => {
+    const now = new Date();
+    // Round to nearest hour
+    const roundedTime = new Date(now);
+    roundedTime.setMinutes(0, 0, 0); // Set minutes, seconds, milliseconds to 0
+    if (now.getMinutes() >= 30) {
+      roundedTime.setHours(roundedTime.getHours() + 1); // Round up if past 30 minutes
+    }
+    updateCommonParameter('jumpTime', roundedTime);
   };
 
   const handleFlightOverLandingZoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,6 +204,68 @@ export const CommonParametersForm: React.FC = () => {
               }}
             />
           </LocalizationProvider>
+        </Grid>
+
+        {/* Time Control Buttons */}
+        <Grid item xs={12} sm={6}>
+          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <Stack direction="row" spacing={1} sx={{ width: '100%', justifyContent: 'center' }}>
+              <Tooltip title="Subtract 1 hour">
+                <IconButton 
+                  onClick={handleTimeDecrement}
+                  size="small"
+                  color="primary"
+                  sx={{ 
+                    border: 1, 
+                    borderColor: 'primary.main',
+                    '&:hover': { 
+                      backgroundColor: 'primary.main', 
+                      color: 'white' 
+                    }
+                  }}
+                >
+                  <Remove />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="Set to current time (rounded to nearest hour)">
+                <IconButton 
+                  onClick={handleSetToNow}
+                  size="small"
+                  color="primary"
+                  sx={{ 
+                    border: 1, 
+                    borderColor: 'primary.main',
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                    '&:hover': { 
+                      backgroundColor: 'primary.dark' 
+                    }
+                  }}
+                >
+                  <Schedule />
+                </IconButton>
+              </Tooltip>
+              
+              <Tooltip title="Add 1 hour">
+                <IconButton 
+                  onClick={handleTimeIncrement}
+                  size="small"
+                  color="primary"
+                  sx={{ 
+                    border: 1, 
+                    borderColor: 'primary.main',
+                    '&:hover': { 
+                      backgroundColor: 'primary.main', 
+                      color: 'white' 
+                    }
+                  }}
+                >
+                  <Add />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Box>
         </Grid>
       </Grid>
     </CollapsibleSection>
