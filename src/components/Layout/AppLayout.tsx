@@ -17,7 +17,7 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import { Settings, Map as MapIcon, CloudDownload, Menu, Close, ChevronLeft, Fullscreen, FullscreenExit } from '@mui/icons-material';
+import { Settings, Map as MapIcon, CloudDownload, Menu, Close, ChevronLeft, Tune } from '@mui/icons-material';
 import { useAppContext } from '../../contexts/AppContext';
 import { JumpParametersForm, UserPreferencesForm, WeatherModelSelector } from '../Parameters';
 import { WeatherTable, WindCompass } from '../Weather';
@@ -65,7 +65,7 @@ export const AppLayout: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
-  const [isFullScreenMap, setIsFullScreenMap] = useState(false);
+  const [showMapControls, setShowMapControls] = useState(!isMobile);
   
   const drawerWidth = 400; // Fixed width for drawer
 
@@ -135,10 +135,14 @@ export const AppLayout: React.FC = () => {
       {/* App Bar */}
       <AppBar 
         position="fixed" 
-        elevation={1} 
+        elevation={0} 
         sx={{ 
           zIndex: theme.zIndex.drawer + 1,
-          display: isFullScreenMap && isMobile ? 'none' : 'block'
+          backgroundColor: 'rgba(255, 255, 255, 0.3)',
+          backdropFilter: 'blur(8px)',
+          color: 'rgba(0, 0, 0, 0.87)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+          pointerEvents: 'none' // Make the AppBar click-through
         }}
       >
         <Toolbar>
@@ -149,7 +153,8 @@ export const AppLayout: React.FC = () => {
             sx={{ 
               mr: 2,
               minWidth: 48,
-              minHeight: 48 // Improve touch target
+              minHeight: 48, // Improve touch target
+              pointerEvents: 'auto' // Make button clickable
             }}
             aria-label={drawerOpen ? "Close menu" : "Open menu"}
           >
@@ -163,24 +168,26 @@ export const AppLayout: React.FC = () => {
             FreeSpot
           </Typography>
 
-          {/* Full Screen Toggle for Mobile */}
+          {/* Map Controls Toggle for Mobile */}
           {isMobile && (
             <IconButton
               color="inherit"
-              onClick={() => setIsFullScreenMap(!isFullScreenMap)}
+              onClick={() => setShowMapControls(!showMapControls)}
               sx={{ 
                 mr: 1,
                 minWidth: 48,
-                minHeight: 48
+                minHeight: 48,
+                pointerEvents: 'auto' // Make button clickable
               }}
-              aria-label={isFullScreenMap ? "Exit fullscreen map" : "Enter fullscreen map"}
+              aria-label={showMapControls ? "Hide map controls" : "Show map controls"}
             >
-              {isFullScreenMap ? <FullscreenExit /> : <Fullscreen />}
+              <Tune />
             </IconButton>
           )}
 
+
           {loading && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pointerEvents: 'none' }}>
               <CircularProgress size={20} color="inherit" />
               <Typography 
                 variant="body2" 
@@ -198,7 +205,7 @@ export const AppLayout: React.FC = () => {
       <Drawer
         variant={isMobile ? "temporary" : "persistent"}
         anchor="left"
-        open={drawerOpen && !(isMobile && isFullScreenMap)}
+        open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         sx={{
           width: isMobile ? '100%' : drawerWidth,
@@ -207,7 +214,7 @@ export const AppLayout: React.FC = () => {
           '& .MuiDrawer-paper': {
             width: isMobile ? '100%' : drawerWidth,
             boxSizing: 'border-box',
-            pt: isFullScreenMap && isMobile ? 0 : 8, // Account for app bar unless fullscreen
+            pt: 8, // Account for app bar
             zIndex: theme.zIndex.drawer,
             // Add better backdrop for mobile
             '& .MuiBackdrop-root': {
@@ -337,7 +344,7 @@ export const AppLayout: React.FC = () => {
         component="main"
         sx={{
           position: 'fixed',
-          top: isFullScreenMap && isMobile ? 0 : '64px',
+          top: 0,
           left: 0,
           right: 0,
           bottom: 0,
@@ -368,48 +375,8 @@ export const AppLayout: React.FC = () => {
           <MapContainer
             exitCalculation={exitCalculation}
             groundWindData={groundWindData}
+            showControls={showMapControls}
           />
-          
-          {/* Mobile Fullscreen Controls */}
-          {isMobile && isFullScreenMap && (
-            <>
-              {/* Menu FAB */}
-              <Fab
-                color="primary"
-                size="medium"
-                onClick={() => setDrawerOpen(true)}
-                sx={{
-                  position: 'absolute',
-                  top: 16,
-                  left: 16,
-                  zIndex: 1000,
-                  minWidth: 56,
-                  minHeight: 56
-                }}
-                aria-label="Open menu"
-              >
-                <Menu />
-              </Fab>
-              
-              {/* Exit Fullscreen FAB */}
-              <Fab
-                color="secondary"
-                size="small"
-                onClick={() => setIsFullScreenMap(false)}
-                sx={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  zIndex: 1000,
-                  minWidth: 48,
-                  minHeight: 48
-                }}
-                aria-label="Exit fullscreen"
-              >
-                <FullscreenExit />
-              </Fab>
-            </>
-          )}
           
           {/* Loading Overlay */}
           {initialLoad && loading && (

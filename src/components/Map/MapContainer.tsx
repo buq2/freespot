@@ -9,11 +9,13 @@ import type { ForecastData } from '../../types';
 interface MapContainerProps {
   exitCalculation: ExitCalculationResult | null;
   groundWindData?: ForecastData;
+  showControls?: boolean;
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({
   exitCalculation,
-  groundWindData
+  groundWindData,
+  showControls = true
 }) => {
   const { jumpParameters, setJumpParameters } = useAppContext();
   const theme = useTheme();
@@ -56,18 +58,19 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   return (
     <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
       {/* Map controls overlay */}
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          position: 'absolute', 
-          top: 16, 
-          right: 16, 
-          zIndex: theme.zIndex.speedDial, // Use proper Material-UI z-index
-          p: isMobile ? 1.5 : 2,
-          maxWidth: isMobile ? '90vw' : '400px',
-          pointerEvents: 'auto'
-        }}
-      >
+      {showControls && (
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            position: 'absolute', 
+            top: 80, // Moved below app bar (65px) with some spacing
+            right: 16, 
+            zIndex: theme.zIndex.speedDial, // Use proper Material-UI z-index
+            p: isMobile ? 1.5 : 2,
+            maxWidth: isMobile ? '90vw' : '400px',
+            pointerEvents: 'auto'
+          }}
+        >
         <Box sx={{ 
           display: 'flex', 
           gap: 1, 
@@ -178,7 +181,8 @@ export const MapContainer: React.FC<MapContainerProps> = ({
             Flight direction: {Math.round(jumpParameters.flightDirection)}°
           </Typography>
         )}
-      </Paper>
+        </Paper>
+      )}
 
       {/* Full Screen Map */}
       <MapView
