@@ -19,14 +19,14 @@ interface AppContextType {
 
 const defaultJumpParameters: JumpParameters = {
   jumpAltitude: 4000, // meters
-  aircraftSpeed: 50, // m/s (180 km/h)
+  aircraftSpeed: 36, // m/s (130 km/h)
   freefallSpeed: 55.56, // m/s (200 km/h)
-  openingAltitude: 1000, // meters
+  openingAltitude: 800, // meters
   canopyDescentRate: 6, // m/s
   glideRatio: 2.5, // This gives us ~16.1 m/s canopy air speed (sqrt(6^2 + (6*2.5)^2) = sqrt(36 + 225))
   setupAltitude: 100, // meters AGL - default to 100m for pattern work
-  numberOfGroups: 1,
-  timeBetweenGroups: 6, // seconds
+  numberOfGroups: 5,
+  timeBetweenGroups: 10, // seconds
   landingZone: { lat: 61.7807, lon: 22.7221 },
   flightDirection: undefined, // headwind
   flightOverLandingZone: false, // default to normal offset exit
