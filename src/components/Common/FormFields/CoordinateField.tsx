@@ -1,5 +1,6 @@
 import React from 'react';
 import { TextField, InputAdornment } from '@mui/material';
+import { useFormField, validators } from '../../../hooks/useFormField';
 
 interface CoordinateFieldProps extends Omit<React.ComponentProps<typeof TextField>, 'value' | 'onChange' | 'type'> {
   /** The coordinate value */
@@ -30,21 +31,28 @@ export const CoordinateField: React.FC<CoordinateFieldProps> = ({
   coordinateType,
   ...textFieldProps
 }) => {
+  // Use the enhanced useFormField hook with coordinate validation
+  const field = useFormField({
+    initialValue: value,
+    validator: coordinateType === 'latitude' ? validators.latitude : validators.longitude,
+    validateOnBlur: true,
+    transform: (val: number) => {
+      // Ensure the value is a valid number and round to 4 decimal places
+      const num = isNaN(val) ? 0 : val;
+      return Math.round(num * 10000) / 10000;
+    }
+  });
+
+  // Sync external value changes with field state
+  React.useEffect(() => {
+    if (value !== field.value) {
+      field.setValue(value);
+    }
+  }, [value]);
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = parseFloat(event.target.value);
-    
-    // Handle empty input
-    if (isNaN(newValue)) {
-      newValue = 0;
-    }
-    
-    // Apply coordinate-specific constraints
-    if (coordinateType === 'latitude') {
-      newValue = Math.max(-90, Math.min(90, newValue));
-    } else if (coordinateType === 'longitude') {
-      newValue = Math.max(-180, Math.min(180, newValue));
-    }
-    
+    const newValue = parseFloat(event.target.value) || 0;
+    field.handleChange(newValue);
     onChange(newValue);
   };
 
@@ -62,9 +70,12 @@ export const CoordinateField: React.FC<CoordinateFieldProps> = ({
   return (
     <TextField
       {...textFieldProps}
-      value={value.toFixed(4)}
+      value={field.value.toFixed(4)}
       onChange={handleChange}
+      onBlur={field.handleBlur}
       type="number"
+      error={field.touched && !!field.error}
+      helperText={field.touched && field.error ? field.error : textFieldProps.helperText}
       inputProps={{
         ...constraints,
         ...textFieldProps.inputProps,
