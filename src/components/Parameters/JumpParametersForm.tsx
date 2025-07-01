@@ -111,21 +111,23 @@ export const JumpParametersForm: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Reset Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<RestartAlt />}
+          onClick={handleResetToDefaults}
+          sx={{ textTransform: 'none' }}
+        >
+          Reset to Defaults
+        </Button>
+      </Box>
+
       <Paper elevation={2} sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">
-            Jump Parameters
-          </Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<RestartAlt />}
-            onClick={handleResetToDefaults}
-            sx={{ textTransform: 'none' }}
-          >
-            Reset to Defaults
-          </Button>
-        </Box>
+        <Typography variant="h6" gutterBottom>
+          Jump Parameters
+        </Typography>
 
       <Grid container spacing={3}>
         {/* Altitudes */}
@@ -318,38 +320,40 @@ export const JumpParametersForm: React.FC = () => {
           />
         </Grid>
 
-        {/* Groups */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Jump Groups
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Number of Groups"
-            value={jumpParameters.numberOfGroups}
-            onChange={handleNumberChange('numberOfGroups')}
-            type="number"
-            inputProps={{ min: 1, max: 10 }}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Time Between Groups"
-            value={jumpParameters.timeBetweenGroups}
-            onChange={handleNumberChange('timeBetweenGroups')}
-            type="number"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">sec</InputAdornment>
-            }}
-          />
-        </Grid>
 
       </Grid>
+      </Paper>
+
+      {/* Jump Groups Section */}
+      <Paper elevation={2} sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Jump Groups
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Number of Groups"
+              value={jumpParameters.numberOfGroups}
+              onChange={handleNumberChange('numberOfGroups')}
+              type="number"
+              inputProps={{ min: 1, max: 10 }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Time Between Groups"
+              value={jumpParameters.timeBetweenGroups}
+              onChange={handleNumberChange('timeBetweenGroups')}
+              type="number"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">sec</InputAdornment>
+              }}
+            />
+          </Grid>
+        </Grid>
       </Paper>
 
       {/* Location & Flight Direction Section */}
