@@ -59,7 +59,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const AppLayout: React.FC = () => {
-  const { profiles, customWeatherData } = useAppContext();
+  const { profiles, commonParameters, customWeatherData } = useAppContext();
   
   // Get enabled profiles for calculations
   const enabledProfiles = profiles.filter(p => p.enabled);
@@ -103,8 +103,8 @@ export const AppLayout: React.FC = () => {
         return;
       }
 
-      // Use the primary profile's location and time for weather data
-      const referenceParams = primaryProfile.parameters;
+      // Use common parameters for weather data location and time
+      const referenceParams = commonParameters;
       
       // Fetch weather data for all selected models
       const results = await fetchMultipleModels(
@@ -128,8 +128,14 @@ export const AppLayout: React.FC = () => {
       
       for (const profile of enabledProfiles) {
         try {
+          // Combine common parameters with profile-specific parameters
+          const fullParameters = {
+            ...commonParameters,
+            ...profile.parameters
+          };
+          
           // Calculate exit points for this profile
-          const exitResult = calculateExitPoints(profile.parameters, primaryModelData);
+          const exitResult = calculateExitPoints(fullParameters, primaryModelData);
           
           // Get ground wind data
           const groundWind = getWindDataAtAltitude(primaryModelData, 10); // 10m AGL
@@ -157,19 +163,19 @@ export const AppLayout: React.FC = () => {
       setLoading(false);
       setInitialLoad(false);
     }
-  }, [profiles, selectedModels, customWeatherData]);
+  }, [profiles, commonParameters, selectedModels, customWeatherData]);
 
   // Auto-calculate when parameters change
   useEffect(() => {
     // Only calculate if we have selected models, enabled profiles, and a valid landing zone
-    if (selectedModels.length > 0 && enabledProfiles.length > 0 && primaryProfile?.parameters.landingZone.lat && primaryProfile?.parameters.landingZone.lon) {
+    if (selectedModels.length > 0 && enabledProfiles.length > 0 && commonParameters.landingZone.lat && commonParameters.landingZone.lon) {
       const delayDebounce = setTimeout(() => {
         handleCalculate();
       }, 500); // 500ms debounce to avoid too many API calls
 
       return () => clearTimeout(delayDebounce);
     }
-  }, [profiles, selectedModels, customWeatherData, handleCalculate]);
+  }, [profiles, commonParameters, selectedModels, customWeatherData, handleCalculate]);
 
   return (
     <Box sx={{ height: '100vh', overflow: 'hidden' }}>
@@ -369,7 +375,7 @@ export const AppLayout: React.FC = () => {
                           data={modelData}
                           modelName={modelName}
                           terrainElevation={terrainElevation}
-                          jumpTime={primaryProfile?.parameters.jumpTime || new Date()}
+                          jumpTime={commonParameters.jumpTime}
                         />
                       </Box>
                     );

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { JumpParameters, JumpProfile, UserPreferences, LatLon, TerrainData, CachedLocationData, ForecastData } from '../types';
+import type { JumpParameters, CommonParameters, FullJumpParameters, JumpProfile, UserPreferences, LatLon, TerrainData, CachedLocationData, ForecastData } from '../types';
 
 interface AppContextType {
   profiles: JumpProfile[];
@@ -8,6 +8,8 @@ interface AppContextType {
   addProfile: (profile: Omit<JumpProfile, 'id'>) => void;
   updateProfile: (id: string, updates: Partial<JumpProfile>) => void;
   deleteProfile: (id: string) => void;
+  commonParameters: CommonParameters;
+  setCommonParameters: (params: CommonParameters) => void;
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
   weatherCache: CachedLocationData[];
@@ -19,8 +21,8 @@ interface AppContextType {
   customWeatherData: ForecastData[] | null;
   setCustomWeatherData: (data: ForecastData[] | null) => void;
   // Backward compatibility
-  jumpParameters: JumpParameters;
-  setJumpParameters: (params: JumpParameters) => void;
+  jumpParameters: FullJumpParameters;
+  setJumpParameters: (params: FullJumpParameters) => void;
 }
 
 // Helper function to round time to nearest hour
@@ -48,12 +50,20 @@ export const defaultJumpParameters: JumpParameters = {
   canopyDescentRate: 6, // m/s
   glideRatio: 2.5, // This gives us ~16.1 m/s canopy air speed (sqrt(6^2 + (6*2.5)^2) = sqrt(36 + 225))
   setupAltitude: 100, // meters AGL - default to 100m for pattern work
-  numberOfGroups: 5,
-  timeBetweenGroups: 10, // seconds
+};
+
+export const defaultCommonParameters: CommonParameters = {
   landingZone: { lat: 61.7807, lon: 22.7221 },
   flightDirection: undefined, // headwind
   flightOverLandingZone: false, // default to normal offset exit
   jumpTime: roundToNearestHour(new Date()),
+  numberOfGroups: 5,
+  timeBetweenGroups: 10, // seconds
+};
+
+export const defaultFullJumpParameters: FullJumpParameters = {
+  ...defaultJumpParameters,
+  ...defaultCommonParameters,
 };
 
 export const defaultUserPreferences: UserPreferences = {
@@ -72,7 +82,7 @@ const generateProfileId = (): string => {
 };
 
 // Default profile templates
-export const createDefaultProfiles = (landingZone: LatLon): JumpProfile[] => [
+export const createDefaultProfiles = (): JumpProfile[] => [
   {
     id: 'sport_jumpers',
     name: 'Sport Jumpers',
@@ -80,12 +90,13 @@ export const createDefaultProfiles = (landingZone: LatLon): JumpProfile[] => [
     color: '#2196F3', // Blue
     showDriftVisualization: true,
     parameters: {
-      ...defaultJumpParameters,
-      landingZone,
       jumpAltitude: 4000,
+      aircraftSpeed: 36,
+      freefallSpeed: 55.56,
       openingAltitude: 800,
       canopyDescentRate: 6,
       glideRatio: 2.5,
+      setupAltitude: 100,
     },
   },
   {
@@ -95,14 +106,13 @@ export const createDefaultProfiles = (landingZone: LatLon): JumpProfile[] => [
     color: '#FF9800', // Orange
     showDriftVisualization: false,
     parameters: {
-      ...defaultJumpParameters,
-      landingZone,
       jumpAltitude: 3000,
+      aircraftSpeed: 36,
+      freefallSpeed: 55.56,
       openingAltitude: 1500,
       canopyDescentRate: 8,
       glideRatio: 2.0,
-      numberOfGroups: 3,
-      timeBetweenGroups: 15,
+      setupAltitude: 100,
     },
   },
   {
@@ -112,14 +122,13 @@ export const createDefaultProfiles = (landingZone: LatLon): JumpProfile[] => [
     color: '#4CAF50', // Green
     showDriftVisualization: false,
     parameters: {
-      ...defaultJumpParameters,
-      landingZone,
       jumpAltitude: 3500,
+      aircraftSpeed: 36,
+      freefallSpeed: 55.56,
       openingAltitude: 1000,
       canopyDescentRate: 7,
       glideRatio: 2.2,
-      numberOfGroups: 2,
-      timeBetweenGroups: 20,
+      setupAltitude: 100,
     },
   },
 ];
@@ -149,18 +158,32 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   };
 
+  // Initialize common parameters
+  const [commonParameters, setCommonParametersState] = useState<CommonParameters>(() => {
+    const storedCommon = loadFromStorage<CommonParameters>('commonParameters', defaultCommonParameters);
+    return {
+      ...defaultCommonParameters,
+      ...storedCommon,
+      jumpTime: roundToNearestHour(new Date(storedCommon.jumpTime || new Date()))
+    };
+  });
+
   // Migrate existing data and initialize profiles
   const [profiles, setProfilesState] = useState<JumpProfile[]>(() => {
     const storedProfiles = loadFromStorage<JumpProfile[]>('jumpProfiles', []);
     
     if (storedProfiles.length > 0) {
-      // Update stored dates and ensure all fields exist
+      // Update stored profiles and remove common parameters from them
       return storedProfiles.map(profile => ({
         ...profile,
         parameters: {
-          ...defaultJumpParameters,
-          ...profile.parameters,
-          jumpTime: roundToNearestHour(new Date(profile.parameters.jumpTime))
+          jumpAltitude: profile.parameters.jumpAltitude || defaultJumpParameters.jumpAltitude,
+          aircraftSpeed: profile.parameters.aircraftSpeed || defaultJumpParameters.aircraftSpeed,
+          freefallSpeed: profile.parameters.freefallSpeed || defaultJumpParameters.freefallSpeed,
+          openingAltitude: profile.parameters.openingAltitude || defaultJumpParameters.openingAltitude,
+          canopyDescentRate: profile.parameters.canopyDescentRate || defaultJumpParameters.canopyDescentRate,
+          glideRatio: profile.parameters.glideRatio || defaultJumpParameters.glideRatio,
+          setupAltitude: profile.parameters.setupAltitude || defaultJumpParameters.setupAltitude,
         }
       }));
     }
@@ -168,17 +191,34 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // Migrate from old single jumpParameters format
     const oldParams = loadFromStorage('jumpParameters', null);
     if (oldParams) {
-      const migratedParams = { ...defaultJumpParameters, ...oldParams };
-      migratedParams.jumpTime = roundToNearestHour(new Date(migratedParams.jumpTime));
+      // Update common parameters from old format
+      const migratedCommon = {
+        landingZone: oldParams.landingZone || defaultCommonParameters.landingZone,
+        flightDirection: oldParams.flightDirection,
+        flightOverLandingZone: oldParams.flightOverLandingZone || defaultCommonParameters.flightOverLandingZone,
+        jumpTime: roundToNearestHour(new Date(oldParams.jumpTime || new Date())),
+        numberOfGroups: oldParams.numberOfGroups || defaultCommonParameters.numberOfGroups,
+        timeBetweenGroups: oldParams.timeBetweenGroups || defaultCommonParameters.timeBetweenGroups,
+      };
+      setCommonParametersState(migratedCommon);
       
-      return createDefaultProfiles(migratedParams.landingZone).map((profile, index) => ({
+      return createDefaultProfiles().map((profile, index) => ({
         ...profile,
-        parameters: index === 0 ? migratedParams : { ...profile.parameters, landingZone: migratedParams.landingZone, jumpTime: migratedParams.jumpTime }
+        enabled: index === 0, // Enable only first profile
+        parameters: index === 0 ? {
+          jumpAltitude: oldParams.jumpAltitude || profile.parameters.jumpAltitude,
+          aircraftSpeed: oldParams.aircraftSpeed || profile.parameters.aircraftSpeed,
+          freefallSpeed: oldParams.freefallSpeed || profile.parameters.freefallSpeed,
+          openingAltitude: oldParams.openingAltitude || profile.parameters.openingAltitude,
+          canopyDescentRate: oldParams.canopyDescentRate || profile.parameters.canopyDescentRate,
+          glideRatio: oldParams.glideRatio || profile.parameters.glideRatio,
+          setupAltitude: oldParams.setupAltitude || profile.parameters.setupAltitude,
+        } : profile.parameters
       }));
     }
     
     // Create default profiles
-    return createDefaultProfiles(defaultJumpParameters.landingZone);
+    return createDefaultProfiles();
   });
 
   const [userPreferences, setUserPreferencesState] = useState<UserPreferences>(() => 
@@ -194,6 +234,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const setProfiles = (newProfiles: JumpProfile[]) => {
     setProfilesState(newProfiles);
     localStorage.setItem('jumpProfiles', JSON.stringify(newProfiles));
+  };
+
+  const setCommonParameters = (params: CommonParameters) => {
+    setCommonParametersState(params);
+    localStorage.setItem('commonParameters', JSON.stringify(params));
   };
 
   const addProfile = (profileData: Omit<JumpProfile, 'id'>) => {
@@ -220,14 +265,23 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setProfiles(newProfiles);
   };
 
-  // Backward compatibility - use first enabled profile or first profile
-  const jumpParameters = profiles.find(p => p.enabled)?.parameters || profiles[0]?.parameters || defaultJumpParameters;
+  // Backward compatibility - combine common parameters with first enabled profile
+  const jumpParameters: FullJumpParameters = {
+    ...commonParameters,
+    ...(profiles.find(p => p.enabled)?.parameters || profiles[0]?.parameters || defaultJumpParameters)
+  };
   
-  const setJumpParameters = (params: JumpParameters) => {
+  const setJumpParameters = (params: FullJumpParameters) => {
+    // Split params into common and profile-specific
+    const { landingZone, flightDirection, flightOverLandingZone, jumpTime, numberOfGroups, timeBetweenGroups, ...profileParams } = params;
+    
+    // Update common parameters
+    setCommonParameters({ landingZone, flightDirection, flightOverLandingZone, jumpTime, numberOfGroups, timeBetweenGroups });
+    
     // Update the first enabled profile or first profile
     const targetProfile = profiles.find(p => p.enabled) || profiles[0];
     if (targetProfile) {
-      updateProfile(targetProfile.id, { parameters: params });
+      updateProfile(targetProfile.id, { parameters: profileParams });
     }
   };
 
@@ -238,7 +292,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Get user location on mount
   useEffect(() => {
-    if (navigator.geolocation && profiles.length > 0 && jumpParameters.landingZone.lat === 0 && jumpParameters.landingZone.lon === 0) {
+    if (navigator.geolocation && commonParameters.landingZone.lat === 0 && commonParameters.landingZone.lon === 0) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const newLandingZone = {
@@ -246,22 +300,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
             lon: position.coords.longitude,
           };
           
-          // Update all profiles with the new landing zone
-          const updatedProfiles = profiles.map(profile => ({
-            ...profile,
-            parameters: {
-              ...profile.parameters,
-              landingZone: newLandingZone,
-            }
-          }));
-          setProfiles(updatedProfiles);
+          // Update common parameters with the new landing zone
+          setCommonParameters({
+            ...commonParameters,
+            landingZone: newLandingZone,
+          });
         },
         (error) => {
           console.error('Error getting location:', error);
         }
       );
     }
-  }, [profiles]);
+  }, [commonParameters]);
 
   const value: AppContextType = {
     profiles,
@@ -269,6 +319,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     addProfile,
     updateProfile,
     deleteProfile,
+    commonParameters,
+    setCommonParameters,
     userPreferences,
     setUserPreferences,
     weatherCache,

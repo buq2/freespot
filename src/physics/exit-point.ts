@@ -1,4 +1,4 @@
-import type { LatLon, JumpParameters, ForecastData, ExitPoint } from '../types';
+import type { LatLon, FullJumpParameters, ForecastData, ExitPoint } from '../types';
 import { movePoint, pointsToVector, calculateBearing, calculateDistance, getDestinationPoint } from './geo';
 import { calculateFreefallDrift, calculateCanopyDrift } from './wind-drift';
 import type { Vector2D } from './vector';
@@ -21,7 +21,7 @@ export interface ExitCalculationResult {
 const calculateOptimalExitPoint = (
   landingZone: LatLon,
   weatherData: ForecastData[],
-  params: JumpParameters
+  params: FullJumpParameters
 ): LatLon => {
   // Calculate freefall drift
   const freefallDrift = calculateFreefallDrift(
@@ -91,7 +91,7 @@ const calculateAircraftHeading = (
 };
 
 // Validate jump parameters
-const validateParameters = (params: JumpParameters): string | null => {
+const validateParameters = (params: FullJumpParameters): string | null => {
   if (params.jumpAltitude <= params.openingAltitude) {
     return 'Jump altitude must be higher than opening altitude';
   }
@@ -142,7 +142,7 @@ const validateParameters = (params: JumpParameters): string | null => {
 
 // Calculate exit points for multiple groups
 export const calculateExitPoints = (
-  params: JumpParameters,
+  params: FullJumpParameters,
   weatherData: ForecastData[]
 ): ExitCalculationResult => {
   // Validate parameters first

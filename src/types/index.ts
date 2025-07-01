@@ -11,6 +11,17 @@ export interface ForecastData {
   temperature?: number; // celsius
 }
 
+// Common parameters shared across all profiles
+export interface CommonParameters {
+  landingZone: LatLon;
+  flightDirection?: number; // degrees, undefined means headwind
+  flightOverLandingZone: boolean; // if true, airplane flies directly over landing zone
+  jumpTime: Date;
+  numberOfGroups: number;
+  timeBetweenGroups: number; // seconds
+}
+
+// Profile-specific jump parameters
 export interface JumpParameters {
   jumpAltitude: number; // meters
   aircraftSpeed: number; // m/s
@@ -19,13 +30,10 @@ export interface JumpParameters {
   canopyDescentRate: number; // m/s
   glideRatio: number;
   setupAltitude: number; // meters AGL - altitude to be on top of landing zone without forward canopy speed
-  numberOfGroups: number;
-  timeBetweenGroups: number; // seconds
-  landingZone: LatLon;
-  flightDirection?: number; // degrees, undefined means headwind
-  flightOverLandingZone: boolean; // if true, airplane flies directly over landing zone
-  jumpTime: Date;
 }
+
+// Combined parameters for calculations (backward compatibility)
+export interface FullJumpParameters extends JumpParameters, CommonParameters {}
 
 export interface JumpProfile {
   id: string;

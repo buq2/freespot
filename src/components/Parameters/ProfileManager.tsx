@@ -23,7 +23,7 @@ interface ProfileManagerProps {
 }
 
 export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
-  const { profiles, addProfile, setProfiles } = useAppContext();
+  const { profiles, commonParameters, addProfile, setProfiles } = useAppContext();
   const primaryProfile = profiles.find(p => p.enabled) || profiles[0];
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
@@ -107,9 +107,13 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
             ...profile,
             id: 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             parameters: {
-              ...profile.parameters,
-              landingZone: primaryProfile?.parameters.landingZone || { lat: 0, lon: 0 }, // Use current landing zone
-              jumpTime: new Date(profile.parameters.jumpTime || Date.now()),
+              jumpAltitude: profile.parameters.jumpAltitude,
+              aircraftSpeed: profile.parameters.aircraftSpeed,
+              freefallSpeed: profile.parameters.freefallSpeed,
+              openingAltitude: profile.parameters.openingAltitude,
+              canopyDescentRate: profile.parameters.canopyDescentRate,
+              glideRatio: profile.parameters.glideRatio,
+              setupAltitude: profile.parameters.setupAltitude,
             }
           }));
 
@@ -120,9 +124,13 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
             ...data,
             id: 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             parameters: {
-              ...data.parameters,
-              landingZone: primaryProfile?.parameters.landingZone || { lat: 0, lon: 0 }, // Use current landing zone
-              jumpTime: new Date(data.parameters.jumpTime || Date.now()),
+              jumpAltitude: data.parameters.jumpAltitude,
+              aircraftSpeed: data.parameters.aircraftSpeed,
+              freefallSpeed: data.parameters.freefallSpeed,
+              openingAltitude: data.parameters.openingAltitude,
+              canopyDescentRate: data.parameters.canopyDescentRate,
+              glideRatio: data.parameters.glideRatio,
+              setupAltitude: data.parameters.setupAltitude,
             }
           };
 
@@ -141,7 +149,7 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
   };
 
   const handleResetToDefaults = () => {
-    const defaultProfiles = createDefaultProfiles(primaryProfile?.parameters.landingZone || { lat: 0, lon: 0 });
+    const defaultProfiles = createDefaultProfiles();
     setProfiles(defaultProfiles);
     setMenuAnchor(null);
   };

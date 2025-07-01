@@ -18,7 +18,8 @@
       "Bash(find:*)",
       "Bash(node test-headwind.js)",
       "Bash(node:*)",
-      "Bash(timeout 10s npm run dev)"
+      "Bash(timeout 10s npm run dev)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

@@ -31,9 +31,6 @@ import {
   GetApp, 
   Palette 
 } from '@mui/icons-material';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useAppContext } from '../../contexts/AppContext';
 import { convertSpeed, convertAltitude } from '../../utils/units';
 import { calculateCanopyAirSpeed } from '../../physics/constants';
@@ -79,39 +76,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
     });
   };
 
-  const handleLocationChange = (field: 'lat' | 'lon') => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value) || 0;
-    updateProfile(profile.id, {
-      parameters: {
-        ...profile.parameters,
-        landingZone: {
-          ...profile.parameters.landingZone,
-          [field]: value
-        }
-      }
-    });
-  };
-
-  const handleFlightDirectionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    updateProfile(profile.id, {
-      parameters: {
-        ...profile.parameters,
-        flightDirection: value === '' ? undefined : Math.round(parseFloat(value) * 10) / 10
-      }
-    });
-  };
-
-  const handleDateChange = (date: Date | null) => {
-    if (date) {
-      updateProfile(profile.id, {
-        parameters: {
-          ...profile.parameters,
-          jumpTime: date
-        }
-      });
-    }
-  };
 
   const handleEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateProfile(profile.id, { enabled: event.target.checked });
@@ -124,14 +88,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
     updateProfile(profile.id, { showDriftVisualization: event.target.checked });
   };
 
-  const handleFlightOverLandingZoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateProfile(profile.id, {
-      parameters: {
-        ...profile.parameters,
-        flightOverLandingZone: event.target.checked
-      }
-    });
-  };
 
   const handleRename = () => {
     if (newName.trim() && newName.trim() !== profile.name) {
@@ -231,9 +187,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
           {profile.showDriftVisualization && (
             <Chip size="small" label="Drift Visualization" variant="outlined" />
           )}
-          {profile.parameters.flightOverLandingZone && (
-            <Chip size="small" label="Over Landing Zone" variant="outlined" />
-          )}
         </Box>
 
         {/* Collapsible Content */}
@@ -260,18 +213,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={profile.parameters.flightOverLandingZone}
-                      onChange={handleFlightOverLandingZoneChange}
-                      size="small"
-                    />
-                  }
-                  label="Fly directly over landing zone"
-                />
-              </Grid>
 
               {/* Altitudes */}
               <Grid item xs={12}>
@@ -482,121 +423,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                 />
               </Grid>
 
-              {/* Jump Groups */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Jump Groups
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Number of Groups"
-                  value={profile.parameters.numberOfGroups}
-                  onChange={handleParameterChange('numberOfGroups')}
-                  type="number"
-                  inputProps={{ min: 1, max: 10 }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Time Between Groups"
-                  value={profile.parameters.timeBetweenGroups}
-                  onChange={handleParameterChange('timeBetweenGroups')}
-                  type="number"
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">sec</InputAdornment>
-                  }}
-                />
-              </Grid>
-
-              {/* Landing Zone */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Landing Zone
-                </Typography>
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Latitude"
-                  value={profile.parameters.landingZone.lat}
-                  onChange={handleLocationChange('lat')}
-                  type="number"
-                  step="0.0001"
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">°</InputAdornment>
-                  }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Longitude"
-                  value={profile.parameters.landingZone.lon}
-                  onChange={handleLocationChange('lon')}
-                  type="number"
-                  step="0.0001"
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">°</InputAdornment>
-                  }}
-                />
-              </Grid>
-
-              {/* Flight Direction */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Aircraft Flight Direction
-                </Typography>
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Flight Direction"
-                  value={profile.parameters.flightDirection !== undefined ? profile.parameters.flightDirection.toFixed(1) : ''}
-                  onChange={handleFlightDirectionChange}
-                  placeholder="Auto (headwind)"
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">°</InputAdornment>
-                  }}
-                  helperText="Leave empty for automatic headwind direction"
-                />
-              </Grid>
-
-              {/* Jump Time */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Jump Time
-                </Typography>
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DateTimePicker
-                    label="Jump Date & Time"
-                    value={profile.parameters.jumpTime}
-                    onChange={handleDateChange}
-                    ampm={false}
-                    slotProps={{ 
-                      textField: { fullWidth: true, size: 'small' },
-                      actionBar: {
-                        actions: ['clear', 'today']
-                      }
-                    }}
-                  />
-                </LocalizationProvider>
-              </Grid>
             </Grid>
           </Box>
         </Collapse>

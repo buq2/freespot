@@ -165,7 +165,7 @@ export const MapView: React.FC<MapViewProps> = ({
   exitCalculation,
   groundWindData
 }) => {
-  const { profiles: contextProfiles, userPreferences } = useAppContext();
+  const { profiles: contextProfiles, commonParameters, userPreferences } = useAppContext();
   
   // Use props profiles or context profiles
   const activeProfiles = profiles.length > 0 ? profiles : contextProfiles;
@@ -173,8 +173,8 @@ export const MapView: React.FC<MapViewProps> = ({
   const primaryProfile = enabledProfiles[0] || activeProfiles[0];
   const [mapCenter, setMapCenter] = useState<LatLng>(
     new LatLng(
-      primaryProfile?.parameters.landingZone.lat || 0, 
-      primaryProfile?.parameters.landingZone.lon || 0
+      commonParameters?.landingZone.lat || 0, 
+      commonParameters?.landingZone.lon || 0
     )
   );
   const hasInitializedRef = useRef(false);
@@ -186,26 +186,26 @@ export const MapView: React.FC<MapViewProps> = ({
   useEffect(() => {
     const firstResult = multiProfileResults[0] || (exitCalculation ? { calculation: exitCalculation } : null);
     
-    if (firstResult && primaryProfile && !hasInitializedRef.current) {
+    if (firstResult && commonParameters && !hasInitializedRef.current) {
       // Center between landing zone and optimal exit point only on first successful calculation
-      const centerLat = (primaryProfile.parameters.landingZone.lat + firstResult.calculation.optimalExitPoint.lat) / 2;
-      const centerLon = (primaryProfile.parameters.landingZone.lon + firstResult.calculation.optimalExitPoint.lon) / 2;
+      const centerLat = (commonParameters.landingZone.lat + firstResult.calculation.optimalExitPoint.lat) / 2;
+      const centerLon = (commonParameters.landingZone.lon + firstResult.calculation.optimalExitPoint.lon) / 2;
       setMapCenter(new LatLng(centerLat, centerLon));
       hasInitializedRef.current = true;
     }
-  }, [multiProfileResults, exitCalculation, primaryProfile]);
+  }, [multiProfileResults, exitCalculation, commonParameters]);
 
   // Helper function to create flight path for a calculation
-  const createFlightPath = (calculation: ExitCalculationResult, parameters: JumpParameters) => {
+  const createFlightPath = (calculation: ExitCalculationResult) => {
     const points = calculation.exitPoints;
-    if (points.length === 0) return null;
+    if (points.length === 0 || !commonParameters) return null;
     
     const heading = calculation.aircraftHeading;
     const extendDistance = 1000; // meters
     
-    if (parameters.flightOverLandingZone) {
+    if (commonParameters.flightOverLandingZone) {
       // For overhead flight, show the flight path passing over the landing zone
-      const landingZone = parameters.landingZone;
+      const landingZone = commonParameters.landingZone;
       const startPoint = getDestinationPoint(landingZone, extendDistance * 2, heading + 180);
       const endPoint = getDestinationPoint(landingZone, extendDistance * 2, heading);
       
@@ -248,15 +248,12 @@ export const MapView: React.FC<MapViewProps> = ({
       const profile = activeProfiles.find(p => p.id === result.profileId);
       if (!profile) continue;
 
-      const flightPath = createFlightPath(
-        result.calculation,
-        profile.parameters
-      );
+      const flightPath = createFlightPath(result.calculation);
 
       const driftPaths = calculateDriftPaths(
         result.calculation,
         primaryWeatherData,
-        profile.parameters,
+        { ...commonParameters, ...profile.parameters },
         profile.showDriftVisualization
       );
 
@@ -270,19 +267,19 @@ export const MapView: React.FC<MapViewProps> = ({
     }
 
     // Fallback to backward compatibility mode
-    if (data.length === 0 && exitCalculation && primaryProfile) {
-      const flightPath = createFlightPath(exitCalculation, primaryProfile.parameters);
+    if (data.length === 0 && exitCalculation && primaryProfile && commonParameters) {
+      const flightPath = createFlightPath(exitCalculation);
       const driftPaths = calculateDriftPaths(
         exitCalculation,
         primaryWeatherData,
-        primaryProfile.parameters,
+        { ...commonParameters, ...primaryProfile.parameters },
         primaryProfile.showDriftVisualization
       );
 
       data.push({
         profile: primaryProfile,
         calculation: exitCalculation,
-        groundWind,
+        groundWind: groundWindData,
         flightPath,
         driftPaths
       });
@@ -317,18 +314,18 @@ export const MapView: React.FC<MapViewProps> = ({
       />
 
       {/* Landing Zone */}
-      {primaryProfile && (
+      {commonParameters && (
         <Marker
-          position={[primaryProfile.parameters.landingZone.lat, primaryProfile.parameters.landingZone.lon]}
+          position={[commonParameters.landingZone.lat, commonParameters.landingZone.lon]}
           icon={landingZoneIcon}
         >
           <Popup>
             <div>
               <strong>Landing Zone</strong>
               <br />
-              Lat: {primaryProfile.parameters.landingZone.lat.toFixed(4)}
+              Lat: {commonParameters.landingZone.lat.toFixed(4)}
               <br />
-              Lon: {primaryProfile.parameters.landingZone.lon.toFixed(4)}
+              Lon: {commonParameters.landingZone.lon.toFixed(4)}
               {profileVisualizationData[0]?.groundWind && (
                 <>
                   <br />
@@ -352,9 +349,9 @@ export const MapView: React.FC<MapViewProps> = ({
       )}
 
       {/* Ground wind visualization */}
-      {primaryProfile && profileVisualizationData[0]?.groundWind && profileVisualizationData[0].groundWind.speed > 0.5 && (
+      {commonParameters && profileVisualizationData[0]?.groundWind && profileVisualizationData[0].groundWind.speed > 0.5 && (
         <Marker
-          position={[primaryProfile.parameters.landingZone.lat, primaryProfile.parameters.landingZone.lon]}
+          position={[commonParameters.landingZone.lat, commonParameters.landingZone.lon]}
           icon={createWindArrowIcon(profileVisualizationData[0].groundWind.direction, profileVisualizationData[0].groundWind.speed)}
           interactive={false}
         />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { useAppContext } from '../../contexts/AppContext';
+import { CommonParametersForm } from './CommonParametersForm';
 import { ProfileManager } from './ProfileManager';
 import { ProfileSection } from './ProfileSection';
 
@@ -9,6 +10,9 @@ export const JumpParametersForm: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Common Parameters */}
+      <CommonParametersForm />
+      
       {/* Profile Manager */}
       <ProfileManager />
       

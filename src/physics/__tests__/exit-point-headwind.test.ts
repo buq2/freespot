@@ -1,8 +1,8 @@
 import { calculateExitPoints } from '../exit-point';
-import type { JumpParameters, ForecastData } from '../../types';
+import type { FullJumpParameters, ForecastData } from '../../types';
 
 describe('Exit Point Calculation - Headwind', () => {
-  const baseParams: JumpParameters = {
+  const baseParams: FullJumpParameters = {
     jumpAltitude: 4000,
     openingAltitude: 1000,
     setupAltitude: 100,
