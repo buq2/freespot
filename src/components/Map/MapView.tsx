@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, Polyline, Popup, useMap } from 'react-leaflet';
 import { LatLng } from 'leaflet';
 import { useAppContext } from '../../contexts/AppContext';
@@ -28,12 +28,15 @@ interface MapViewProps {
 }
 
 // Component to handle map centering and initialization
-const MapController: React.FC<{ center: LatLng }> = ({ center }) => {
+const MapController: React.FC<{ center: LatLng; shouldCenter: boolean }> = ({ center, shouldCenter }) => {
   const map = useMap();
   
   useEffect(() => {
-    map.setView(center, map.getZoom());
-  }, [center, map]);
+    // Only set view on initial load or when explicitly requested
+    if (shouldCenter) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map, shouldCenter]);
   
   useEffect(() => {
     // Force map to resize and invalidate when first loaded
@@ -153,18 +156,19 @@ export const MapView: React.FC<MapViewProps> = ({
   const [mapCenter, setMapCenter] = useState<LatLng>(
     new LatLng(jumpParameters.landingZone.lat, jumpParameters.landingZone.lon)
   );
+  const hasInitializedRef = useRef(false);
 
   // Debug: Log when component renders
   console.log('MapView rendering with center:', mapCenter, 'exitCalculation:', !!exitCalculation);
 
+  // Only center the map on the very first time we get exit calculation data
   useEffect(() => {
-    if (exitCalculation) {
-      // Center between landing zone and optimal exit point
+    if (exitCalculation && !hasInitializedRef.current) {
+      // Center between landing zone and optimal exit point only on first successful calculation
       const centerLat = (jumpParameters.landingZone.lat + exitCalculation.optimalExitPoint.lat) / 2;
       const centerLon = (jumpParameters.landingZone.lon + exitCalculation.optimalExitPoint.lon) / 2;
       setMapCenter(new LatLng(centerLat, centerLon));
-    } else {
-      setMapCenter(new LatLng(jumpParameters.landingZone.lat, jumpParameters.landingZone.lon));
+      hasInitializedRef.current = true;
     }
   }, [exitCalculation, jumpParameters.landingZone]);
 
@@ -227,9 +231,9 @@ export const MapView: React.FC<MapViewProps> = ({
             cursor: isSettingLandingZone ? 'crosshair' : 'default',
             minHeight: '400px'
           }}
-          key={`map-${mapCenter.lat}-${mapCenter.lng}`} // Force re-render on center change
+          key="map" // Fixed key to prevent unnecessary re-renders
         >
-      <MapController center={mapCenter} />
+      <MapController center={mapCenter} shouldCenter={!hasInitializedRef.current} />
       
       <TileLayer
         attribution={tileConfig.attribution}
