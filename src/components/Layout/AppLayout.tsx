@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import {
   Box,
   AppBar,
@@ -17,11 +17,44 @@ import {
 } from '@mui/material';
 import { Menu, Close, ChevronLeft, Tune } from '@mui/icons-material';
 import { useAppContext, useAdvancedMode } from '../../contexts';
-import { JumpParametersForm, UserPreferencesForm, WeatherModelSelector } from '../Parameters';
-import { WeatherTable, WindCompass } from '../Weather';
-import { ExitPointResults } from '../Results';
-import { MapContainer } from '../Map';
+import { JumpParametersForm } from '../Parameters';
 import { useWeatherCalculations, useExitPointCalculations } from '../../hooks';
+
+// Lazy load heavy components
+const MapContainer = React.lazy(() => import('../Map/MapContainer').then(module => ({ default: module.MapContainer })));
+const UserPreferencesForm = React.lazy(() => import('../Parameters/UserPreferencesForm').then(module => ({ default: module.UserPreferencesForm })));
+const WeatherModelSelector = React.lazy(() => import('../Parameters/WeatherModelSelector').then(module => ({ default: module.WeatherModelSelector })));
+const WeatherTable = React.lazy(() => import('../Weather/WeatherTable').then(module => ({ default: module.WeatherTable })));
+const WindCompass = React.lazy(() => import('../Weather/WindCompass').then(module => ({ default: module.WindCompass })));
+const ExitPointResults = React.lazy(() => import('../Results/ExitPointResults').then(module => ({ default: module.ExitPointResults })));
+
+// Loading fallback component
+const ComponentLoader: React.FC = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+    <CircularProgress size={24} />
+    <Typography variant="body2" sx={{ ml: 2 }}>Loading...</Typography>
+  </Box>
+);
+
+// Map loading fallback
+const MapLoader: React.FC = () => (
+  <Box sx={{ 
+    height: '100%', 
+    width: '100%', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    flexDirection: 'column',
+    gap: 2,
+    bgcolor: 'grey.100'
+  }}>
+    <CircularProgress size={48} />
+    <Typography variant="h6" color="text.secondary">Loading Map...</Typography>
+    <Typography variant="body2" color="text.secondary">
+      Initializing map components
+    </Typography>
+  </Box>
+);
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -314,23 +347,29 @@ export const AppLayout: React.FC = () => {
           <TabPanel value={tabValue} index={0}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 2 }}>
               <JumpParametersForm />
-              <UserPreferencesForm />
+              <Suspense fallback={<ComponentLoader />}>
+                <UserPreferencesForm />
+              </Suspense>
             </Box>
           </TabPanel>
 
           <TabPanel value={tabValue} index={1}>
             <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <WeatherModelSelector
-                selectedModels={selectedModels}
-                onModelSelectionChange={setSelectedModels}
-              />
+              <Suspense fallback={<ComponentLoader />}>
+                <WeatherModelSelector
+                  selectedModels={selectedModels}
+                  onModelSelectionChange={setSelectedModels}
+                />
+              </Suspense>
 
               {/* Ground Wind Display */}
               {groundWindData && (
-                <WindCompass 
-                  windData={groundWindData} 
-                  title="Ground Wind (10m AGL)"
-                />
+                <Suspense fallback={<ComponentLoader />}>
+                  <WindCompass 
+                    windData={groundWindData} 
+                    title="Ground Wind (10m AGL)"
+                  />
+                </Suspense>
               )}
 
               {/* Weather Tables */}
@@ -351,12 +390,14 @@ export const AppLayout: React.FC = () => {
                     
                     return (
                       <Box key={modelId} sx={{ mb: 2 }}>
-                        <WeatherTable
-                          data={modelData}
-                          modelName={modelName}
-                          terrainElevation={terrainElevation}
-                          jumpTime={commonParameters.jumpTime}
-                        />
+                        <Suspense fallback={<ComponentLoader />}>
+                          <WeatherTable
+                            data={modelData}
+                            modelName={modelName}
+                            terrainElevation={terrainElevation}
+                            jumpTime={commonParameters.jumpTime}
+                          />
+                        </Suspense>
                       </Box>
                     );
                   })}
@@ -369,7 +410,9 @@ export const AppLayout: React.FC = () => {
             <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
               {/* Exit Point Results */}
               {exitCalculation && (
-                <ExitPointResults result={exitCalculation} />
+                <Suspense fallback={<ComponentLoader />}>
+                  <ExitPointResults result={exitCalculation} />
+                </Suspense>
               )}
             </Box>
           </TabPanel>
@@ -412,14 +455,16 @@ export const AppLayout: React.FC = () => {
 
         {/* Full Screen Map */}
         <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
-          <MapContainer
-            multiProfileResults={exitPointCalculations.enabledProfiles.length > 0 ? exitPointCalculations.results : []}
-            profiles={profiles}
-            primaryWeatherData={primaryWeatherData}
-            showControls={showMapControls}
-            exitCalculation={exitCalculation}
-            groundWindData={groundWindData}
-          />
+          <Suspense fallback={<MapLoader />}>
+            <MapContainer
+              multiProfileResults={exitPointCalculations.enabledProfiles.length > 0 ? exitPointCalculations.results : []}
+              profiles={profiles}
+              primaryWeatherData={primaryWeatherData}
+              showControls={showMapControls}
+              exitCalculation={exitCalculation}
+              groundWindData={groundWindData}
+            />
+          </Suspense>
           
           {/* Loading Overlay */}
           {initialLoad && loading && (
