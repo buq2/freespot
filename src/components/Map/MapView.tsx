@@ -4,7 +4,7 @@ import { LatLng } from 'leaflet';
 import { useAppContext } from '../../contexts';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import './icons'; // Import to trigger Leaflet icon fixes
-import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIcon } from './icons';
+import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIcon, createExitPointIcon, createColoredGroupExitIcon } from './icons';
 import type { ForecastData, JumpParameters, JumpProfile } from '../../types';
 
 // Multi-profile calculation result
@@ -390,7 +390,7 @@ export const MapView: React.FC<MapViewProps> = ({
           {profileData.calculation.optimalExitPoint && (
             <Marker
               position={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
-              icon={exitPointIcon}
+              icon={createExitPointIcon(profileData.profile.color)}
             >
               <Popup>
                 <strong>{profileData.profile.name} - Optimal Exit Point</strong>
@@ -407,7 +407,7 @@ export const MapView: React.FC<MapViewProps> = ({
             <Marker
               key={`${profileData.profile.id}-group-${exit.groupNumber}`}
               position={[exit.location.lat, exit.location.lon]}
-              icon={createGroupExitIcon(exit.groupNumber)}
+              icon={createColoredGroupExitIcon(exit.groupNumber, profileData.profile.color)}
             >
               <Popup>
                 <strong>{profileData.profile.name} - Group {exit.groupNumber}</strong>
@@ -480,7 +480,7 @@ export const MapView: React.FC<MapViewProps> = ({
               {/* Opening position marker */}
               <Marker
                 position={[driftPath.path[1].lat, driftPath.path[1].lon]}
-                icon={createGroupExitIcon(driftPath.groupNumber)}
+                icon={createColoredGroupExitIcon(driftPath.groupNumber, profileData.profile.color)}
                 opacity={0.6}
               >
                 <Popup>
