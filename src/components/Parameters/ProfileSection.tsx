@@ -176,21 +176,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
           </Box>
         </Box>
 
-        {/* Profile Options */}
-        <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-          {profile.showDriftVisualization && (
-            <Chip size="small" label="Drift" variant="outlined" />
-          )}
-          {profile.showSafetyCircle && (
-            <Chip size="small" label="Safety Circle" variant="outlined" />
-          )}
-          {profile.showGroupExitPoints && (
-            <Chip size="small" label="Exit Points" variant="outlined" />
-          )}
-          {profile.showFlightPath && (
-            <Chip size="small" label="Flight Path" variant="outlined" />
-          )}
-        </Box>
 
         {/* Collapsible Content */}
         <Collapse in={expanded}>
