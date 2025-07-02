@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { JumpParameters, CommonParameters, FullJumpParameters, JumpProfile, UserPreferences, LatLon, TerrainData, CachedLocationData, ForecastData } from '../types';
+import { defaultJumpParameters, createDefaultProfiles, generateProfileId } from '../constants/profiles';
 
 interface AppContextType {
   profiles: JumpProfile[];
@@ -42,15 +43,6 @@ const roundToNearestHour = (date: Date): Date => {
   return rounded;
 };
 
-export const defaultJumpParameters: JumpParameters = {
-  jumpAltitude: 4000, // meters
-  aircraftSpeed: 36, // m/s (130 km/h)
-  freefallSpeed: 55.56, // m/s (200 km/h)
-  openingAltitude: 800, // meters
-  canopyDescentRate: 6, // m/s
-  glideRatio: 2.5, // This gives us ~16.1 m/s canopy air speed (sqrt(6^2 + (6*2.5)^2) = sqrt(36 + 225))
-  setupAltitude: 100, // meters AGL - default to 100m for pattern work
-};
 
 export const defaultCommonParameters: CommonParameters = {
   landingZone: { lat: 61.7807, lon: 22.7221 },
@@ -76,71 +68,6 @@ export const defaultUserPreferences: UserPreferences = {
   sportWindLimit: 11, // m/s
 };
 
-// Generate unique ID for profiles
-const generateProfileId = (): string => {
-  return 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-};
-
-// Default profile templates
-export const createDefaultProfiles = (): JumpProfile[] => [
-  {
-    id: 'sport_jumpers',
-    name: 'Sport Jumpers',
-    enabled: true,
-    color: '#2196F3', // Blue
-    showDriftVisualization: true,
-    showSafetyCircle: true,
-    showGroupExitPoints: true,
-    showFlightPath: true,
-    parameters: {
-      jumpAltitude: 4000,
-      aircraftSpeed: 36,
-      freefallSpeed: 55.56,
-      openingAltitude: 800,
-      canopyDescentRate: 6,
-      glideRatio: 2.5,
-      setupAltitude: 100,
-    },
-  },
-  {
-    id: 'tandem',
-    name: 'Tandem',
-    enabled: false,
-    color: '#FF9800', // Orange
-    showDriftVisualization: false,
-    showSafetyCircle: true,
-    showGroupExitPoints: false,
-    showFlightPath: false,
-    parameters: {
-      jumpAltitude: 4000,
-      aircraftSpeed: 36,
-      freefallSpeed: 50,
-      openingAltitude: 1200,
-      canopyDescentRate: 4,
-      glideRatio: 2.0,
-      setupAltitude: 100,
-    },
-  },
-  {
-    id: 'student',
-    name: 'Student',
-    enabled: false,
-    color: '#4CAF50', // Green
-    showDriftVisualization: false,
-    showSafetyCircle: true,
-    showGroupExitPoints: false,
-    showFlightPath: false,
-    parameters: {
-      jumpAltitude: 4000,
-      aircraftSpeed: 36,
-      freefallSpeed: 55.56,
-      openingAltitude: 1400,
-      canopyDescentRate: 5,
-      glideRatio: 2.2,
-      setupAltitude: 100,
-    },
-  },
-];
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 

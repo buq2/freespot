@@ -15,7 +15,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add, GetApp, Publish, MoreVert } from '@mui/icons-material';
-import { useAppContext, createDefaultProfiles } from '../../contexts';
+import { useAppContext } from '../../contexts';
+import { createDefaultProfiles } from '../../constants/profiles';
 import type { JumpProfile } from '../../types';
 
 interface ProfileManagerProps {
