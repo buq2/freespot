@@ -178,9 +178,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
 
         {/* Profile Options */}
         <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-          {profile.enabled && (
-            <Chip size="small" label="Active" color="success" />
-          )}
           {profile.showDriftVisualization && (
             <Chip size="small" label="Drift Visualization" variant="outlined" />
           )}
