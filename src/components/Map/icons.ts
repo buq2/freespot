@@ -66,11 +66,15 @@ export const createGroupExitIcon = (groupNumber: number) => L.divIcon({
 // Wind arrow icon
 export const createWindArrowIcon = (direction: number, speed: number) => {
   const length = Math.min(40, 20 + speed * 2); // Scale with wind speed
+  // Wind direction in meteorology is where wind comes FROM
+  // We want to show where wind is going TO, so add 180 degrees
+  const arrowDirection = (direction + 180) % 360;
+  
   return L.divIcon({
     className: 'wind-arrow-icon',
     html: `
       <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" 
-           style="transform: rotate(${direction}deg)">
+           style="transform: rotate(${arrowDirection}deg)">
         <line x1="30" y1="30" x2="30" y2="${30 - length}" 
               stroke="#666" stroke-width="2"/>
         <path d="M30 ${30 - length} L25 ${35 - length} L35 ${35 - length} Z" 
