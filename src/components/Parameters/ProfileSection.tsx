@@ -81,21 +81,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
     updateProfile(profile.id, { enabled: event.target.checked });
   };
 
-  const handleShowDriftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateProfile(profile.id, { showDriftVisualization: event.target.checked });
-  };
-
-  const handleShowSafetyCircleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateProfile(profile.id, { showSafetyCircle: event.target.checked });
-  };
-
-  const handleShowGroupExitPointsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateProfile(profile.id, { showGroupExitPoints: event.target.checked });
-  };
-
-  const handleShowFlightPathChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateProfile(profile.id, { showFlightPath: event.target.checked });
-  };
 
 
   const handleRename = () => {
@@ -208,63 +193,45 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
         <Collapse in={expanded}>
           <Box sx={{ mt: 2 }}>
             <Grid container spacing={3}>
-              {/* Profile Settings */}
+              {/* Visualization Settings */}
               <Grid item xs={12}>
                 <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                   Visualization Settings
                 </Typography>
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={profile.showSafetyCircle}
-                      onChange={handleShowSafetyCircleChange}
-                      size="small"
-                    />
-                  }
-                  label="Show safety circle"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={profile.showGroupExitPoints}
-                      onChange={handleShowGroupExitPointsChange}
-                      size="small"
-                    />
-                  }
-                  label="Show group exit points"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={profile.showFlightPath}
-                      onChange={handleShowFlightPathChange}
-                      size="small"
-                    />
-                  }
-                  label="Show airplane flight path"
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={profile.showDriftVisualization}
-                      onChange={handleShowDriftChange}
-                      size="small"
-                    />
-                  }
-                  label="Show freefall drift visualization"
-                />
+                <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                  <Chip
+                    size="small"
+                    label="Safety Circle"
+                    variant={profile.showSafetyCircle ? "filled" : "outlined"}
+                    color={profile.showSafetyCircle ? "primary" : "default"}
+                    onClick={() => updateProfile(profile.id, { showSafetyCircle: !profile.showSafetyCircle })}
+                    sx={{ cursor: 'pointer' }}
+                  />
+                  <Chip
+                    size="small"
+                    label="Exit Points"
+                    variant={profile.showGroupExitPoints ? "filled" : "outlined"}
+                    color={profile.showGroupExitPoints ? "primary" : "default"}
+                    onClick={() => updateProfile(profile.id, { showGroupExitPoints: !profile.showGroupExitPoints })}
+                    sx={{ cursor: 'pointer' }}
+                  />
+                  <Chip
+                    size="small"
+                    label="Flight Path"
+                    variant={profile.showFlightPath ? "filled" : "outlined"}
+                    color={profile.showFlightPath ? "primary" : "default"}
+                    onClick={() => updateProfile(profile.id, { showFlightPath: !profile.showFlightPath })}
+                    sx={{ cursor: 'pointer' }}
+                  />
+                  <Chip
+                    size="small"
+                    label="Drift Visualization"
+                    variant={profile.showDriftVisualization ? "filled" : "outlined"}
+                    color={profile.showDriftVisualization ? "primary" : "default"}
+                    onClick={() => updateProfile(profile.id, { showDriftVisualization: !profile.showDriftVisualization })}
+                    sx={{ cursor: 'pointer' }}
+                  />
+                </Box>
               </Grid>
 
 
