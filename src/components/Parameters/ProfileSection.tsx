@@ -21,6 +21,8 @@ import {
   DialogContent,
   DialogActions,
   Chip,
+  Card,
+  CardContent,
 } from '@mui/material';
 import { 
   ExpandMore, 
@@ -194,260 +196,278 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
         <Collapse in={expanded}>
           <Box sx={{ mt: 2 }}>
             <Grid container spacing={3}>
-              {/* Visualization Settings */}
+              {/* Visualization Settings Card */}
               <AdvancedOption>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                    Visualization Settings
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-                    <Chip
-                      size="small"
-                      label="Safety Circle"
-                      variant={profile.showSafetyCircle ? "filled" : "outlined"}
-                      color={profile.showSafetyCircle ? "primary" : "default"}
-                      onClick={() => updateProfile(profile.id, { showSafetyCircle: !profile.showSafetyCircle })}
-                      sx={{ cursor: 'pointer' }}
-                    />
-                    <Chip
-                      size="small"
-                      label="Exit Points"
-                      variant={profile.showGroupExitPoints ? "filled" : "outlined"}
-                      color={profile.showGroupExitPoints ? "primary" : "default"}
-                      onClick={() => updateProfile(profile.id, { showGroupExitPoints: !profile.showGroupExitPoints })}
-                      sx={{ cursor: 'pointer' }}
-                    />
-                    <Chip
-                      size="small"
-                      label="Flight Path"
-                      variant={profile.showFlightPath ? "filled" : "outlined"}
-                      color={profile.showFlightPath ? "primary" : "default"}
-                      onClick={() => updateProfile(profile.id, { showFlightPath: !profile.showFlightPath })}
-                      sx={{ cursor: 'pointer' }}
-                    />
-                    <Chip
-                      size="small"
-                      label="Drift Visualization"
-                      variant={profile.showDriftVisualization ? "filled" : "outlined"}
-                      color={profile.showDriftVisualization ? "primary" : "default"}
-                      onClick={() => updateProfile(profile.id, { showDriftVisualization: !profile.showDriftVisualization })}
-                      sx={{ cursor: 'pointer' }}
-                    />
-                  </Box>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                        Visualization Settings
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                        <Chip
+                          size="small"
+                          label="Safety Circle"
+                          variant={profile.showSafetyCircle ? "filled" : "outlined"}
+                          color={profile.showSafetyCircle ? "primary" : "default"}
+                          onClick={() => updateProfile(profile.id, { showSafetyCircle: !profile.showSafetyCircle })}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                        <Chip
+                          size="small"
+                          label="Exit Points"
+                          variant={profile.showGroupExitPoints ? "filled" : "outlined"}
+                          color={profile.showGroupExitPoints ? "primary" : "default"}
+                          onClick={() => updateProfile(profile.id, { showGroupExitPoints: !profile.showGroupExitPoints })}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                        <Chip
+                          size="small"
+                          label="Flight Path"
+                          variant={profile.showFlightPath ? "filled" : "outlined"}
+                          color={profile.showFlightPath ? "primary" : "default"}
+                          onClick={() => updateProfile(profile.id, { showFlightPath: !profile.showFlightPath })}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                        <Chip
+                          size="small"
+                          label="Drift Visualization"
+                          variant={profile.showDriftVisualization ? "filled" : "outlined"}
+                          color={profile.showDriftVisualization ? "primary" : "default"}
+                          onClick={() => updateProfile(profile.id, { showDriftVisualization: !profile.showDriftVisualization })}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                      </Box>
+                    </CardContent>
+                  </Card>
                 </Grid>
               </AdvancedOption>
 
-
-              {/* Altitudes */}
+              {/* Altitude Planning Card */}
               <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Altitudes
-                </Typography>
-              </Grid>
-              
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Jump Altitude"
-                  value={displayJumpAltitude.toFixed(0)}
-                  onChange={(e) => {
-                    const displayValue = parseFloat(e.target.value) || 0;
-                    const metersValue = convertAltitude(displayValue, userPreferences.units.altitude, 'meters');
-                    updateProfile(profile.id, {
-                      parameters: {
-                        ...profile.parameters,
-                        jumpAltitude: metersValue
-                      }
-                    });
-                  }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">
-                      {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
-                    </InputAdornment>
-                  }}
-                />
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                      Altitude Planning
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Jump Altitude"
+                          value={displayJumpAltitude.toFixed(0)}
+                          onChange={(e) => {
+                            const displayValue = parseFloat(e.target.value) || 0;
+                            const metersValue = convertAltitude(displayValue, userPreferences.units.altitude, 'meters');
+                            updateProfile(profile.id, {
+                              parameters: {
+                                ...profile.parameters,
+                                jumpAltitude: metersValue
+                              }
+                            });
+                          }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">
+                              {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
+                            </InputAdornment>
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Opening Altitude"
+                          value={displayOpeningAltitude.toFixed(0)}
+                          onChange={(e) => {
+                            const displayValue = parseFloat(e.target.value) || 0;
+                            const metersValue = convertAltitude(displayValue, userPreferences.units.altitude, 'meters');
+                            updateProfile(profile.id, {
+                              parameters: {
+                                ...profile.parameters,
+                                openingAltitude: metersValue
+                              }
+                            });
+                          }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">
+                              {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
+                            </InputAdornment>
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Setup Altitude"
+                          value={displaySetupAltitude.toFixed(0)}
+                          onChange={(e) => {
+                            const displayValue = parseFloat(e.target.value) || 0;
+                            const metersValue = convertAltitude(displayValue, userPreferences.units.altitude, 'meters');
+                            updateProfile(profile.id, {
+                              parameters: {
+                                ...profile.parameters,
+                                setupAltitude: metersValue
+                              }
+                            });
+                          }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">
+                              {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
+                            </InputAdornment>
+                          }}
+                          helperText="Altitude AGL to be on top of landing zone"
+                        />
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
               </Grid>
 
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Opening Altitude"
-                  value={displayOpeningAltitude.toFixed(0)}
-                  onChange={(e) => {
-                    const displayValue = parseFloat(e.target.value) || 0;
-                    const metersValue = convertAltitude(displayValue, userPreferences.units.altitude, 'meters');
-                    updateProfile(profile.id, {
-                      parameters: {
-                        ...profile.parameters,
-                        openingAltitude: metersValue
-                      }
-                    });
-                  }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">
-                      {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
-                    </InputAdornment>
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Setup Altitude"
-                  value={displaySetupAltitude.toFixed(0)}
-                  onChange={(e) => {
-                    const displayValue = parseFloat(e.target.value) || 0;
-                    const metersValue = convertAltitude(displayValue, userPreferences.units.altitude, 'meters');
-                    updateProfile(profile.id, {
-                      parameters: {
-                        ...profile.parameters,
-                        setupAltitude: metersValue
-                      }
-                    });
-                  }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">
-                      {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
-                    </InputAdornment>
-                  }}
-                  helperText="Altitude AGL to be on top of landing zone"
-                />
-              </Grid>
-
-              {/* Speeds */}
+              {/* Speed Card */}
               <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Speeds
-                </Typography>
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                      Speeds
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Aircraft Speed"
+                          value={displayAircraftSpeed.toFixed(1)}
+                          onChange={(e) => {
+                            const displayValue = parseFloat(e.target.value) || 0;
+                            const msValue = convertSpeed(displayValue, userPreferences.units.speed, 'ms');
+                            updateProfile(profile.id, {
+                              parameters: {
+                                ...profile.parameters,
+                                aircraftSpeed: msValue
+                              }
+                            });
+                          }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">
+                              {userPreferences.units.speed === 'ms' ? 'm/s' : 
+                               userPreferences.units.speed === 'kmh' ? 'km/h' :
+                               userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
+                            </InputAdornment>
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Freefall Speed"
+                          value={displayFreefallSpeed.toFixed(1)}
+                          onChange={(e) => {
+                            const displayValue = parseFloat(e.target.value) || 0;
+                            const msValue = convertSpeed(displayValue, userPreferences.units.speed, 'ms');
+                            updateProfile(profile.id, {
+                              parameters: {
+                                ...profile.parameters,
+                                freefallSpeed: msValue
+                              }
+                            });
+                          }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">
+                              {userPreferences.units.speed === 'ms' ? 'm/s' : 
+                               userPreferences.units.speed === 'kmh' ? 'km/h' :
+                               userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
+                            </InputAdornment>
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Canopy Descent Rate"
+                          value={displayCanopyDescentRate.toFixed(1)}
+                          onChange={(e) => {
+                            const displayValue = parseFloat(e.target.value) || 0;
+                            const msValue = convertSpeed(displayValue, userPreferences.units.speed, 'ms');
+                            updateProfile(profile.id, {
+                              parameters: {
+                                ...profile.parameters,
+                                canopyDescentRate: msValue
+                              }
+                            });
+                          }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">
+                              {userPreferences.units.speed === 'ms' ? 'm/s' : 
+                               userPreferences.units.speed === 'kmh' ? 'km/h' :
+                               userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
+                            </InputAdornment>
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
               </Grid>
 
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Aircraft Speed"
-                  value={displayAircraftSpeed.toFixed(1)}
-                  onChange={(e) => {
-                    const displayValue = parseFloat(e.target.value) || 0;
-                    const msValue = convertSpeed(displayValue, userPreferences.units.speed, 'ms');
-                    updateProfile(profile.id, {
-                      parameters: {
-                        ...profile.parameters,
-                        aircraftSpeed: msValue
-                      }
-                    });
-                  }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">
-                      {userPreferences.units.speed === 'ms' ? 'm/s' : 
-                       userPreferences.units.speed === 'kmh' ? 'km/h' :
-                       userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
-                    </InputAdornment>
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Freefall Speed"
-                  value={displayFreefallSpeed.toFixed(1)}
-                  onChange={(e) => {
-                    const displayValue = parseFloat(e.target.value) || 0;
-                    const msValue = convertSpeed(displayValue, userPreferences.units.speed, 'ms');
-                    updateProfile(profile.id, {
-                      parameters: {
-                        ...profile.parameters,
-                        freefallSpeed: msValue
-                      }
-                    });
-                  }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">
-                      {userPreferences.units.speed === 'ms' ? 'm/s' : 
-                       userPreferences.units.speed === 'kmh' ? 'km/h' :
-                       userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
-                    </InputAdornment>
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Canopy Descent Rate"
-                  value={displayCanopyDescentRate.toFixed(1)}
-                  onChange={(e) => {
-                    const displayValue = parseFloat(e.target.value) || 0;
-                    const msValue = convertSpeed(displayValue, userPreferences.units.speed, 'ms');
-                    updateProfile(profile.id, {
-                      parameters: {
-                        ...profile.parameters,
-                        canopyDescentRate: msValue
-                      }
-                    });
-                  }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">
-                      {userPreferences.units.speed === 'ms' ? 'm/s' : 
-                       userPreferences.units.speed === 'kmh' ? 'km/h' :
-                       userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
-                    </InputAdornment>
-                  }}
-                />
-              </Grid>
-
-              {/* Canopy Performance */}
+              {/* Canopy Performance Card */}
               <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Canopy Performance
-                </Typography>
-              </Grid>
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                      Canopy Performance
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Glide Ratio"
+                          value={profile.parameters.glideRatio}
+                          onChange={handleParameterChange('glideRatio')}
+                          type="number"
+                          step="0.1"
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">:1</InputAdornment>
+                          }}
+                        />
+                      </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Glide Ratio"
-                  value={profile.parameters.glideRatio}
-                  onChange={handleParameterChange('glideRatio')}
-                  type="number"
-                  step="0.1"
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">:1</InputAdornment>
-                  }}
-                />
+                      <AdvancedOption>
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            label="Canopy Air Speed (calculated)"
+                            value={displayCanopyAirSpeed.toFixed(1)}
+                            InputProps={{
+                              readOnly: true,
+                              endAdornment: <InputAdornment position="end">
+                                {userPreferences.units.speed === 'ms' ? 'm/s' : 
+                                 userPreferences.units.speed === 'kmh' ? 'km/h' :
+                                 userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
+                              </InputAdornment>
+                            }}
+                            sx={{ 
+                              '& .MuiInputBase-input': { 
+                                backgroundColor: 'action.hover' 
+                              } 
+                            }}
+                          />
+                        </Grid>
+                      </AdvancedOption>
+                    </Grid>
+                  </CardContent>
+                </Card>
               </Grid>
-
-              <AdvancedOption>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Canopy Air Speed (calculated)"
-                    value={displayCanopyAirSpeed.toFixed(1)}
-                    InputProps={{
-                      readOnly: true,
-                      endAdornment: <InputAdornment position="end">
-                        {userPreferences.units.speed === 'ms' ? 'm/s' : 
-                         userPreferences.units.speed === 'kmh' ? 'km/h' :
-                         userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
-                      </InputAdornment>
-                    }}
-                    sx={{ 
-                      '& .MuiInputBase-input': { 
-                        backgroundColor: 'action.hover' 
-                      } 
-                    }}
-                  />
-                </Grid>
-              </AdvancedOption>
 
             </Grid>
           </Box>

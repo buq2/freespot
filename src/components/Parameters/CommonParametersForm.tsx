@@ -10,6 +10,8 @@ import {
   IconButton,
   Stack,
   Tooltip,
+  Card,
+  CardContent,
 } from '@mui/material';
 import { Add, Remove, Schedule } from '@mui/icons-material';
 import { CollapsibleSection } from '../Common/CollapsibleSection';
@@ -82,14 +84,15 @@ export const CommonParametersForm: React.FC = () => {
       defaultExpanded={true}
     >
       <Grid container spacing={3}>
-        {/* Jump Time */}
+        {/* Time & Date Card */}
         <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Jump Time
-          </Typography>
-        </Grid>
-        
-        <Grid item xs={12} sm={6}>
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                Time & Date
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DateTimePicker
               label="Jump Date & Time"
@@ -106,173 +109,190 @@ export const CommonParametersForm: React.FC = () => {
           </LocalizationProvider>
         </Grid>
 
-        {/* Time Control Buttons */}
-        <Grid item xs={12} sm={6}>
-          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Stack direction="row" spacing={1} sx={{ width: '100%', justifyContent: 'center' }}>
-              <Tooltip title="Subtract 1 hour">
-                <IconButton 
-                  onClick={handleTimeDecrement}
-                  size="small"
-                  color="primary"
-                  sx={{ 
-                    border: 1, 
-                    borderColor: 'primary.main',
-                    '&:hover': { 
-                      backgroundColor: 'primary.main', 
-                      color: 'white' 
-                    }
-                  }}
-                >
-                  <Remove />
-                </IconButton>
-              </Tooltip>
-              
-              <Tooltip title="Set to current time (rounded to nearest hour)">
-                <IconButton 
-                  onClick={handleSetToNow}
-                  size="small"
-                  color="primary"
-                  sx={{ 
-                    border: 1, 
-                    borderColor: 'primary.main',
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    '&:hover': { 
-                      backgroundColor: 'primary.dark' 
-                    }
-                  }}
-                >
-                  <Schedule />
-                </IconButton>
-              </Tooltip>
-              
-              <Tooltip title="Add 1 hour">
-                <IconButton 
-                  onClick={handleTimeIncrement}
-                  size="small"
-                  color="primary"
-                  sx={{ 
-                    border: 1, 
-                    borderColor: 'primary.main',
-                    '&:hover': { 
-                      backgroundColor: 'primary.main', 
-                      color: 'white' 
-                    }
-                  }}
-                >
-                  <Add />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          </Box>
+                {/* Time Control Buttons */}
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                    <Stack direction="row" spacing={1} sx={{ width: '100%', justifyContent: 'center' }}>
+                      <Tooltip title="Subtract 1 hour">
+                        <IconButton 
+                          onClick={handleTimeDecrement}
+                          size="small"
+                          color="primary"
+                          sx={{ 
+                            border: 1, 
+                            borderColor: 'primary.main',
+                            '&:hover': { 
+                              backgroundColor: 'primary.main', 
+                              color: 'white' 
+                            }
+                          }}
+                        >
+                          <Remove />
+                        </IconButton>
+                      </Tooltip>
+                      
+                      <Tooltip title="Set to current time (rounded to nearest hour)">
+                        <IconButton 
+                          onClick={handleSetToNow}
+                          size="small"
+                          color="primary"
+                          sx={{ 
+                            border: 1, 
+                            borderColor: 'primary.main',
+                            backgroundColor: 'primary.main',
+                            color: 'white',
+                            '&:hover': { 
+                              backgroundColor: 'primary.dark' 
+                            }
+                          }}
+                        >
+                          <Schedule />
+                        </IconButton>
+                      </Tooltip>
+                      
+                      <Tooltip title="Add 1 hour">
+                        <IconButton 
+                          onClick={handleTimeIncrement}
+                          size="small"
+                          color="primary"
+                          sx={{ 
+                            border: 1, 
+                            borderColor: 'primary.main',
+                            '&:hover': { 
+                              backgroundColor: 'primary.main', 
+                              color: 'white' 
+                            }
+                          }}
+                        >
+                          <Add />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Grid>
 
-        {/* Landing Zone */}
+        {/* Location Card */}
         <AdvancedOption>
           <Grid item xs={12}>
-            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-              Landing Zone Coordinates
-            </Typography>
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <CoordinateField
-              fullWidth
-              size="small"
-              label="Latitude"
-              value={commonParameters.landingZone.lat}
-              onChange={(lat) => updateCommonParameter('landingZone', {
-                ...commonParameters.landingZone, lat
-              })}
-              coordinateType="latitude"
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <CoordinateField
-              fullWidth
-              size="small"
-              label="Longitude"
-              value={commonParameters.landingZone.lon}
-              onChange={(lon) => updateCommonParameter('landingZone', {
-                ...commonParameters.landingZone, lon
-              })}
-              coordinateType="longitude"
-            />
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                  Location
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <CoordinateField
+                      fullWidth
+                      size="small"
+                      label="Latitude"
+                      value={commonParameters.landingZone.lat}
+                      onChange={(lat) => updateCommonParameter('landingZone', {
+                        ...commonParameters.landingZone, lat
+                      })}
+                      coordinateType="latitude"
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6}>
+                    <CoordinateField
+                      fullWidth
+                      size="small"
+                      label="Longitude"
+                      value={commonParameters.landingZone.lon}
+                      onChange={(lon) => updateCommonParameter('landingZone', {
+                        ...commonParameters.landingZone, lon
+                      })}
+                      coordinateType="longitude"
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
           </Grid>
         </AdvancedOption>
 
-        {/* Flight Direction */}
+        {/* Flight Planning Card */}
         <AdvancedOption>
           <Grid item xs={12}>
-            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-              Aircraft Flight Direction
-            </Typography>
-          </Grid>
-        
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              size="small"
-              label="Flight Direction"
-              value={commonParameters.flightDirection !== undefined ? commonParameters.flightDirection.toFixed(1) : ''}
-              onChange={handleFlightDirectionChange}
-              placeholder="Auto (headwind)"
-              InputProps={{
-                endAdornment: <InputAdornment position="end">°</InputAdornment>
-              }}
-              helperText="Leave empty for automatic headwind direction"
-            />
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                  Flight Planning
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Flight Direction"
+                      value={commonParameters.flightDirection !== undefined ? commonParameters.flightDirection.toFixed(1) : ''}
+                      onChange={handleFlightDirectionChange}
+                      placeholder="Auto (headwind)"
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">°</InputAdornment>
+                      }}
+                      helperText="Leave empty for automatic headwind direction"
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={6}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={commonParameters.flightOverLandingZone}
+                          onChange={handleFlightOverLandingZoneChange}
+                          size="small"
+                        />
+                      }
+                      label="Fly directly over landing zone"
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
           </Grid>
         </AdvancedOption>
 
-        <AdvancedOption>
-          <Grid item xs={12} sm={6}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={commonParameters.flightOverLandingZone}
-                  onChange={handleFlightOverLandingZoneChange}
-                  size="small"
-                />
-              }
-              label="Fly directly over landing zone"
-            />
-          </Grid>
-        </AdvancedOption>
-
-        {/* Jump Groups */}
+        {/* Jump Groups Card */}
         <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Jump Groups
-          </Typography>
-        </Grid>
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                Jump Groups
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Number of Groups"
+                    value={commonParameters.numberOfGroups}
+                    onChange={handleParameterChange('numberOfGroups')}
+                    type="number"
+                    inputProps={{ min: 1, max: 10 }}
+                  />
+                </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            size="small"
-            label="Number of Groups"
-            value={commonParameters.numberOfGroups}
-            onChange={handleParameterChange('numberOfGroups')}
-            type="number"
-            inputProps={{ min: 1, max: 10 }}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            size="small"
-            label="Time Between Groups"
-            value={commonParameters.timeBetweenGroups}
-            onChange={handleParameterChange('timeBetweenGroups')}
-            type="number"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">sec</InputAdornment>
-            }}
-          />
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Time Between Groups"
+                    value={commonParameters.timeBetweenGroups}
+                    onChange={handleParameterChange('timeBetweenGroups')}
+                    type="number"
+                    InputProps={{
+                      endAdornment: <InputAdornment position="end">sec</InputAdornment>
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </CollapsibleSection>
