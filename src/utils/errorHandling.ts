@@ -3,42 +3,46 @@
  * and error classification throughout the application.
  */
 
-export const enum ErrorType {
+export const ErrorType = {
   // Network and API errors
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  API_ERROR = 'API_ERROR',
-  WEATHER_API_ERROR = 'WEATHER_API_ERROR',
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+  NETWORK_ERROR: 'NETWORK_ERROR',
+  API_ERROR: 'API_ERROR',
+  WEATHER_API_ERROR: 'WEATHER_API_ERROR',
+  TIMEOUT_ERROR: 'TIMEOUT_ERROR',
   
   // Validation errors
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  INVALID_COORDINATES = 'INVALID_COORDINATES',
-  INVALID_PARAMETERS = 'INVALID_PARAMETERS',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INVALID_COORDINATES: 'INVALID_COORDINATES',
+  INVALID_PARAMETERS: 'INVALID_PARAMETERS',
   
   // Calculation errors
-  CALCULATION_ERROR = 'CALCULATION_ERROR',
-  PHYSICS_ERROR = 'PHYSICS_ERROR',
-  WEATHER_DATA_ERROR = 'WEATHER_DATA_ERROR',
+  CALCULATION_ERROR: 'CALCULATION_ERROR',
+  PHYSICS_ERROR: 'PHYSICS_ERROR',
+  WEATHER_DATA_ERROR: 'WEATHER_DATA_ERROR',
   
   // User interface errors
-  RENDER_ERROR = 'RENDER_ERROR',
-  COMPONENT_ERROR = 'COMPONENT_ERROR',
+  RENDER_ERROR: 'RENDER_ERROR',
+  COMPONENT_ERROR: 'COMPONENT_ERROR',
   
   // Storage errors
-  STORAGE_ERROR = 'STORAGE_ERROR',
-  CACHE_ERROR = 'CACHE_ERROR',
+  STORAGE_ERROR: 'STORAGE_ERROR',
+  CACHE_ERROR: 'CACHE_ERROR',
   
   // Generic errors
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
-  CONFIGURATION_ERROR = 'CONFIGURATION_ERROR'
-}
+  UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+  CONFIGURATION_ERROR: 'CONFIGURATION_ERROR'
+} as const;
 
-export const enum ErrorSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
+export type ErrorType = typeof ErrorType[keyof typeof ErrorType];
+
+export const ErrorSeverity = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical'
+} as const;
+
+export type ErrorSeverity = typeof ErrorSeverity[keyof typeof ErrorSeverity];
 
 export interface AppError extends Error {
   type: ErrorType;
