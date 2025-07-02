@@ -82,111 +82,6 @@ export const CommonParametersForm: React.FC = () => {
       defaultExpanded={true}
     >
       <Grid container spacing={3}>
-        {/* Landing Zone */}
-        <AdvancedOption>
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-              Landing Zone Coordinates
-            </Typography>
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <CoordinateField
-              fullWidth
-              size="small"
-              label="Latitude"
-              value={commonParameters.landingZone.lat}
-              onChange={(lat) => updateCommonParameter('landingZone', {
-                ...commonParameters.landingZone, lat
-              })}
-              coordinateType="latitude"
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <CoordinateField
-              fullWidth
-              size="small"
-              label="Longitude"
-              value={commonParameters.landingZone.lon}
-              onChange={(lon) => updateCommonParameter('landingZone', {
-                ...commonParameters.landingZone, lon
-              })}
-              coordinateType="longitude"
-            />
-          </Grid>
-        </AdvancedOption>
-
-        {/* Flight Direction */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Aircraft Flight Direction
-          </Typography>
-        </Grid>
-        
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            size="small"
-            label="Flight Direction"
-            value={commonParameters.flightDirection !== undefined ? commonParameters.flightDirection.toFixed(1) : ''}
-            onChange={handleFlightDirectionChange}
-            placeholder="Auto (headwind)"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">°</InputAdornment>
-            }}
-            helperText="Leave empty for automatic headwind direction"
-          />
-        </Grid>
-
-        <AdvancedOption>
-          <Grid item xs={12} sm={6}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={commonParameters.flightOverLandingZone}
-                  onChange={handleFlightOverLandingZoneChange}
-                  size="small"
-                />
-              }
-              label="Fly directly over landing zone"
-            />
-          </Grid>
-        </AdvancedOption>
-
-        {/* Jump Groups */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Jump Groups
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            size="small"
-            label="Number of Groups"
-            value={commonParameters.numberOfGroups}
-            onChange={handleParameterChange('numberOfGroups')}
-            type="number"
-            inputProps={{ min: 1, max: 10 }}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            size="small"
-            label="Time Between Groups"
-            value={commonParameters.timeBetweenGroups}
-            onChange={handleParameterChange('timeBetweenGroups')}
-            type="number"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">sec</InputAdornment>
-            }}
-          />
-        </Grid>
-
         {/* Jump Time */}
         <Grid item xs={12}>
           <Typography variant="subtitle2" color="textSecondary" gutterBottom>
@@ -271,6 +166,113 @@ export const CommonParametersForm: React.FC = () => {
               </Tooltip>
             </Stack>
           </Box>
+        </Grid>
+
+        {/* Landing Zone */}
+        <AdvancedOption>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Landing Zone Coordinates
+            </Typography>
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <CoordinateField
+              fullWidth
+              size="small"
+              label="Latitude"
+              value={commonParameters.landingZone.lat}
+              onChange={(lat) => updateCommonParameter('landingZone', {
+                ...commonParameters.landingZone, lat
+              })}
+              coordinateType="latitude"
+            />
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <CoordinateField
+              fullWidth
+              size="small"
+              label="Longitude"
+              value={commonParameters.landingZone.lon}
+              onChange={(lon) => updateCommonParameter('landingZone', {
+                ...commonParameters.landingZone, lon
+              })}
+              coordinateType="longitude"
+            />
+          </Grid>
+        </AdvancedOption>
+
+        {/* Flight Direction */}
+        <AdvancedOption>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Aircraft Flight Direction
+            </Typography>
+          </Grid>
+        
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Flight Direction"
+              value={commonParameters.flightDirection !== undefined ? commonParameters.flightDirection.toFixed(1) : ''}
+              onChange={handleFlightDirectionChange}
+              placeholder="Auto (headwind)"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">°</InputAdornment>
+              }}
+              helperText="Leave empty for automatic headwind direction"
+            />
+          </Grid>
+        </AdvancedOption>
+
+        <AdvancedOption>
+          <Grid item xs={12} sm={6}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={commonParameters.flightOverLandingZone}
+                  onChange={handleFlightOverLandingZoneChange}
+                  size="small"
+                />
+              }
+              label="Fly directly over landing zone"
+            />
+          </Grid>
+        </AdvancedOption>
+
+        {/* Jump Groups */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+            Jump Groups
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label="Number of Groups"
+            value={commonParameters.numberOfGroups}
+            onChange={handleParameterChange('numberOfGroups')}
+            type="number"
+            inputProps={{ min: 1, max: 10 }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            size="small"
+            label="Time Between Groups"
+            value={commonParameters.timeBetweenGroups}
+            onChange={handleParameterChange('timeBetweenGroups')}
+            type="number"
+            InputProps={{
+              endAdornment: <InputAdornment position="end">sec</InputAdornment>
+            }}
+          />
         </Grid>
       </Grid>
     </CollapsibleSection>
