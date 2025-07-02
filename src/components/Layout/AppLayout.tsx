@@ -19,6 +19,7 @@ import { Menu, Close, ChevronLeft, Tune } from '@mui/icons-material';
 import { useAppContext, useAdvancedMode } from '../../contexts';
 import { JumpParametersForm } from '../Parameters';
 import { useWeatherCalculations, useExitPointCalculations } from '../../hooks';
+import { weatherCache } from '../../services/weather/cache';
 
 // Lazy load heavy components
 const MapContainer = React.lazy(() => import('../Map/MapContainer').then(module => ({ default: module.MapContainer })));
@@ -162,17 +163,54 @@ export const AppLayout: React.FC = () => {
     }
   }, []); // Empty dependency array to prevent recreation
 
-  // Auto-calculate when parameters change
+  // Auto-calculate when parameters change with conditional debounce
   useEffect(() => {
     // Only calculate if we have selected models, enabled profiles, and a valid landing zone
     if (selectedModels.length > 0 && exitPointCalculations.enabledProfiles.length > 0 && commonParameters.landingZone.lat && commonParameters.landingZone.lon) {
-      const delayDebounce = setTimeout(() => {
-        handleCalculate();
-      }, 500); // 500ms debounce to avoid too many API calls
-
-      return () => clearTimeout(delayDebounce);
+      
+      let timeoutId: NodeJS.Timeout | null = null;
+      
+      // Check if weather data is already cached for current parameters
+      const checkCacheAndCalculate = async () => {
+        try {
+          const cachedData = await weatherCache.get(
+            { lat: commonParameters.landingZone.lat!, lon: commonParameters.landingZone.lon! },
+            commonParameters.jumpTime
+          );
+          
+          // If we have cached data for all selected models, skip debounce
+          const hasAllModels = cachedData && selectedModels.every(modelId => 
+            cachedData.weatherModels[modelId] && cachedData.weatherModels[modelId].length > 0
+          );
+          
+          if (hasAllModels) {
+            // Data is available, calculate immediately
+            handleCalculate();
+          } else {
+            // Data not available, use debounce to avoid rapid API calls
+            timeoutId = setTimeout(() => {
+              handleCalculate();
+            }, 500);
+          }
+        } catch (error) {
+          // If cache check fails, fall back to debounced calculation
+          console.warn('Cache check failed, using debounced calculation:', error);
+          timeoutId = setTimeout(() => {
+            handleCalculate();
+          }, 500);
+        }
+      };
+      
+      checkCacheAndCalculate();
+      
+      // Cleanup function
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
     }
-  }, [exitPointCalculations.enabledProfiles, commonParameters, selectedModels, customWeatherData, handleCalculate]); // Restore handleCalculate dependency
+  }, [exitPointCalculations.enabledProfiles, commonParameters, selectedModels, customWeatherData, handleCalculate]);
 
   return (
     <Box sx={{ height: '100vh', overflow: 'hidden' }}>
