@@ -320,7 +320,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                               {userPreferences.units.altitude === 'meters' ? 'm' : 'ft'}
                             </InputAdornment>
                           }}
-                          helperText="Altitude AGL to be on top of landing zone"
+                          helperText="Altitude to be on top of landing zone"
                         />
                       </Grid>
                     </Grid>
