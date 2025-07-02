@@ -28,17 +28,6 @@ export const landingZoneIcon = L.divIcon({
   iconAnchor: [20, 20],
 });
 
-// Exit point icon (airplane) - default blue version for backward compatibility
-export const exitPointIcon = L.divIcon({
-  className: 'exit-point-icon',
-  html: `
-    <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
-      <path d="M15 5 L10 25 L15 20 L20 25 Z" fill="#0066ff" stroke="#004499" stroke-width="1"/>
-    </svg>
-  `,
-  iconSize: [30, 30],
-  iconAnchor: [15, 15],
-});
 
 // Exit point icon with custom color
 export const createExitPointIcon = (color: string = '#0066ff') => {
@@ -61,28 +50,6 @@ export const createExitPointIcon = (color: string = '#0066ff') => {
   });
 };
 
-// Group exit icon (numbered) - default version for backward compatibility
-export const createGroupExitIcon = (groupNumber: number) => L.divIcon({
-  className: 'group-exit-icon',
-  html: `
-    <div style="
-      background: #0066ff;
-      color: white;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 12px;
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    ">${groupNumber}</div>
-  `,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-});
 
 // Group exit icon with custom color
 export const createColoredGroupExitIcon = (groupNumber: number, color: string = '#0066ff') => {
