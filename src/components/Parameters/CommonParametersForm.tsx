@@ -265,7 +265,7 @@ export const CommonParametersForm: React.FC = () => {
                 Jump Groups
               </Typography>
               <Grid container spacing={2}>
-                <Grid>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
@@ -280,7 +280,7 @@ export const CommonParametersForm: React.FC = () => {
                   />
                 </Grid>
 
-                <Grid>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     size="small"
