@@ -42,7 +42,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
       <Grid container spacing={3}>
         {/* Optimal Exit Point */}
         <AdvancedOption>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card variant="outlined">
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -71,7 +71,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
         </AdvancedOption>
 
         {/* Aircraft Information */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card variant="outlined">
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -103,7 +103,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
 
         {/* Exit Points List */}
         <AdvancedOption>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Card variant="outlined">
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -141,7 +141,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
         </AdvancedOption>
 
         {/* Summary Statistics */}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Card variant="outlined" sx={{ bgcolor: 'background.default' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -149,7 +149,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
               </Typography>
               
               <Grid container spacing={2}>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <Typography variant="body2" color="textSecondary">
                     Total Groups
                   </Typography>
@@ -158,7 +158,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
                   </Typography>
                 </Grid>
                 
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <Typography variant="body2" color="textSecondary">
                     Safety Radius
                   </Typography>
@@ -167,7 +167,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
                   </Typography>
                 </Grid>
                 
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <Typography variant="body2" color="textSecondary">
                     Flight Heading
                   </Typography>
@@ -176,7 +176,7 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
                   </Typography>
                 </Grid>
                 
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <Typography variant="body2" color="textSecondary">
                     Exit Spread
                   </Typography>

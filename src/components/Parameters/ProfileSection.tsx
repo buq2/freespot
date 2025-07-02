@@ -180,7 +180,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
             <Grid container spacing={3}>
               {/* Visualization Settings Card */}
               <AdvancedOption>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="subtitle2" color="textSecondary" gutterBottom>
@@ -226,14 +226,14 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
               </AdvancedOption>
 
               {/* Altitude Planning Card */}
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                       Altitude Planning
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -257,7 +257,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                         />
                       </Grid>
 
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -281,7 +281,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                         />
                       </Grid>
 
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -311,14 +311,14 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
               </Grid>
 
               {/* Speed Card */}
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                       Speeds
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -344,7 +344,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                         />
                       </Grid>
 
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -370,7 +370,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                         />
                       </Grid>
 
-                      <Grid item xs={12} sm={4}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -401,14 +401,14 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
               </Grid>
 
               {/* Canopy Performance Card */}
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                       Canopy Performance
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -416,15 +416,15 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                           value={profile.parameters.glideRatio}
                           onChange={handleParameterChange('glideRatio')}
                           type="number"
-                          step="0.1"
                           InputProps={{
                             endAdornment: <InputAdornment position="end">:1</InputAdornment>
                           }}
+                          inputProps={{ step: "0.1" }}
                         />
                       </Grid>
 
                       <AdvancedOption>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <TextField
                             fullWidth
                             size="small"

@@ -18,7 +18,7 @@ import type { Units } from '../../types';
 export const UserPreferencesForm: React.FC = () => {
   const { userPreferences, updatePreference, updateUnits } = usePreferencesContext();
 
-  const handleUnitsChange = (unitType: keyof Units) => (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleUnitsChange = (unitType: keyof Units) => (event: React.ChangeEvent<HTMLInputElement>) => {
     updateUnits({ [unitType]: event.target.value as Units[typeof unitType] });
   };
 
@@ -37,14 +37,14 @@ export const UserPreferencesForm: React.FC = () => {
     >
       <Grid container spacing={3}>
         {/* Units Card */}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Card variant="outlined">
             <CardContent>
               <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                 Units
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Altitude</InputLabel>
                     <Select
@@ -58,7 +58,7 @@ export const UserPreferencesForm: React.FC = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Speed</InputLabel>
                     <Select
@@ -74,7 +74,7 @@ export const UserPreferencesForm: React.FC = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <FormControl fullWidth size="small">
                     <InputLabel>Temperature</InputLabel>
                     <Select
@@ -93,14 +93,14 @@ export const UserPreferencesForm: React.FC = () => {
         </Grid>
 
         {/* Wind Warning Limits Card */}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Card variant="outlined">
             <CardContent>
               <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                 Wind Warning Limits
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     size="small"
@@ -108,7 +108,7 @@ export const UserPreferencesForm: React.FC = () => {
                     value={userPreferences.studentWindLimit}
                     onChange={handleWindLimitChange('studentWindLimit')}
                     type="number"
-                    step="0.5"
+                    inputProps={{ step: "0.5" }}
                     InputProps={{
                       endAdornment: <InputAdornment position="end">m/s</InputAdornment>
                     }}
@@ -116,7 +116,7 @@ export const UserPreferencesForm: React.FC = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     size="small"
@@ -124,7 +124,7 @@ export const UserPreferencesForm: React.FC = () => {
                     value={userPreferences.sportWindLimit}
                     onChange={handleWindLimitChange('sportWindLimit')}
                     type="number"
-                    step="0.5"
+                    inputProps={{ step: "0.5" }}
                     InputProps={{
                       endAdornment: <InputAdornment position="end">m/s</InputAdornment>
                     }}

@@ -78,14 +78,14 @@ export const CommonParametersForm: React.FC = () => {
     >
       <Grid container spacing={3}>
         {/* Time & Date Card */}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Card variant="outlined">
             <CardContent>
               <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                 Time & Date
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DateTimePicker
               label="Jump Date & Time"
@@ -103,7 +103,7 @@ export const CommonParametersForm: React.FC = () => {
         </Grid>
 
                 {/* Time Control Buttons */}
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                     <Stack direction="row" spacing={1} sx={{ width: '100%', justifyContent: 'center' }}>
                       <Tooltip title="Subtract 1 hour">
@@ -170,14 +170,14 @@ export const CommonParametersForm: React.FC = () => {
 
         {/* Location Card */}
         <AdvancedOption>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                   Location
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <CoordinateField
                       fullWidth
                       size="small"
@@ -190,7 +190,7 @@ export const CommonParametersForm: React.FC = () => {
                     />
                   </Grid>
                   
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <CoordinateField
                       fullWidth
                       size="small"
@@ -210,14 +210,14 @@ export const CommonParametersForm: React.FC = () => {
 
         {/* Flight Planning Card */}
         <AdvancedOption>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                   Flight Planning
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth
                       size="small"
@@ -232,7 +232,7 @@ export const CommonParametersForm: React.FC = () => {
                     />
                   </Grid>
                   
-                  <Grid item xs={12} sm={6}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <FormControlLabel
                       control={
                         <Switch
@@ -251,14 +251,14 @@ export const CommonParametersForm: React.FC = () => {
         </AdvancedOption>
 
         {/* Jump Groups Card */}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Card variant="outlined">
             <CardContent>
               <Typography variant="subtitle2" color="textSecondary" gutterBottom>
                 Jump Groups
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     size="small"
@@ -267,13 +267,13 @@ export const CommonParametersForm: React.FC = () => {
                     onChange={handleParameterChange('numberOfGroups')}
                     type="number"
                     InputProps={{
-                      min: 1, max: 10,
                       endAdornment: <InputAdornment position="end"></InputAdornment>
                     }}
+                    inputProps={{ min: 1, max: 10 }}
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     size="small"
