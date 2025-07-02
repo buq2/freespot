@@ -31,10 +31,10 @@ const generateProfileId = (): string => {
 export const createDefaultProfiles = (): JumpProfile[] => [
   {
     id: 'sport_jumpers',
-    name: 'Sport Jumpers',
+    name: 'Sport',
     enabled: true,
     color: '#2196F3', // Blue
-    showDriftVisualization: true,
+    showDriftVisualization: false,
     showSafetyCircle: true,
     showGroupExitPoints: true,
     showFlightPath: true,
@@ -55,14 +55,14 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     color: '#FF9800', // Orange
     showDriftVisualization: false,
     showSafetyCircle: true,
-    showGroupExitPoints: true,
-    showFlightPath: true,
+    showGroupExitPoints: false,
+    showFlightPath: false,
     parameters: {
-      jumpAltitude: 3000,
+      jumpAltitude: 4000,
       aircraftSpeed: 36,
-      freefallSpeed: 55.56,
+      freefallSpeed: 50,
       openingAltitude: 1500,
-      canopyDescentRate: 8,
+      canopyDescentRate: 4,
       glideRatio: 2.0,
       setupAltitude: 100,
     },
@@ -74,14 +74,14 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     color: '#4CAF50', // Green
     showDriftVisualization: false,
     showSafetyCircle: true,
-    showGroupExitPoints: true,
-    showFlightPath: true,
+    showGroupExitPoints: false,
+    showFlightPath: false,
     parameters: {
-      jumpAltitude: 3500,
+      jumpAltitude: 4000,
       aircraftSpeed: 36,
       freefallSpeed: 55.56,
-      openingAltitude: 1000,
-      canopyDescentRate: 7,
+      openingAltitude: 1300,
+      canopyDescentRate: 5,
       glideRatio: 2.2,
       setupAltitude: 100,
     },
