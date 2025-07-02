@@ -24,11 +24,6 @@ const PRESSURE_LEVELS = [
   { pressure: 600, altitude: 4200 },
   { pressure: 500, altitude: 5600 },
   { pressure: 400, altitude: 7200 },
-  { pressure: 300, altitude: 9200 },
-  { pressure: 250, altitude: 10400 },
-  { pressure: 200, altitude: 11800 },
-  { pressure: 150, altitude: 13500 },
-  { pressure: 100, altitude: 16000 },
 ];
 
 // Height levels available for all models (already in AGL)
@@ -298,6 +293,7 @@ export const fetchWeatherData = async (
   }
 
   // Fetch weather data
+  console.log(`Fetching data ${params}`)
   const response = await fetch(`${OPENMETEO_API_URL}?${params}`);
   if (!response.ok) {
     throw new Error(`Weather API error: ${response.statusText}`);
