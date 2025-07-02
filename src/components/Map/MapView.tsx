@@ -185,9 +185,6 @@ export const MapView: React.FC<MapViewProps> = ({
   );
   const hasInitializedRef = useRef(false);
 
-  // Debug: Log when component renders
-  console.log('MapView rendering with center:', mapCenter, 'multiProfileResults:', multiProfileResults.length);
-
   // Only center the map on the very first time we get calculation data
   useEffect(() => {
     const firstResult = multiProfileResults[0] || (exitCalculation ? { calculation: exitCalculation } : null);
