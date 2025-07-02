@@ -89,6 +89,9 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     enabled: true,
     color: '#2196F3', // Blue
     showDriftVisualization: true,
+    showSafetyCircle: true,
+    showGroupExitPoints: true,
+    showFlightPath: true,
     parameters: {
       jumpAltitude: 4000,
       aircraftSpeed: 36,
@@ -105,6 +108,9 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     enabled: false,
     color: '#FF9800', // Orange
     showDriftVisualization: false,
+    showSafetyCircle: true,
+    showGroupExitPoints: false,
+    showFlightPath: false,
     parameters: {
       jumpAltitude: 4000,
       aircraftSpeed: 36,
@@ -121,6 +127,9 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     enabled: false,
     color: '#4CAF50', // Green
     showDriftVisualization: false,
+    showSafetyCircle: true,
+    showGroupExitPoints: false,
+    showFlightPath: false,
     parameters: {
       jumpAltitude: 4000,
       aircraftSpeed: 36,
