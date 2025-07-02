@@ -59,7 +59,7 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
   canDelete = true 
 }) => {
   const { updateProfile, deleteProfile, userPreferences } = useAppContext();
-  const [expanded, setExpanded] = useState(profile.enabled);
+  const [expanded, setExpanded] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showRenameDialog, setShowRenameDialog] = useState(false);
@@ -79,9 +79,6 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
 
   const handleEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateProfile(profile.id, { enabled: event.target.checked });
-    if (event.target.checked) {
-      setExpanded(true);
-    }
   };
 
   const handleShowDriftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
