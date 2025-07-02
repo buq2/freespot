@@ -1,5 +1,5 @@
 import type { LatLon, FullJumpParameters, ForecastData, ExitPoint } from '../types';
-import { movePoint, pointsToVector, calculateBearing, calculateDistance, getDestinationPoint } from './geo';
+import { movePoint, pointsToVector } from './geo';
 import { calculateFreefallDrift, calculateCanopyDrift } from './wind-drift';
 import type { Vector2D } from './vector';
 import { windToVector, addVectors, scaleVector } from './vector';

@@ -1,6 +1,5 @@
-import { useState, useCallback, useMemo } from 'react';
-import { sanitizeInput, sanitizeObject, SanitizationSchemas } from '../utils/inputSanitization';
-import { createAppError, ErrorType, type AppError } from '../utils/errorHandling';
+import { useState, useCallback } from 'react';
+import { sanitizeInput } from '../utils/inputSanitization';
 
 export type ValidationRule<T> = {
   test: (value: T) => boolean;
@@ -206,8 +205,8 @@ export const useFormValidation = <T extends Record<string, any>>(options: {
       const sanitizedValue = sanitizeFieldValue(field, value);
       const newValues = { ...prev.values, [field]: sanitizedValue };
       
-      let newErrors = { ...prev.errors };
-      let newWarnings = { ...prev.warnings };
+      const newErrors = { ...prev.errors };
+      const newWarnings = { ...prev.warnings };
 
       // Validate if real-time validation is enabled or field is configured to validate on change
       const config = schema[field];

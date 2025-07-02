@@ -12,7 +12,7 @@ import {
   Chip,
   Divider
 } from '@mui/material';
-import { Flight, LocationOn, Speed, Height } from '@mui/icons-material';
+import { Flight, LocationOn, Height } from '@mui/icons-material';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import { useAppContext } from '../../contexts';
 import { AdvancedOption } from '../Common';

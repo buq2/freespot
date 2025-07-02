@@ -230,8 +230,7 @@ const extractPressureLevelData = (
 };
 
 export const getAvailableAltitudeLevels = async (
-  location: LatLon,
-  modelId: string
+  location: LatLon
 ): Promise<number[]> => {
   const terrainElevation = await fetchTerrainElevation(location);
   

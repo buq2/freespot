@@ -1,35 +1,27 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
-  Container,
-  Grid,
   AppBar,
   Toolbar,
   Typography,
   CircularProgress,
   Alert,
-  Paper,
   Tabs,
   Tab,
   Drawer,
   IconButton,
-  Fab,
   useTheme,
   useMediaQuery,
   Switch,
   FormControlLabel
 } from '@mui/material';
-import { Settings, Map as MapIcon, CloudDownload, Menu, Close, ChevronLeft, Tune } from '@mui/icons-material';
+import { Menu, Close, ChevronLeft, Tune } from '@mui/icons-material';
 import { useAppContext, useAdvancedMode } from '../../contexts';
 import { JumpParametersForm, UserPreferencesForm, WeatherModelSelector } from '../Parameters';
 import { WeatherTable, WindCompass } from '../Weather';
 import { ExitPointResults } from '../Results';
 import { MapContainer } from '../Map';
 import { useWeatherCalculations, useExitPointCalculations } from '../../hooks';
-import type { ForecastData, JumpProfile } from '../../types';
-
-// Import the type from the hook instead of redefining it
-import type { MultiProfileResult } from '../../hooks';
 
 interface TabPanelProps {
   children?: React.ReactNode;

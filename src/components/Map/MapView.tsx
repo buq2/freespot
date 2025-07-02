@@ -4,7 +4,7 @@ import { LatLng } from 'leaflet';
 import { useAppContext } from '../../contexts';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import './icons'; // Import to trigger Leaflet icon fixes
-import { landingZoneIcon, exitPointIcon, createGroupExitIcon, createWindArrowIcon, createExitPointIcon, createColoredGroupExitIcon } from './icons';
+import { landingZoneIcon, createWindArrowIcon, createExitPointIcon, createColoredGroupExitIcon } from './icons';
 import type { ForecastData, JumpParameters, JumpProfile } from '../../types';
 
 // Multi-profile calculation result
@@ -18,7 +18,6 @@ import { getDestinationPoint, movePoint } from '../../physics/geo';
 import { DrawingManager } from './DrawingManager';
 import { LandingZoneManager } from './LandingZoneManager';
 import { calculateFreefallDrift, calculateCanopyDrift } from '../../physics/wind-drift';
-import { interpolateWeatherData } from '../../services/weather/openmeteo';
 import './leaflet.css';
 
 interface MapViewProps {

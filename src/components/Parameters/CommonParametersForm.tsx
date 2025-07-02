@@ -25,13 +25,6 @@ import { useParametersContext } from '../../contexts/ParametersContext';
 export const CommonParametersForm: React.FC = () => {
   const { commonParameters, updateCommonParameter } = useParametersContext();
 
-  const handleLocationChange = (field: 'lat' | 'lon') => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value) || 0;
-    updateCommonParameter('landingZone', {
-      ...commonParameters.landingZone,
-      [field]: value
-    });
-  };
 
   const handleFlightDirectionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;

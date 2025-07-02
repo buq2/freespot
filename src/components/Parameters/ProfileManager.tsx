@@ -23,8 +23,8 @@ interface ProfileManagerProps {
   onClose?: () => void;
 }
 
-export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
-  const { profiles, commonParameters, addProfile, setProfiles } = useAppContext();
+export const ProfileManager: React.FC<ProfileManagerProps> = () => {
+  const { profiles, addProfile, setProfiles } = useAppContext();
   const primaryProfile = profiles.find(p => p.enabled) || profiles[0];
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
@@ -56,17 +56,6 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
     }
   };
 
-  const handleExportProfile = (profile: JumpProfile) => {
-    const dataStr = JSON.stringify(profile, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${profile.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_profile.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setMenuAnchor(null);
-  };
 
   const handleExportAllProfiles = () => {
     const dataStr = JSON.stringify(profiles, null, 2);

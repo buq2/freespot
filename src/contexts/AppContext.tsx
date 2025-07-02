@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { JumpParameters, CommonParameters, FullJumpParameters, JumpProfile, UserPreferences, LatLon, TerrainData, CachedLocationData, ForecastData } from '../types';
+import type { CommonParameters, FullJumpParameters, JumpProfile, UserPreferences, TerrainData, CachedLocationData, ForecastData } from '../types';
 import { defaultJumpParameters, createDefaultProfiles, generateProfileId } from '../constants/profiles';
 
 interface AppContextType {

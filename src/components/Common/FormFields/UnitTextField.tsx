@@ -2,7 +2,6 @@ import React from 'react';
 import { TextField, InputAdornment } from '@mui/material';
 import { convertSpeed, convertAltitude } from '../../../utils/units';
 import { usePreferencesContext } from '../../../contexts/PreferencesContext';
-import type { Units } from '../../../types';
 
 interface UnitTextFieldProps extends Omit<React.ComponentProps<typeof TextField>, 'value' | 'onChange'> {
   /** The numeric value in base units (meters for altitude, m/s for speed) */

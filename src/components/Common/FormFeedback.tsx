@@ -9,11 +9,9 @@ import {
   LinearProgress,
   Paper,
   Stack,
-  Typography,
-  useTheme
+  Typography
 } from '@mui/material';
 import {
-  CheckCircle,
   Error,
   Warning,
   Info,
@@ -50,7 +48,6 @@ export const ValidationFeedback: React.FC<ValidationFeedbackProps> = ({
   showFieldFeedback = true,
   severity
 }) => {
-  const theme = useTheme();
   const errorCount = Object.keys(errors).length;
   const warningCount = Object.keys(warnings).length;
   

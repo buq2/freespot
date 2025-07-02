@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { JumpProfile, ForecastData, CommonParameters, FullJumpParameters } from '../types';
+import type { JumpProfile, ForecastData, FullJumpParameters } from '../types';
 import { calculateExitPoints as calculateExitPointsPhysics } from '../physics/exit-point';
 import type { ExitCalculationResult } from '../physics/exit-point';
 import { useProfileContext } from '../contexts/ProfileContext';

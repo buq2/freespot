@@ -172,7 +172,7 @@ export const CustomWeatherInput: React.FC<CustomWeatherInputProps> = ({
       setRows(newRows);
       setError(null);
       setTabValue(0); // Switch to manual entry tab
-    } catch (err) {
+    } catch {
       setError('Failed to parse import data. Please check the format.');
     }
   };

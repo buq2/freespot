@@ -83,8 +83,7 @@ export const useFormField = <T>(options: UseFormFieldOptions<T>): UseFormFieldRe
     validationRules = [],
     validateOnChange = false,
     validateOnBlur = true,
-    transform,
-    debounceMs = 0
+    transform
   } = options;
 
   const [value, setValueState] = useState<T>(initialValue);

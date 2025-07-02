@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box, Collapse } from '@mui/material';
 import { useAdvancedMode } from '../../contexts/AdvancedModeContext';
 
 interface AdvancedOptionProps {

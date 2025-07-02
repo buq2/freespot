@@ -60,8 +60,7 @@ export const useWeatherCalculations = (): UseWeatherCalculationsReturn => {
   const { 
     setIsWeatherLoading, 
     setWeatherError, 
-    addToWeatherCache,
-    selectedWeatherModel 
+    addToWeatherCache
   } = useWeatherContext();
   
   // Keep track of the current request to avoid race conditions

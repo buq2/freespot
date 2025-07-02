@@ -7,20 +7,16 @@ import {
   Select,
   MenuItem,
   Typography,
-  Switch,
-  FormControlLabel,
   InputAdornment,
   Card,
   CardContent,
 } from '@mui/material';
 import { CollapsibleSection } from '../Common/CollapsibleSection';
 import { usePreferencesContext } from '../../contexts/PreferencesContext';
-import { useResponsive } from '../../hooks/useResponsive';
 import type { Units } from '../../types';
 
 export const UserPreferencesForm: React.FC = () => {
   const { userPreferences, updatePreference, updateUnits } = usePreferencesContext();
-  const responsive = useResponsive();
 
   const handleUnitsChange = (unitType: keyof Units) => (event: React.ChangeEvent<{ value: unknown }>) => {
     updateUnits({ [unitType]: event.target.value as Units[typeof unitType] });

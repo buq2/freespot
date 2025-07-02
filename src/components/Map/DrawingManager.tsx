@@ -40,7 +40,7 @@ export const DrawingManager: React.FC<DrawingManagerProps> = ({
   // Use custom hook to manage map interaction mode
   useMapInteractionMode(map, isActive);
   
-  const mapEvents = useMapEvents({
+  useMapEvents({
     click: (e) => {
       if (isActive) {
         const newPoints = [...points, e.latlng];
