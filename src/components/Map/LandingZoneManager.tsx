@@ -1,7 +1,8 @@
-import React from 'react';
-import { useMapEvents } from 'react-leaflet';
+import React, { useEffect } from 'react';
+import { useMapEvents, useMap } from 'react-leaflet';
 import { IconButton, Tooltip, Box, Typography, Paper, useTheme } from '@mui/material';
 import { Clear } from '@mui/icons-material';
+import { useMapInteractionMode } from '../../hooks/useMapInteractionMode';
 
 interface LandingZoneManagerProps {
   onLandingZoneSet: (lat: number, lon: number) => void;
@@ -15,8 +16,12 @@ export const LandingZoneManager: React.FC<LandingZoneManagerProps> = ({
   onCancel
 }) => {
   const theme = useTheme();
+  const map = useMap();
   
-  const map = useMapEvents({
+  // Use custom hook to manage map interaction mode
+  useMapInteractionMode(map, isActive);
+  
+  const mapEvents = useMapEvents({
     click: (e) => {
       if (isActive) {
         onLandingZoneSet(e.latlng.lat, e.latlng.lng);

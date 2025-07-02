@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useMapEvents, Polyline, Marker } from 'react-leaflet';
+import { useMapEvents, useMap, Polyline, Marker } from 'react-leaflet';
 import { LatLng, divIcon } from 'leaflet';
 import { IconButton, Tooltip, Box, Typography, Paper, useTheme } from '@mui/material';
 import { Clear } from '@mui/icons-material';
 import { calculateBearing } from '../../physics/geo';
+import { useMapInteractionMode } from '../../hooks/useMapInteractionMode';
 
 interface DrawingManagerProps {
   onFlightPathComplete: (bearing: number) => void;
@@ -34,8 +35,12 @@ export const DrawingManager: React.FC<DrawingManagerProps> = ({
 }) => {
   const theme = useTheme();
   const [points, setPoints] = useState<LatLng[]>([]);
+  const map = useMap();
   
-  const map = useMapEvents({
+  // Use custom hook to manage map interaction mode
+  useMapInteractionMode(map, isActive);
+  
+  const mapEvents = useMapEvents({
     click: (e) => {
       if (isActive) {
         const newPoints = [...points, e.latlng];

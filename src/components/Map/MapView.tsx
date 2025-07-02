@@ -176,6 +176,7 @@ export const MapView: React.FC<MapViewProps> = ({
   // Use props profiles or context profiles
   const activeProfiles = profiles.length > 0 ? profiles : contextProfiles;
   const enabledProfiles = activeProfiles.filter(p => p.enabled);
+  
   const primaryProfile = enabledProfiles[0] || activeProfiles[0];
   const [mapCenter, setMapCenter] = useState<LatLng>(
     new LatLng(
@@ -307,7 +308,6 @@ export const MapView: React.FC<MapViewProps> = ({
           style={{ 
             height: '100%', 
             width: '100%',
-            cursor: isSettingLandingZone ? 'crosshair' : 'default',
             minHeight: '400px'
           }}
           key="map" // Fixed key to prevent unnecessary re-renders
@@ -359,7 +359,6 @@ export const MapView: React.FC<MapViewProps> = ({
         <Marker
           position={[commonParameters.landingZone.lat, commonParameters.landingZone.lon]}
           icon={createWindArrowIcon(profileVisualizationData[0].groundWind.direction, profileVisualizationData[0].groundWind.speed)}
-          interactive={false}
         />
       )}
 
@@ -371,14 +370,14 @@ export const MapView: React.FC<MapViewProps> = ({
             <Circle
               center={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
               radius={profileData.calculation.safetyRadius}
-            pathOptions={{
-              color: profileData.profile.color,
-              fillColor: profileData.profile.color,
-              fillOpacity: 0.1,
-              weight: 2,
-              dashArray: '5, 10'
-            }}
-          >
+              pathOptions={{
+                color: profileData.profile.color,
+                fillColor: profileData.profile.color,
+                fillOpacity: 0.1,
+                weight: 2,
+                dashArray: '5, 10'
+              }}
+            >
             <Popup>
               <strong>{profileData.profile.name}</strong>
               <br />
