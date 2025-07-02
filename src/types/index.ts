@@ -84,3 +84,13 @@ export interface CachedLocationData {
     [modelId: string]: ForecastData[];
   };
 }
+
+// Weather context specific cache data structure
+export interface WeatherCacheEntry {
+  locationKey: string;
+  modelId: string;
+  date: Date;
+  data?: ForecastData[];
+  terrainElevation?: number;
+  fetchedAt: Date;
+}

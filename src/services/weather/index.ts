@@ -55,7 +55,7 @@ export const fetchMultipleModels = async (
   models: string[],
   date: Date,
   customWeatherData?: ForecastData[] | null
-): Promise<{ [modelId: string]: ForecastData[] } & { terrainElevation: number }> => {
+): Promise<{ models: { [modelId: string]: ForecastData[] }; terrainElevation: number }> => {
   const results: { [modelId: string]: ForecastData[] } = {};
   let terrainElevation = 0;
   
@@ -76,7 +76,7 @@ export const fetchMultipleModels = async (
     }
   }
   
-  return { ...results, terrainElevation };
+  return { models: results, terrainElevation };
 };
 
 export const getWindDataAtAltitude = (

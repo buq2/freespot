@@ -28,6 +28,37 @@ export {
 } from './inputSanitization';
 
 // Re-export existing utilities
-export { convertSpeed, convertAltitude, getSpeedUnit, getAltitudeUnit } from './units';
-export { calculateWindWarnings } from './windWarnings';
-export { mapUtils } from './mapUtils';
+export { 
+  convertSpeed, 
+  convertAltitude, 
+  convertTemperature,
+  formatAltitude,
+  formatSpeed,
+  formatTemperature,
+  metersToFeet,
+  feetToMeters,
+  msToKmh,
+  kmhToMs,
+  msToMph,
+  mphToMs,
+  msToKnots,
+  knotsToMs,
+  celsiusToFahrenheit,
+  fahrenheitToCelsius
+} from './units';
+
+export { 
+  getWindWarningLevel,
+  getWindWarningLabel,
+  hasWindWarnings,
+  type WindWarningLevel
+} from './windWarnings';
+
+export { 
+  calculateDistance,
+  calculateBearing,
+  calculateDestination,
+  generateCirclePoints,
+  formatCoordinates,
+  isValidCoordinates
+} from './mapUtils';

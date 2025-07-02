@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import type { LatLon, ForecastData } from '../types';
+import type { LatLon, ForecastData, WeatherCacheEntry } from '../types';
 import { fetchMultipleModels, getWindDataAtAltitude } from '../services/weather';
 import { useWeatherContext } from '../contexts/WeatherContext';
 
@@ -107,7 +107,7 @@ export const useWeatherCalculations = (): UseWeatherCalculationsReturn => {
         };
       }
 
-      const { terrainElevation, ...weatherData } = fetchResult;
+      const { terrainElevation, models: weatherData } = fetchResult;
       
       // Use the first selected model as primary for calculations
       const primaryModelData = weatherData[models[0]] || null;

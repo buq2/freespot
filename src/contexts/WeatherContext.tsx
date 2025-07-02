@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { CachedLocationData, ForecastData, TerrainData } from '../types';
+import type { WeatherCacheEntry, ForecastData, TerrainData } from '../types';
 
 interface WeatherContextType {
-  weatherCache: CachedLocationData[];
-  setWeatherCache: (cache: CachedLocationData[]) => void;
-  addToWeatherCache: (data: CachedLocationData) => void;
+  weatherCache: WeatherCacheEntry[];
+  setWeatherCache: (cache: WeatherCacheEntry[]) => void;
+  addToWeatherCache: (data: WeatherCacheEntry) => void;
   clearWeatherCache: () => void;
-  getWeatherFromCache: (locationKey: string, modelId: string, date: Date) => CachedLocationData | undefined;
+  getWeatherFromCache: (locationKey: string, modelId: string, date: Date) => WeatherCacheEntry | undefined;
   terrainData: TerrainData | null;
   setTerrainData: (data: TerrainData | null) => void;
   selectedWeatherModel: string;
@@ -35,14 +35,14 @@ interface WeatherProviderProps {
 }
 
 export const WeatherProvider: React.FC<WeatherProviderProps> = ({ children }) => {
-  const [weatherCache, setWeatherCache] = useState<CachedLocationData[]>([]);
+  const [weatherCache, setWeatherCache] = useState<WeatherCacheEntry[]>([]);
   const [terrainData, setTerrainData] = useState<TerrainData | null>(null);
   const [selectedWeatherModel, setSelectedWeatherModel] = useState<string>('best_match');
   const [customWeatherData, setCustomWeatherData] = useState<ForecastData[] | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState<boolean>(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
 
-  const addToWeatherCache = (data: CachedLocationData) => {
+  const addToWeatherCache = (data: WeatherCacheEntry) => {
     setWeatherCache(prevCache => {
       // Remove any existing entry for the same location/model/date
       const filteredCache = prevCache.filter(cached => 
@@ -63,7 +63,7 @@ export const WeatherProvider: React.FC<WeatherProviderProps> = ({ children }) =>
     setWeatherCache([]);
   };
 
-  const getWeatherFromCache = (locationKey: string, modelId: string, date: Date): CachedLocationData | undefined => {
+  const getWeatherFromCache = (locationKey: string, modelId: string, date: Date): WeatherCacheEntry | undefined => {
     const CACHE_DURATION_MS = 3 * 60 * 60 * 1000; // 3 hours
     const now = new Date().getTime();
     
