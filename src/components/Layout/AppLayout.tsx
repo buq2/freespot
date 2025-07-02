@@ -327,20 +327,11 @@ export const AppLayout: React.FC = () => {
           </TabPanel>
 
           <TabPanel value={tabValue} index={1}>
-            <Box sx={{ p: 2 }}>
+            <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
               <WeatherModelSelector
                 selectedModels={selectedModels}
                 onModelSelectionChange={setSelectedModels}
               />
-            </Box>
-          </TabPanel>
-
-          <TabPanel value={tabValue} index={2}>
-            <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {/* Exit Point Results */}
-              {exitCalculation && (
-                <ExitPointResults result={exitCalculation} />
-              )}
 
               {/* Ground Wind Display */}
               {groundWindData && (
@@ -378,6 +369,15 @@ export const AppLayout: React.FC = () => {
                     );
                   })}
                 </Box>
+              )}
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={2}>
+            <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {/* Exit Point Results */}
+              {exitCalculation && (
+                <ExitPointResults result={exitCalculation} />
               )}
             </Box>
           </TabPanel>
