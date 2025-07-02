@@ -265,7 +265,7 @@ export const CommonParametersForm: React.FC = () => {
                 Jump Groups
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+                <Grid>
                   <TextField
                     fullWidth
                     size="small"
@@ -273,11 +273,14 @@ export const CommonParametersForm: React.FC = () => {
                     value={commonParameters.numberOfGroups}
                     onChange={handleParameterChange('numberOfGroups')}
                     type="number"
-                    inputProps={{ min: 1, max: 10 }}
+                    InputProps={{
+                      min: 1, max: 10,
+                      endAdornment: <InputAdornment position="end"></InputAdornment>
+                    }}
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid>
                   <TextField
                     fullWidth
                     size="small"
