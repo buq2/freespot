@@ -32,6 +32,7 @@ import {
   Palette 
 } from '@mui/icons-material';
 import { useAppContext } from '../../contexts';
+import { AdvancedOption } from '../Common';
 import { convertSpeed, convertAltitude } from '../../utils/units';
 import { calculateCanopyAirSpeed } from '../../physics/constants';
 import type { JumpProfile } from '../../types';
@@ -194,45 +195,47 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
           <Box sx={{ mt: 2 }}>
             <Grid container spacing={3}>
               {/* Visualization Settings */}
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Visualization Settings
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-                  <Chip
-                    size="small"
-                    label="Safety Circle"
-                    variant={profile.showSafetyCircle ? "filled" : "outlined"}
-                    color={profile.showSafetyCircle ? "primary" : "default"}
-                    onClick={() => updateProfile(profile.id, { showSafetyCircle: !profile.showSafetyCircle })}
-                    sx={{ cursor: 'pointer' }}
-                  />
-                  <Chip
-                    size="small"
-                    label="Exit Points"
-                    variant={profile.showGroupExitPoints ? "filled" : "outlined"}
-                    color={profile.showGroupExitPoints ? "primary" : "default"}
-                    onClick={() => updateProfile(profile.id, { showGroupExitPoints: !profile.showGroupExitPoints })}
-                    sx={{ cursor: 'pointer' }}
-                  />
-                  <Chip
-                    size="small"
-                    label="Flight Path"
-                    variant={profile.showFlightPath ? "filled" : "outlined"}
-                    color={profile.showFlightPath ? "primary" : "default"}
-                    onClick={() => updateProfile(profile.id, { showFlightPath: !profile.showFlightPath })}
-                    sx={{ cursor: 'pointer' }}
-                  />
-                  <Chip
-                    size="small"
-                    label="Drift Visualization"
-                    variant={profile.showDriftVisualization ? "filled" : "outlined"}
-                    color={profile.showDriftVisualization ? "primary" : "default"}
-                    onClick={() => updateProfile(profile.id, { showDriftVisualization: !profile.showDriftVisualization })}
-                    sx={{ cursor: 'pointer' }}
-                  />
-                </Box>
-              </Grid>
+              <AdvancedOption>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Visualization Settings
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                    <Chip
+                      size="small"
+                      label="Safety Circle"
+                      variant={profile.showSafetyCircle ? "filled" : "outlined"}
+                      color={profile.showSafetyCircle ? "primary" : "default"}
+                      onClick={() => updateProfile(profile.id, { showSafetyCircle: !profile.showSafetyCircle })}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                    <Chip
+                      size="small"
+                      label="Exit Points"
+                      variant={profile.showGroupExitPoints ? "filled" : "outlined"}
+                      color={profile.showGroupExitPoints ? "primary" : "default"}
+                      onClick={() => updateProfile(profile.id, { showGroupExitPoints: !profile.showGroupExitPoints })}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                    <Chip
+                      size="small"
+                      label="Flight Path"
+                      variant={profile.showFlightPath ? "filled" : "outlined"}
+                      color={profile.showFlightPath ? "primary" : "default"}
+                      onClick={() => updateProfile(profile.id, { showFlightPath: !profile.showFlightPath })}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                    <Chip
+                      size="small"
+                      label="Drift Visualization"
+                      variant={profile.showDriftVisualization ? "filled" : "outlined"}
+                      color={profile.showDriftVisualization ? "primary" : "default"}
+                      onClick={() => updateProfile(profile.id, { showDriftVisualization: !profile.showDriftVisualization })}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                  </Box>
+                </Grid>
+              </AdvancedOption>
 
 
               {/* Altitudes */}
@@ -422,27 +425,29 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Canopy Air Speed (calculated)"
-                  value={displayCanopyAirSpeed.toFixed(1)}
-                  InputProps={{
-                    readOnly: true,
-                    endAdornment: <InputAdornment position="end">
-                      {userPreferences.units.speed === 'ms' ? 'm/s' : 
-                       userPreferences.units.speed === 'kmh' ? 'km/h' :
-                       userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
-                    </InputAdornment>
-                  }}
-                  sx={{ 
-                    '& .MuiInputBase-input': { 
-                      backgroundColor: 'action.hover' 
-                    } 
-                  }}
-                />
-              </Grid>
+              <AdvancedOption>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Canopy Air Speed (calculated)"
+                    value={displayCanopyAirSpeed.toFixed(1)}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: <InputAdornment position="end">
+                        {userPreferences.units.speed === 'ms' ? 'm/s' : 
+                         userPreferences.units.speed === 'kmh' ? 'km/h' :
+                         userPreferences.units.speed === 'mph' ? 'mph' : 'kts'}
+                      </InputAdornment>
+                    }}
+                    sx={{ 
+                      '& .MuiInputBase-input': { 
+                        backgroundColor: 'action.hover' 
+                      } 
+                    }}
+                  />
+                </Grid>
+              </AdvancedOption>
 
             </Grid>
           </Box>

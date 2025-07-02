@@ -14,6 +14,7 @@ import {
 import { Add, Remove, Schedule } from '@mui/icons-material';
 import { CollapsibleSection } from '../Common/CollapsibleSection';
 import { CoordinateField } from '../Common/FormFields';
+import { AdvancedOption } from '../Common';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -82,37 +83,39 @@ export const CommonParametersForm: React.FC = () => {
     >
       <Grid container spacing={3}>
         {/* Landing Zone */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-            Landing Zone
-          </Typography>
-        </Grid>
-        
-        <Grid item xs={12} sm={6}>
-          <CoordinateField
-            fullWidth
-            size="small"
-            label="Latitude"
-            value={commonParameters.landingZone.lat}
-            onChange={(lat) => updateCommonParameter('landingZone', {
-              ...commonParameters.landingZone, lat
-            })}
-            coordinateType="latitude"
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6}>
-          <CoordinateField
-            fullWidth
-            size="small"
-            label="Longitude"
-            value={commonParameters.landingZone.lon}
-            onChange={(lon) => updateCommonParameter('landingZone', {
-              ...commonParameters.landingZone, lon
-            })}
-            coordinateType="longitude"
-          />
-        </Grid>
+        <AdvancedOption>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+              Landing Zone Coordinates
+            </Typography>
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <CoordinateField
+              fullWidth
+              size="small"
+              label="Latitude"
+              value={commonParameters.landingZone.lat}
+              onChange={(lat) => updateCommonParameter('landingZone', {
+                ...commonParameters.landingZone, lat
+              })}
+              coordinateType="latitude"
+            />
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <CoordinateField
+              fullWidth
+              size="small"
+              label="Longitude"
+              value={commonParameters.landingZone.lon}
+              onChange={(lon) => updateCommonParameter('landingZone', {
+                ...commonParameters.landingZone, lon
+              })}
+              coordinateType="longitude"
+            />
+          </Grid>
+        </AdvancedOption>
 
         {/* Flight Direction */}
         <Grid item xs={12}>
@@ -136,18 +139,20 @@ export const CommonParametersForm: React.FC = () => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={commonParameters.flightOverLandingZone}
-                onChange={handleFlightOverLandingZoneChange}
-                size="small"
-              />
-            }
-            label="Fly directly over landing zone"
-          />
-        </Grid>
+        <AdvancedOption>
+          <Grid item xs={12} sm={6}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={commonParameters.flightOverLandingZone}
+                  onChange={handleFlightOverLandingZoneChange}
+                  size="small"
+                />
+              }
+              label="Fly directly over landing zone"
+            />
+          </Grid>
+        </AdvancedOption>
 
         {/* Jump Groups */}
         <Grid item xs={12}>

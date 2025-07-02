@@ -4,6 +4,7 @@ import { ProfileProvider } from './ProfileContext';
 import { ParametersProvider } from './ParametersContext';
 import { WeatherProvider } from './WeatherContext';
 import { PreferencesProvider } from './PreferencesContext';
+import { AdvancedModeProvider } from './AdvancedModeContext';
 
 interface CombinedProviderProps {
   children: ReactNode;
@@ -17,13 +18,15 @@ interface CombinedProviderProps {
 export const CombinedProvider: React.FC<CombinedProviderProps> = ({ children }) => {
   return (
     <PreferencesProvider>
-      <ParametersProvider>
-        <ProfileProvider>
-          <WeatherProvider>
-            {children}
-          </WeatherProvider>
-        </ProfileProvider>
-      </ParametersProvider>
+      <AdvancedModeProvider>
+        <ParametersProvider>
+          <ProfileProvider>
+            <WeatherProvider>
+              {children}
+            </WeatherProvider>
+          </ProfileProvider>
+        </ParametersProvider>
+      </AdvancedModeProvider>
     </PreferencesProvider>
   );
 };

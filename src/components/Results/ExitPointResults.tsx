@@ -15,6 +15,7 @@ import {
 import { Flight, LocationOn, Speed, Height } from '@mui/icons-material';
 import type { ExitCalculationResult } from '../../physics/exit-point';
 import { useAppContext } from '../../contexts';
+import { AdvancedOption } from '../Common';
 import { formatAltitude } from '../../utils/units';
 import { calculateDistance } from '../../physics/geo';
 
@@ -40,32 +41,34 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
 
       <Grid container spacing={3}>
         {/* Optimal Exit Point */}
-        <Grid item xs={12} md={6}>
-          <Card variant="outlined">
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <LocationOn color="primary" sx={{ mr: 1 }} />
-                <Typography variant="h6">Optimal Exit Point</Typography>
-              </Box>
-              
-              <Typography variant="body2" color="textSecondary" gutterBottom>
-                Coordinates
-              </Typography>
-              <Typography variant="body1">
-                {result.optimalExitPoint.lat.toFixed(4)}°N, {result.optimalExitPoint.lon.toFixed(4)}°E
-              </Typography>
-              
-              <Box sx={{ mt: 2 }}>
+        <AdvancedOption>
+          <Grid item xs={12} md={6}>
+            <Card variant="outlined">
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <LocationOn color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="h6">Optimal Exit Point</Typography>
+                </Box>
+                
                 <Typography variant="body2" color="textSecondary" gutterBottom>
-                  Safety Radius
+                  Coordinates
                 </Typography>
                 <Typography variant="body1">
-                  {formatAltitude(result.safetyRadius, userPreferences.units.altitude)}
+                  {result.optimalExitPoint.lat.toFixed(4)}°N, {result.optimalExitPoint.lon.toFixed(4)}°E
                 </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+                
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Safety Radius
+                  </Typography>
+                  <Typography variant="body1">
+                    {formatAltitude(result.safetyRadius, userPreferences.units.altitude)}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </AdvancedOption>
 
         {/* Aircraft Information */}
         <Grid item xs={12} md={6}>
@@ -99,41 +102,43 @@ export const ExitPointResults: React.FC<ExitPointResultsProps> = ({ result }) =>
         </Grid>
 
         {/* Exit Points List */}
-        <Grid item xs={12}>
-          <Card variant="outlined">
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Height color="primary" sx={{ mr: 1 }} />
-                <Typography variant="h6">Group Exit Points</Typography>
-              </Box>
-              
-              <List dense>
-                {result.exitPoints.map((exit, index) => (
-                  <React.Fragment key={exit.groupNumber}>
-                    <ListItem>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Chip 
-                              label={`Group ${exit.groupNumber}`} 
-                              size="small" 
-                              color="primary" 
-                            />
-                            <Typography variant="body2">
-                              {exit.location.lat.toFixed(4)}°N, {exit.location.lon.toFixed(4)}°E
-                            </Typography>
-                          </Box>
-                        }
-                        secondary={`Exit point for group ${exit.groupNumber}`}
-                      />
-                    </ListItem>
-                    {index < result.exitPoints.length - 1 && <Divider />}
-                  </React.Fragment>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid>
+        <AdvancedOption>
+          <Grid item xs={12}>
+            <Card variant="outlined">
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Height color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="h6">Group Exit Points</Typography>
+                </Box>
+                
+                <List dense>
+                  {result.exitPoints.map((exit, index) => (
+                    <React.Fragment key={exit.groupNumber}>
+                      <ListItem>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Chip 
+                                label={`Group ${exit.groupNumber}`} 
+                                size="small" 
+                                color="primary" 
+                              />
+                              <Typography variant="body2">
+                                {exit.location.lat.toFixed(4)}°N, {exit.location.lon.toFixed(4)}°E
+                              </Typography>
+                            </Box>
+                          }
+                          secondary={`Exit point for group ${exit.groupNumber}`}
+                        />
+                      </ListItem>
+                      {index < result.exitPoints.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
+          </Grid>
+        </AdvancedOption>
 
         {/* Summary Statistics */}
         <Grid item xs={12}>

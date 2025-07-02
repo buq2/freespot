@@ -26,3 +26,6 @@ export { CollapsibleSection } from './CollapsibleSection';
 
 // Form fields
 export * from './FormFields';
+
+// Advanced mode components
+export { AdvancedOption } from './AdvancedOption';

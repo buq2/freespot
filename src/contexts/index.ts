@@ -3,6 +3,7 @@ export { ProfileProvider, useProfileContext, createDefaultProfiles, defaultJumpP
 export { ParametersProvider, useParametersContext, defaultCommonParameters } from './ParametersContext';
 export { WeatherProvider, useWeatherContext } from './WeatherContext';
 export { PreferencesProvider, usePreferencesContext, defaultUserPreferences } from './PreferencesContext';
+export { AdvancedModeProvider, useAdvancedMode } from './AdvancedModeContext';
 
 // Combined provider
 export { CombinedProvider } from './CombinedProvider';

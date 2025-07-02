@@ -15,10 +15,12 @@ import {
   IconButton,
   Fab,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Switch,
+  FormControlLabel
 } from '@mui/material';
 import { Settings, Map as MapIcon, CloudDownload, Menu, Close, ChevronLeft, Tune } from '@mui/icons-material';
-import { useAppContext } from '../../contexts';
+import { useAppContext, useAdvancedMode } from '../../contexts';
 import { JumpParametersForm, UserPreferencesForm, WeatherModelSelector } from '../Parameters';
 import { WeatherTable, WindCompass } from '../Weather';
 import { ExitPointResults } from '../Results';
@@ -53,6 +55,7 @@ function TabPanel(props: TabPanelProps) {
 
 export const AppLayout: React.FC = () => {
   const { profiles, commonParameters, customWeatherData } = useAppContext();
+  const { showAdvanced, setShowAdvanced } = useAdvancedMode();
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -271,6 +274,31 @@ export const AppLayout: React.FC = () => {
                 <Close />
               </IconButton>
             )}
+          </Box>
+          
+          {/* Advanced Options Toggle */}
+          <Box sx={{ 
+            px: 2, 
+            py: 1.5, 
+            borderBottom: 1, 
+            borderColor: 'divider',
+            backgroundColor: 'action.hover'
+          }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showAdvanced}
+                  onChange={(e) => setShowAdvanced(e.target.checked)}
+                  size="small"
+                />
+              }
+              label={
+                <Typography variant="body2" color="text.secondary">
+                  Show advanced options
+                </Typography>
+              }
+              sx={{ m: 0 }}
+            />
           </Box>
           
           <Tabs 
