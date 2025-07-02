@@ -85,6 +85,18 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
     updateProfile(profile.id, { showDriftVisualization: event.target.checked });
   };
 
+  const handleShowSafetyCircleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateProfile(profile.id, { showSafetyCircle: event.target.checked });
+  };
+
+  const handleShowGroupExitPointsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateProfile(profile.id, { showGroupExitPoints: event.target.checked });
+  };
+
+  const handleShowFlightPathChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateProfile(profile.id, { showFlightPath: event.target.checked });
+  };
+
 
   const handleRename = () => {
     if (newName.trim() && newName.trim() !== profile.name) {
@@ -179,7 +191,16 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
         {/* Profile Options */}
         <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
           {profile.showDriftVisualization && (
-            <Chip size="small" label="Drift Visualization" variant="outlined" />
+            <Chip size="small" label="Drift" variant="outlined" />
+          )}
+          {profile.showSafetyCircle && (
+            <Chip size="small" label="Safety Circle" variant="outlined" />
+          )}
+          {profile.showGroupExitPoints && (
+            <Chip size="small" label="Exit Points" variant="outlined" />
+          )}
+          {profile.showFlightPath && (
+            <Chip size="small" label="Flight Path" variant="outlined" />
           )}
         </Box>
 
@@ -190,10 +211,49 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
               {/* Profile Settings */}
               <Grid item xs={12}>
                 <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Profile Settings
+                  Visualization Settings
                 </Typography>
               </Grid>
               
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={profile.showSafetyCircle}
+                      onChange={handleShowSafetyCircleChange}
+                      size="small"
+                    />
+                  }
+                  label="Show safety circle"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={profile.showGroupExitPoints}
+                      onChange={handleShowGroupExitPointsChange}
+                      size="small"
+                    />
+                  }
+                  label="Show group exit points"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={profile.showFlightPath}
+                      onChange={handleShowFlightPathChange}
+                      size="small"
+                    />
+                  }
+                  label="Show airplane flight path"
+                />
+              </Grid>
+
               <Grid item xs={12} sm={6}>
                 <FormControlLabel
                   control={

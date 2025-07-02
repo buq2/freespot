@@ -41,6 +41,9 @@ export interface JumpProfile {
   enabled: boolean;
   color: string;
   showDriftVisualization: boolean;
+  showSafetyCircle: boolean;
+  showGroupExitPoints: boolean;
+  showFlightPath: boolean;
   parameters: JumpParameters;
 }
 

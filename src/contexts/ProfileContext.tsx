@@ -35,6 +35,9 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     enabled: true,
     color: '#2196F3', // Blue
     showDriftVisualization: true,
+    showSafetyCircle: true,
+    showGroupExitPoints: true,
+    showFlightPath: true,
     parameters: {
       jumpAltitude: 4000,
       aircraftSpeed: 36,
@@ -51,6 +54,9 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     enabled: false,
     color: '#FF9800', // Orange
     showDriftVisualization: false,
+    showSafetyCircle: true,
+    showGroupExitPoints: true,
+    showFlightPath: true,
     parameters: {
       jumpAltitude: 3000,
       aircraftSpeed: 36,
@@ -67,6 +73,9 @@ export const createDefaultProfiles = (): JumpProfile[] => [
     enabled: false,
     color: '#4CAF50', // Green
     showDriftVisualization: false,
+    showSafetyCircle: true,
+    showGroupExitPoints: true,
+    showFlightPath: true,
     parameters: {
       jumpAltitude: 3500,
       aircraftSpeed: 36,
@@ -112,6 +121,10 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
       // Update stored profiles and ensure they have all required fields
       return storedProfiles.map(profile => ({
         ...profile,
+        // Default new visualization fields to true if not present
+        showSafetyCircle: profile.showSafetyCircle !== undefined ? profile.showSafetyCircle : true,
+        showGroupExitPoints: profile.showGroupExitPoints !== undefined ? profile.showGroupExitPoints : true,
+        showFlightPath: profile.showFlightPath !== undefined ? profile.showFlightPath : true,
         parameters: {
           jumpAltitude: profile.parameters.jumpAltitude || defaultJumpParameters.jumpAltitude,
           aircraftSpeed: profile.parameters.aircraftSpeed || defaultJumpParameters.aircraftSpeed,

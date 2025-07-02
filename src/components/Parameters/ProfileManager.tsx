@@ -44,6 +44,9 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
         enabled: false,
         color: availableColor,
         showDriftVisualization: false,
+        showSafetyCircle: true,
+        showGroupExitPoints: true,
+        showFlightPath: true,
         parameters: baseProfile ? { ...baseProfile.parameters } : { ...primaryProfile?.parameters },
       });
 
@@ -106,6 +109,10 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
           const newProfiles = validProfiles.map(profile => ({
             ...profile,
             id: 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            // Default new visualization fields to true if not present
+            showSafetyCircle: profile.showSafetyCircle !== undefined ? profile.showSafetyCircle : true,
+            showGroupExitPoints: profile.showGroupExitPoints !== undefined ? profile.showGroupExitPoints : true,
+            showFlightPath: profile.showFlightPath !== undefined ? profile.showFlightPath : true,
             parameters: {
               jumpAltitude: profile.parameters.jumpAltitude,
               aircraftSpeed: profile.parameters.aircraftSpeed,
@@ -123,6 +130,10 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({ onClose }) => {
           const newProfile: JumpProfile = {
             ...data,
             id: 'profile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            // Default new visualization fields to true if not present
+            showSafetyCircle: data.showSafetyCircle !== undefined ? data.showSafetyCircle : true,
+            showGroupExitPoints: data.showGroupExitPoints !== undefined ? data.showGroupExitPoints : true,
+            showFlightPath: data.showFlightPath !== undefined ? data.showFlightPath : true,
             parameters: {
               jumpAltitude: data.parameters.jumpAltitude,
               aircraftSpeed: data.parameters.aircraftSpeed,

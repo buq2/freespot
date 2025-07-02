@@ -366,7 +366,7 @@ export const MapView: React.FC<MapViewProps> = ({
       {profileVisualizationData.map((profileData, profileIndex) => (
         <React.Fragment key={`profile-${profileData.profile.id}`}>
           {/* Safety circle */}
-          {profileData.calculation.optimalExitPoint && (
+          {profileData.profile.showSafetyCircle && profileData.calculation.optimalExitPoint && (
             <Circle
               center={[profileData.calculation.optimalExitPoint.lat, profileData.calculation.optimalExitPoint.lon]}
               radius={profileData.calculation.safetyRadius}
@@ -403,7 +403,7 @@ export const MapView: React.FC<MapViewProps> = ({
           )}
 
           {/* Individual group exits */}
-          {profileData.calculation.exitPoints?.map((exit) => (
+          {profileData.profile.showGroupExitPoints && profileData.calculation.exitPoints?.map((exit) => (
             <Marker
               key={`${profileData.profile.id}-group-${exit.groupNumber}`}
               position={[exit.location.lat, exit.location.lon]}
@@ -420,7 +420,7 @@ export const MapView: React.FC<MapViewProps> = ({
           ))}
 
           {/* Aircraft flight path */}
-          {profileData.flightPath && (
+          {profileData.profile.showFlightPath && profileData.flightPath && (
             <Polyline
               positions={profileData.flightPath.map(p => [p.lat, p.lon])}
               pathOptions={{
